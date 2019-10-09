@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ERP_Connect</string>
+    <string name="keine_verbindung_try_again">Keine Verbindung. Try Again!</string>
+</resources>
