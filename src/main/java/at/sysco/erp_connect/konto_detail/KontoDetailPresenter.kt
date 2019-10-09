@@ -15,7 +15,7 @@ class KontoDetailPresenter(
         kontoDetailView?.hideProgress()
     }
 
-    override fun onFailureFileLoad() {
+    override fun onFailureFileLoad(failureCode: String) {
         Log.w("Presenter", "Failed loading file")
     }
 

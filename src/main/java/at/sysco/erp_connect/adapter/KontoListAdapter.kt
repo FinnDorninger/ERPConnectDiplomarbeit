@@ -13,8 +13,7 @@ import kotlinx.android.synthetic.main.konto_list_item.view.*
 
 class KontoAdapter(val items: List<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>() {
-
-    // Gets the number of animals in the list
+    // Gets the size of item
     override fun getItemCount(): Int {
         return items.size
     }

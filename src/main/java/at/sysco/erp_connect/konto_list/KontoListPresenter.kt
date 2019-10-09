@@ -1,6 +1,5 @@
 package at.sysco.erp_connect.konto_list
 
-import android.util.Log
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoListModel
@@ -12,7 +11,7 @@ class KontoListPresenter(
     var kontoListView: KontoListContract.View? = kontoListView
 
     override fun onfinished(kontoArrayList: List<Konto>) {
-        kontoListView?.setTextData(kontoArrayList)
+        kontoListView?.displayKontoListInRecyclerView(kontoArrayList)
         kontoListView?.hideProgress()
     }
 

@@ -8,7 +8,7 @@ import retrofit2.http.GET
 
 interface KontoApi {
     //TO-DO: "getKontoDetail(KontoNummer)" -> Darstellung KontoDetails
-    //TO-DO: SharedPreferences -> User/Passwort/BaseURL
+    //TO-DO-Später: SharedPreferences -> User/Passwort/BaseURL
     @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
     fun getKontoList(): Call<KontoList>
 

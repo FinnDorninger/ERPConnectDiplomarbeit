@@ -1,7 +1,6 @@
 package at.sysco.erp_connect.model
 
 import android.content.Context
-import android.util.Log
 import android.util.Xml
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.konto_list.KontoListContract
@@ -19,10 +18,8 @@ import java.io.*
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 class KontoListModel(val context: Context) : KontoListContract.Model {
-    val retrofit = Retrofit.Builder()
-
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        context.deleteFile(KONTO_LIST_FILE_NAME)
+        //context.deleteFile(KONTO_LIST_FILE_NAME)
         if (KONTO_LIST_FILE_NAME.doesFileExist()) {
             loadKontoListFromFile(onFinishedListener)
         } else {
@@ -39,8 +36,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
     private fun loadKontoListFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         val path = context.filesDir.toString() + "/" + KONTO_LIST_FILE_NAME
-        var inputStream: InputStream? = null
-
+        var inputStream: FileInputStream? = null
         try {
             inputStream = File(path).inputStream()
             val kontoList = Persister().read(KontoList::class.java, inputStream).kontenList
@@ -48,10 +44,16 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 onFinishedListener.onfinished(kontoList)
             }
         } catch (e: IOException) {
-            //Exception when File could not be loaded
-            onFinishedListener.onFailure(FailureCode.NO_FILE)
+            //Exception: File does not exist or is corrupt
+            if (path.doesFileExist()) {
+                context.deleteFile(KONTO_LIST_FILE_NAME)
+                onFinishedListener.onFailure(FailureCode.DAMAGED_FILE)
+            } else {
+                onFinishedListener.onFailure(FailureCode.NO_FILE)
+            }
         } catch (e: PersistenceException) {
             //Exception when Persister can not serialize object from file.
+            context.deleteFile(KONTO_LIST_FILE_NAME)
             onFinishedListener.onFailure(FailureCode.DAMAGED_FILE)
         } finally {
             inputStream?.close()
@@ -60,14 +62,16 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
     //TO-DO: onResponse -> Error!
     private fun loadDataFromWebservice(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
+        val retrofit = Retrofit.Builder()
         val call = KontoApi.Factory.create().getKontoList()
+
         call.enqueue(object : Callback<KontoList> {
             override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                 var responseKontoList = response.body()?.kontenList
                 responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
 
                 if (responseKontoList != null) {
-                    save(responseKontoList)
+                    save(responseKontoList, onFinishedListener)
                     onFinishedListener.onfinished(responseKontoList)
                 } else {
                     onFinishedListener.onFailure(FailureCode.FAILED_CONNECTION)
@@ -80,75 +84,111 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         })
     }
 
-    private fun save(listToSave: List<Konto>) {
-        val serializer = Xml.newSerializer()
+    private fun save(
+        listToSave: List<Konto>,
+        onFinishedListener: KontoListContract.Model.OnFinishedListener
+    ) {
+        var fileWriter: FileWriter? = null
         val writer = StringWriter()
-        val file = File(context.filesDir, KONTO_LIST_FILE_NAME)
-        val fileWriter = FileWriter(file, false) //Append -> Overwriting file
-
-        val tagList = arrayOf(
-            "KontenWebservice"
-            , "Kontonummer"
-            , "Kontoname"
-            , "Staat"
-            , "Postleitzahl"
-            , "Ort"
-            , "Strasse"
-            , "Landesvorwahl"
-            , "Ortsvorwahl"
-            , "Telefon"
-            , "LandesvorwahlMobiltelefonnummer"
-            , "BetreibervorwahlMobiltelefonnummer"
-            , "Mobiltelefonnummer"
-            , "E-Mail-Adresse"
-            , "WWW-Adresse"
-            , "Notiz"
-        )
+        val serializer = Xml.newSerializer()
         serializer.setOutput(writer)
-        serializer.startTag("", "MESOWebService")
-        for (konto in listToSave) {
-            serializer.startTag("", "KontenWebservice")
-            serializer.startTag("", "Kontonummer")
-            serializer.text(konto.kNumber)
-            serializer.endTag("", "Kontonummer")
-            serializer.startTag("", "Kontoname")
-            serializer.text(konto.kName)
-            serializer.endTag("", "Kontoname")
-            serializer.startTag("", "Staat")
-            serializer.text(konto.kCountry.orEmpty())
-            serializer.endTag("", "Staat")
-            serializer.startTag("", "Postleitzahl")
-            serializer.text(konto.kPlz.orEmpty())
-            serializer.endTag("", "Postleitzahl")
-            serializer.startTag("", "Ort")
-            serializer.text(konto.kCity.orEmpty())
-            serializer.endTag("", "Ort")
-            serializer.startTag("", "Strasse")
-            serializer.text(konto.kStreet.orEmpty())
-            serializer.endTag("", "Strasse")
-            serializer.startTag("", "Telefon")
-            serializer.text(konto.kTelMain.orEmpty())
-            serializer.endTag("", "Telefon")
-            serializer.startTag("", "E-Mail-Adresse")
-            serializer.text(konto.kMail.orEmpty())
-            serializer.endTag("", "E-Mail-Adresse")
-            serializer.startTag("", "WWW-Adresse")
-            serializer.text(konto.kUrl.orEmpty())
-            serializer.endTag("", "WWW-Adresse")
-            serializer.startTag("", "Notiz")
-            serializer.text(konto.kNote.orEmpty())
-            serializer.endTag("", "Notiz")
-            serializer.endTag("", "KontenWebservice")
-        }
-        serializer.endTag("", "MESOWebService")
-        serializer.endDocument()
+
         try {
+            val file = File(context.filesDir, KONTO_LIST_FILE_NAME)
+            fileWriter = FileWriter(file, false)
+
+            serializer.startTag("", "MESOWebService")
+            for (konto in listToSave) {
+                serializer.startTag("", "KontenWebservice")
+                if (konto.kNumber != null) {
+                    serializer.startTag("", "Kontonummer")
+                    serializer.text(konto.kNumber)
+                    serializer.endTag("", "Kontonummer")
+                }
+                if (konto.kName != null) {
+                    serializer.startTag("", "Kontoname")
+                    serializer.text(konto.kName)
+                    serializer.endTag("", "Kontoname")
+                }
+                if (konto.kCountry != null) {
+                    serializer.startTag("", "Staat")
+                    serializer.text(konto.kCountry)
+                    serializer.endTag("", "Staat")
+                }
+                if (konto.kPlz != null) {
+                    serializer.startTag("", "Postleitzahl")
+                    serializer.text(konto.kPlz)
+                    serializer.endTag("", "Postleitzahl")
+                }
+                if (konto.kCity != null) {
+                    serializer.startTag("", "Ort")
+                    serializer.text(konto.kCity)
+                    serializer.endTag("", "Ort")
+                }
+                if (konto.kStreet != null) {
+                    serializer.startTag("", "Strasse")
+                    serializer.text(konto.kStreet)
+                    serializer.endTag("", "Strasse")
+                }
+                if (konto.kTelCountry != null) {
+                    serializer.startTag("", "Landesvorwahl")
+                    serializer.text(konto.kTelCountry)
+                    serializer.endTag("", "Landesvorwahl")
+                }
+                if (konto.kTelCity != null) {
+                    serializer.startTag("", "Ortsvorwahl")
+                    serializer.text(konto.kTelCity)
+                    serializer.endTag("", "Ortsvorwahl")
+                }
+                if (konto.kTelMain != null) {
+                    serializer.startTag("", "Telefon")
+                    serializer.text(konto.kTelMain)
+                    serializer.endTag("", "Telefon")
+                }
+                if (konto.kMobilCountry != null) {
+                    serializer.startTag("", "LandesvorwahlMobiltelefonnummer")
+                    serializer.text(konto.kMobilCountry)
+                    serializer.endTag("", "LandesvorwahlMobiltelefonnummer")
+                }
+                if (konto.kMobilOperatorTel != null) {
+                    serializer.startTag("", "BetreibervorwahlMobiltelefonnummer")
+                    serializer.text(konto.kMobilOperatorTel)
+                    serializer.endTag("", "BetreibervorwahlMobiltelefonnummer")
+                }
+                if (konto.kMobilOperatorTel != null) {
+                    serializer.startTag("", "Mobiltelefonnummer")
+                    serializer.text(konto.kMobilTel)
+                    serializer.endTag("", "Mobiltelefonnummer")
+                }
+                if (konto.kMail != null) {
+                    serializer.startTag("", "E-Mail-Adresse")
+                    serializer.text(konto.kMail)
+                    serializer.endTag("", "E-Mail-Adresse")
+                }
+                if (konto.kUrl != null) {
+                    serializer.startTag("", "WWW-Adresse")
+                    serializer.text(konto.kUrl)
+                    serializer.endTag("", "WWW-Adresse")
+                }
+                if (konto.kNote != null) {
+                    serializer.startTag("", "Notiz")
+                    serializer.text(konto.kNote)
+                    serializer.endTag("", "Notiz")
+                }
+                serializer.endTag("", "KontenWebservice")
+            }
+            serializer.endTag("", "MESOWebService")
+            serializer.endDocument()
+
             fileWriter.write(writer.toString())
-        } catch (e: IOException) {
-
-        } finally {
             fileWriter.close()
+        } catch (e: IOException) {
+            onFinishedListener.onFailure(FailureCode.NO_FILE)
+        } catch (e: PersistenceException) {
+            context.deleteFile(KONTO_LIST_FILE_NAME)
+            onFinishedListener.onFailure(FailureCode.DAMAGED_FILE)
+        } finally {
+            fileWriter?.close()
         }
-
     }
 }

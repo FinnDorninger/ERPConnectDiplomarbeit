@@ -6,7 +6,7 @@ interface KontoDetailContract {
     interface Model {
         interface OnFinishedListener {
             fun onfinished(konto: Konto)
-            fun onFailureFileLoad()
+            fun onFailureFileLoad(failureCode: String)
         }
 
         fun getKontoDetail(onFinishedListener: OnFinishedListener, kontoNummer: String)

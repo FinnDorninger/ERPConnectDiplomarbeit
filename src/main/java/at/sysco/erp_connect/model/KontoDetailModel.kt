@@ -2,19 +2,14 @@ package at.sysco.erp_connect.model
 
 import android.content.Context
 import android.util.Log
-import android.util.Xml
+import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
-import at.sysco.erp_connect.konto_list.KontoListContract
-import at.sysco.erp_connect.network.KontoApi
 import at.sysco.erp_connect.pojo.KontoList
+import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
 import java.io.File
-import java.io.FileWriter
-import java.io.StringWriter
+import java.io.FileInputStream
+import java.io.IOException
 import java.lang.Exception
 
 const val KONTO_DETAIL_FILE_NAME = "KontoFile.xml"
@@ -40,21 +35,28 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
-        Log.w("Test", "Laden von Datei..")
+        val path = context.filesDir.toString() + "/" + KONTO_DETAIL_FILE_NAME
+        var fileInputStream: FileInputStream? = null
+
         try {
-            val path = context.filesDir.toString() + "/" + KONTO_DETAIL_FILE_NAME
-            val file = File(path)
-            val test = file.inputStream()
-            val kontoList = Persister().read(KontoList::class.java, test).kontenList
+            fileInputStream = File(path).inputStream()
+            val kontoList = Persister().read(KontoList::class.java, fileInputStream).kontenList
             if (kontoList != null) {
                 val konto = kontoList.find { it.kNumber == kontoNummer }
                 onFinishedListener.onfinished(konto!!)
             } else {
                 context.deleteFile(KONTO_DETAIL_FILE_NAME)
-                onFinishedListener.onFailureFileLoad()
+                onFinishedListener.onFailureFileLoad(FailureCode.DAMAGED_FILE)
             }
-        } catch (e: Exception) {
-            onFinishedListener.onFailureFileLoad()
+        } catch (e: IOException) {
+            //Exception when File could not be loaded
+            onFinishedListener.onFailureFileLoad(FailureCode.NO_FILE)
+        } catch (e: PersistenceException) {
+            context.deleteFile(KONTO_DETAIL_FILE_NAME)
+            onFinishedListener.onFailureFileLoad(FailureCode.DAMAGED_FILE)
+            Log.w("Finn", "Lol")
+        } finally {
+            fileInputStream?.close()
         }
     }
 }

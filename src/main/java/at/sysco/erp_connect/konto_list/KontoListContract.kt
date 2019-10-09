@@ -8,7 +8,6 @@ interface KontoListContract {
             fun onfinished(kontoArrayList: List<Konto>)
             fun onFailure(failureCode: String)
         }
-
         fun getKontoList(onFinishedListener: OnFinishedListener)
     }
 
@@ -16,7 +15,7 @@ interface KontoListContract {
         fun showLoadingError()
         fun showProgress()
         fun hideProgress()
-        fun setTextData(kontoArrayList: List<Konto>)
+        fun displayKontoListInRecyclerView(kontoArrayList: List<Konto>)
     }
 
     interface Presenter {
