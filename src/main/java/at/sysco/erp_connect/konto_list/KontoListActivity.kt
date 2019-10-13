@@ -22,6 +22,8 @@ class KontoListActivity : AppCompatActivity(),
 
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
         kontoListPresenter.requestFromWS()
+
+        search_konto.isActivated = false
     }
 
     override fun showProgress() {
@@ -41,13 +43,18 @@ class KontoListActivity : AppCompatActivity(),
         rv_konto_list.adapter = adapter
         try_again.visibility = View.GONE
 
+        search_konto.isActivated = true
+
         search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
+                if (adapter.exampleList.isNotEmpty()) {
+                    adapter.filter.filter(newText)
+                    return false
+                }
                 return false
             }
         })

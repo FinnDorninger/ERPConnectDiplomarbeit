@@ -16,11 +16,10 @@ import kotlinx.android.synthetic.main.konto_list_item.view.*
 
 class KontoAdapter(exampleList: MutableList<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>(), Filterable {
-    var exampleList: List<Konto>
+    var exampleList: List<Konto> = exampleList
     var exampleListFull: ArrayList<Konto>
 
     init {
-        this.exampleList = exampleList
         this.exampleListFull = ArrayList(exampleList)
     }
 
@@ -79,7 +78,6 @@ class KontoAdapter(exampleList: MutableList<Konto>, val context: Context) :
             exampleList.addAll(results?.values as ArrayList<Konto>)
             notifyDataSetChanged()
         }
-
     }
 }
 
