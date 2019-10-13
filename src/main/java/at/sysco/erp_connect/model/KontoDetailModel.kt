@@ -49,12 +49,10 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                 onFinishedListener.onFailureFileLoad(FailureCode.DAMAGED_FILE)
             }
         } catch (e: IOException) {
-            //Exception when File could not be loaded
             onFinishedListener.onFailureFileLoad(FailureCode.NO_FILE)
         } catch (e: PersistenceException) {
             context.deleteFile(KONTO_DETAIL_FILE_NAME)
             onFinishedListener.onFailureFileLoad(FailureCode.DAMAGED_FILE)
-            Log.w("Finn", "Lol")
         } finally {
             fileInputStream?.close()
         }

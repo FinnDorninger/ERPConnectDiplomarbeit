@@ -1,10 +1,12 @@
 package at.sysco.erp_connect.network
 
+import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.pojo.KontoList
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.SimpleXmlConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface KontoApi {
     //TO-DO: "getKontoDetail(KontoNummer)" -> Darstellung KontoDetails

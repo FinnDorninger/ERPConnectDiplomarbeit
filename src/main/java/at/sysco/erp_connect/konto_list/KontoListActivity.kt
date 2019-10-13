@@ -3,12 +3,12 @@ package at.sysco.erp_connect.konto_list
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import at.sysco.erp_connect.adapter.KontoAdapter
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoListModel
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_list.*
 
 
@@ -33,10 +33,24 @@ class KontoListActivity : AppCompatActivity(),
     }
 
     override fun displayKontoListInRecyclerView(kontoArrayList: List<Konto>) {
+        val test2: MutableList<Konto> = kontoArrayList as MutableList<Konto>
+        val adapter = KontoAdapter(test2, this)
+
         rv_konto_list.layoutManager = LinearLayoutManager(this)
         rv_konto_list.addItemDecoration(DividerItemDecoration(rv_konto_list.context, 1))
+        rv_konto_list.adapter = adapter
         try_again.visibility = View.GONE
-        rv_konto_list.adapter = KontoAdapter(kontoArrayList, this)
+
+        search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter.filter(newText)
+                return false
+            }
+        })
     }
 
     override fun showLoadingError() {
