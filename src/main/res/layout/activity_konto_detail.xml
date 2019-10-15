@@ -4,89 +4,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_dark"
-    android:gravity="center_horizontal"
     android:orientation="vertical"
     tools:context=".konto_list.KontoListActivity">
 
     <TextView
-        android:id="@+id/tKontoName"
-        android:layout_width="match_parent"
+        android:id="@+id/textName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:text="@{konto.kName}"
+        android:layout_gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        android:textSize="22sp"
+        android:text="Dummy" />
 
     <TextView
-        android:id="@+id/tKontoNumber"
-        android:layout_width="match_parent"
+        android:id="@+id/textKontoNumber"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
+        android:layout_gravity="center_horizontal"
         android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        android:textSize="15sp"
+        android:text="Dummy" />
 
-    <TextView
-        android:id="@+id/tKontoCountry"
-        android:layout_width="match_parent"
+    <GridLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        android:layout_gravity="top|center"
+        android:orientation="horizontal"
+        android:columnCount="4"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginVertical="15dp">
 
-    <TextView
-        android:id="@+id/tKontoCityNumber"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        <ImageView
+            android:id="@+id/buttonCall"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:src="@drawable/ic_phone_24px"
+            android:layout_marginEnd="10dp" />
 
-    <TextView
-        android:id="@+id/tKontoCity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        <ImageView
+            android:id="@+id/buttonSMS"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:src="@drawable/ic_textsms_24px"
+            android:layout_marginEnd="10dp" />
 
-    <TextView
-        android:id="@+id/tKontoPhone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        <ImageView
+            android:id="@+id/buttonMap"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:src="@drawable/ic_map_24px"
+            android:layout_marginEnd="10dp" />
 
-    <TextView
-        android:id="@+id/tKontoMail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        <ImageView
+            android:id="@+id/buttonURL"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:src="@drawable/ic_open_in_browser_24px"
+            android:layout_marginEnd="10dp" />
+    </GridLayout>
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp" />
     <TextView
-        android:id="@+id/tKontoWww"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
+        android:id="@+id/textPhone"
+        android:layout_width="wrap_content"
+        android:layout_height="62dp"
+        android:layout_gravity="center"
+        android:text="@string/textFestnetz"
         android:textColor="@android:color/white"
-        android:textSize="25sp" />
-
-    <TextView
-        android:id="@+id/tKontoNote"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="20dp"
-        android:paddingBottom="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="25sp" />
+        android:textSize="22sp" />
 </LinearLayout>

@@ -27,14 +27,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     override fun setTextData(konto: Konto) {
-        tKontoCity.text = "City: " + konto.kCity
-        tKontoCityNumber.text = "PLZ: " + konto.kPlz
-        tKontoCountry.text = "Country: " + konto.kCountry
-        tKontoMail.text = "Mail: " + konto.kMail
-        tKontoName.text = "Name: " + konto.kName
-        tKontoNote.text = "Notiz: " + konto.kNote
-        tKontoNumber.text = "Nummer: " + konto.kNumber
-        tKontoPhone.text = "Phone: " + konto.kTelMain
-        tKontoWww.text = "WWW: " + konto.kUrl
+        textName.text = konto.kName
+        textKontoNumber.text = "(" + konto.kNumber + ")"
     }
 }

@@ -2,6 +2,7 @@ package at.sysco.erp_connect.konto_list
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -20,14 +21,14 @@ class KontoListActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(at.sysco.erp_connect.R.layout.activity_konto_list)
 
+        search_konto.visibility = View.GONE
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
         kontoListPresenter.requestFromWS()
-
-        search_konto.isActivated = false
     }
 
     override fun showProgress() {
         progressBar.visibility = View.VISIBLE
+        search_konto.visibility = View.GONE
     }
 
     override fun hideProgress() {
@@ -35,15 +36,16 @@ class KontoListActivity : AppCompatActivity(),
     }
 
     override fun displayKontoListInRecyclerView(kontoArrayList: List<Konto>) {
-        val test2: MutableList<Konto> = kontoArrayList as MutableList<Konto>
+        val test2: ArrayList<Konto> = ArrayList(kontoArrayList)
         val adapter = KontoAdapter(test2, this)
+
+        try_again.visibility = View.GONE
+        search_konto.visibility = View.VISIBLE
 
         rv_konto_list.layoutManager = LinearLayoutManager(this)
         rv_konto_list.addItemDecoration(DividerItemDecoration(rv_konto_list.context, 1))
         rv_konto_list.adapter = adapter
-        try_again.visibility = View.GONE
 
-        search_konto.isActivated = true
 
         search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -51,10 +53,7 @@ class KontoListActivity : AppCompatActivity(),
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (adapter.exampleList.isNotEmpty()) {
-                    adapter.filter.filter(newText)
-                    return false
-                }
+                adapter.filter.filter(newText)
                 return false
             }
         })

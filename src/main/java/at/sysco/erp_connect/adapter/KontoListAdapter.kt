@@ -14,9 +14,9 @@ import at.sysco.erp_connect.konto_detail.KontoDetailActivity
 import at.sysco.erp_connect.pojo.Konto
 import kotlinx.android.synthetic.main.konto_list_item.view.*
 
-class KontoAdapter(exampleList: MutableList<Konto>, val context: Context) :
+class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>(), Filterable {
-    var exampleList: List<Konto> = exampleList
+    var exampleList: ArrayList<Konto> = exampleList
     var exampleListFull: ArrayList<Konto>
 
     init {
