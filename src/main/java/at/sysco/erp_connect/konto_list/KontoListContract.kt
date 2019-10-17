@@ -15,7 +15,7 @@ interface KontoListContract {
         fun showLoadingError()
         fun showProgress()
         fun hideProgress()
-        fun displayKontoListInRecyclerView(kontoArrayList: List<Konto>)
+        fun displayKontoListInRecyclerView(kontoList: List<Konto>)
     }
 
     interface Presenter {

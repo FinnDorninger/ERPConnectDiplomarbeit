@@ -19,7 +19,6 @@ const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 class KontoListModel(val context: Context) : KontoListContract.Model {
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        //context.deleteFile(KONTO_LIST_FILE_NAME)
         if (KONTO_LIST_FILE_NAME.doesFileExist()) {
             loadKontoListFromFile(onFinishedListener)
         } else {
