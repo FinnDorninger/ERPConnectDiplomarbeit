@@ -14,21 +14,40 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
+import android.net.NetworkInfo
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.util.Log
+import androidx.core.content.ContextCompat.getSystemService
+
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 class KontoListModel(val context: Context) : KontoListContract.Model {
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-            loadKontoListFromFile(onFinishedListener)
-        } else {
+        if (checkInternetConnection(context)) {
             loadDataFromWebservice(onFinishedListener)
+        } else if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+            loadKontoListFromFile(onFinishedListener)
         }
     }
+
 
     private fun String.doesFileExist(): Boolean {
         if (context.fileList().contains(this)) {
             return true
+        }
+        return false
+    }
+
+    private fun checkInternetConnection(context: Context): Boolean {
+        val connectivity =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val info = connectivity.allNetworks
+        for (i in info.indices) {
+            if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
+                return true
+            }
         }
         return false
     }
