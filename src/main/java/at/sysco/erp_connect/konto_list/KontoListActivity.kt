@@ -1,13 +1,12 @@
 package at.sysco.erp_connect.konto_list
 
+import android.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import at.sysco.erp_connect.R
 import at.sysco.erp_connect.adapter.KontoAdapter
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.pojo.Konto
@@ -18,11 +17,11 @@ import kotlinx.android.synthetic.main.activity_konto_list.*
 
 class KontoListActivity : AppCompatActivity(),
     KontoListContract.View {
-    var kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
+    private lateinit var kontoListPresenter: KontoListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_konto_list)
+        setContentView(at.sysco.erp_connect.R.layout.activity_konto_list)
 
         initRecyclerView()
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
@@ -33,11 +32,9 @@ class KontoListActivity : AppCompatActivity(),
         if (withAction) {
             val snackbar: Snackbar =
                 Snackbar.make(findViewById(R.id.content), title, Snackbar.LENGTH_INDEFINITE)
-            //val snackbarView = snackbar.view
-            //val textView : TextView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text)
             snackbar.setAction(
-                "Retry!",
-                View.OnClickListener { kontoListPresenter.requestFromWS() })
+                "Retry!"
+            ) { kontoListPresenter.requestFromWS() }
             snackbar.show()
         } else {
             val snackbar: Snackbar =
@@ -55,6 +52,7 @@ class KontoListActivity : AppCompatActivity(),
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_FILE -> showSnackbar(failureCode, true)
             FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
+            FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
         }
     }
 
@@ -66,13 +64,13 @@ class KontoListActivity : AppCompatActivity(),
         progressBar.visibility = View.GONE
     }
 
-    fun initRecyclerView() {
+    private fun initRecyclerView() {
         rv_konto_list.layoutManager = LinearLayoutManager(this)
         rv_konto_list.addItemDecoration(DividerItemDecoration(rv_konto_list.context, 1))
     }
 
-    override fun displayKontoListInRecyclerView(kontoArrayList: List<Konto>) {
-        val adapter = KontoAdapter(ArrayList(kontoArrayList), this)
+    override fun displayKontoListInRecyclerView(kontoList: List<Konto>) {
+        val adapter = KontoAdapter(ArrayList(kontoList), this)
         search_konto.visibility = View.VISIBLE
         rv_konto_list.adapter = adapter
 

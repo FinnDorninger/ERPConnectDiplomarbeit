@@ -15,7 +15,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
-import android.util.Log
 import at.sysco.erp_connect.constants.FinishCode
 import java.lang.IllegalArgumentException
 
