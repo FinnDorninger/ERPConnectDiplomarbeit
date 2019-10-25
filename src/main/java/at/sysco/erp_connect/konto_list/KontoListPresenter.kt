@@ -1,6 +1,8 @@
 package at.sysco.erp_connect.konto_list
 
+import android.util.Log
 import at.sysco.erp_connect.constants.FailureCode
+import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoListModel
 
@@ -10,16 +12,17 @@ class KontoListPresenter(
 ) : KontoListContract.Presenter, KontoListContract.Model.OnFinishedListener {
     var kontoListView: KontoListContract.View? = kontoListView
 
-    override fun onfinished(kontoArrayList: List<Konto>) {
+    override fun onfinished(kontoArrayList: List<Konto>, finishCode: String) {
         kontoListView?.displayKontoListInRecyclerView(kontoArrayList)
         kontoListView?.hideProgress()
+        if (finishCode != FinishCode.finishedOnWeb) {
+            kontoListView?.onSucess(finishCode)
+        }
     }
 
     override fun onFailure(failureCode: String) {
         kontoListView?.hideProgress()
-        when (failureCode) {
-            FailureCode.FAILED_CONNECTION -> kontoListView?.showLoadingError()
-        }
+        kontoListView?.onError(failureCode)
     }
 
     override fun requestFromWS() {

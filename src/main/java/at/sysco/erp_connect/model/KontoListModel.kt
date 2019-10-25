@@ -14,24 +14,21 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
-import android.net.NetworkInfo
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.util.Log
-import androidx.core.content.ContextCompat.getSystemService
+import at.sysco.erp_connect.constants.FinishCode
+import java.lang.IllegalArgumentException
 
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 class KontoListModel(val context: Context) : KontoListContract.Model {
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        if (checkInternetConnection(context)) {
-            loadDataFromWebservice(onFinishedListener)
-        } else if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-            loadKontoListFromFile(onFinishedListener)
+        when {
+            checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
+            KONTO_LIST_FILE_NAME.doesFileExist() -> loadKontoListFromFile(onFinishedListener)
+            else -> onFinishedListener.onFailure(FailureCode.NO_FILE)
         }
     }
-
 
     private fun String.doesFileExist(): Boolean {
         if (context.fileList().contains(this)) {
@@ -56,23 +53,26 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val path = context.filesDir.toString() + "/" + KONTO_LIST_FILE_NAME
         var inputStream: FileInputStream? = null
         try {
-            inputStream = File(path).inputStream()
+            val file = File(path)
+            inputStream = file.inputStream()
             val kontoList = Persister().read(KontoList::class.java, inputStream).kontenList
             if (kontoList != null) {
-                onFinishedListener.onfinished(kontoList)
+                onFinishedListener.onfinished(kontoList, FinishCode.finishedOnFile)
+            } else {
+                onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
         } catch (e: IOException) {
             //Exception: File does not exist or is corrupt
-            if (path.doesFileExist()) {
-                context.deleteFile(KONTO_LIST_FILE_NAME)
-                onFinishedListener.onFailure(FailureCode.DAMAGED_FILE)
+            if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+                removeFile()
+                onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
                 onFinishedListener.onFailure(FailureCode.NO_FILE)
             }
         } catch (e: PersistenceException) {
             //Exception when Persister can not serialize object from file.
-            context.deleteFile(KONTO_LIST_FILE_NAME)
-            onFinishedListener.onFailure(FailureCode.DAMAGED_FILE)
+            removeFile()
+            onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
             inputStream?.close()
         }
@@ -90,14 +90,24 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
                 if (responseKontoList != null) {
                     save(responseKontoList, onFinishedListener)
-                    onFinishedListener.onfinished(responseKontoList)
+                    onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                 } else {
-                    onFinishedListener.onFailure(FailureCode.FAILED_CONNECTION)
+                    //When file exists load from file
+                    if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+                        loadKontoListFromFile(onFinishedListener)
+                    } else {
+                        onFinishedListener.onFailure(FailureCode.NO_FILE)
+                    }
                 }
             }
 
             override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                onFinishedListener.onFailure(FailureCode.FAILED_CONNECTION)
+                //When file exists load from file
+                if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+                    loadKontoListFromFile(onFinishedListener)
+                } else {
+                    onFinishedListener.onFailure(FailureCode.NO_FILE)
+                }
             }
         })
     }
@@ -199,14 +209,24 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             serializer.endDocument()
 
             fileWriter.write(writer.toString())
-            fileWriter.close()
+
         } catch (e: IOException) {
-            onFinishedListener.onFailure(FailureCode.NO_FILE)
-        } catch (e: PersistenceException) {
-            context.deleteFile(KONTO_LIST_FILE_NAME)
-            onFinishedListener.onFailure(FailureCode.DAMAGED_FILE)
+            removeFile()
+            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE) //TO-DO: Wirklich?
+        } catch (e: IllegalArgumentException) {
+            removeFile()
+            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE) //TO-DO: Wirklich?
+        } catch (e: IllegalStateException) {
+            removeFile()
+            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE) //TO-DO: Wirklich?
         } finally {
             fileWriter?.close()
+        }
+    }
+
+    private fun removeFile() {
+        when {
+            KONTO_LIST_FILE_NAME.doesFileExist() -> context.deleteFile(KONTO_LIST_FILE_NAME)
         }
     }
 }

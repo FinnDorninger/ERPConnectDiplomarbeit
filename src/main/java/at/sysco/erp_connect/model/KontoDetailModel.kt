@@ -1,7 +1,6 @@
 package at.sysco.erp_connect.model
 
 import android.content.Context
-import android.util.Log
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
 import at.sysco.erp_connect.pojo.KontoList
@@ -10,7 +9,6 @@ import org.simpleframework.xml.core.Persister
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.lang.Exception
 
 const val KONTO_DETAIL_FILE_NAME = "KontoFile.xml"
 
@@ -46,13 +44,13 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                 onFinishedListener.onfinished(konto!!)
             } else {
                 context.deleteFile(KONTO_DETAIL_FILE_NAME)
-                onFinishedListener.onFailureFileLoad(FailureCode.DAMAGED_FILE)
+                onFinishedListener.onFailureFileLoad(FailureCode.ERROR_LOADING_FILE)
             }
         } catch (e: IOException) {
             onFinishedListener.onFailureFileLoad(FailureCode.NO_FILE)
         } catch (e: PersistenceException) {
             context.deleteFile(KONTO_DETAIL_FILE_NAME)
-            onFinishedListener.onFailureFileLoad(FailureCode.DAMAGED_FILE)
+            onFinishedListener.onFailureFileLoad(FailureCode.ERROR_LOADING_FILE)
         } finally {
             fileInputStream?.close()
         }
