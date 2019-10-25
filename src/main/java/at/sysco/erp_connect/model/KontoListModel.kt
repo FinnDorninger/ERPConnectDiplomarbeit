@@ -15,6 +15,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
+import android.util.Log
 import at.sysco.erp_connect.constants.FinishCode
 import java.lang.IllegalArgumentException
 
@@ -208,17 +209,21 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             serializer.endTag("", "MESOWebService")
             serializer.endDocument()
 
-            fileWriter.write(writer.toString())
-
+            val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
+            if (context.filesDir.freeSpace > bytesOfFile) {
+                fileWriter.write(writer.toString())
+            } else {
+                onFinishedListener.onFailure(FailureCode.NOT_ENOUGH_SPACE)
+            }
         } catch (e: IOException) {
             removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE) //TO-DO: Wirklich?
+            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
         } catch (e: IllegalArgumentException) {
             removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE) //TO-DO: Wirklich?
+            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
         } catch (e: IllegalStateException) {
             removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE) //TO-DO: Wirklich?
+            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
         } finally {
             fileWriter?.close()
         }

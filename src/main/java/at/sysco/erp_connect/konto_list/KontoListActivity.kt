@@ -1,6 +1,5 @@
 package at.sysco.erp_connect.konto_list
 
-import android.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -8,6 +7,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import at.sysco.erp_connect.R
 import at.sysco.erp_connect.adapter.KontoAdapter
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.pojo.Konto
@@ -22,7 +22,7 @@ class KontoListActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(at.sysco.erp_connect.R.layout.activity_konto_list)
+        setContentView(R.layout.activity_konto_list)
 
         initRecyclerView()
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
