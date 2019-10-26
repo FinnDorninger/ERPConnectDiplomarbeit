@@ -26,7 +26,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
             KONTO_LIST_FILE_NAME.doesFileExist() -> loadKontoListFromFile(onFinishedListener)
-            else -> onFinishedListener.onFailure(FailureCode.NO_FILE)
+            else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
     }
 
@@ -53,8 +53,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val path = context.filesDir.toString() + "/" + KONTO_LIST_FILE_NAME
         var inputStream: FileInputStream? = null
         try {
-            val file = File(path)
-            inputStream = file.inputStream()
+            inputStream = File(path).inputStream()
             val kontoList = Persister().read(KontoList::class.java, inputStream).kontenList
             if (kontoList != null) {
                 onFinishedListener.onfinished(kontoList, FinishCode.finishedOnFile)
@@ -67,7 +66,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 removeFile()
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
-                onFinishedListener.onFailure(FailureCode.NO_FILE)
+                onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
         } catch (e: PersistenceException) {
             //Exception when Persister can not serialize object from file.
@@ -96,7 +95,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                     if (KONTO_LIST_FILE_NAME.doesFileExist()) {
                         loadKontoListFromFile(onFinishedListener)
                     } else {
-                        onFinishedListener.onFailure(FailureCode.NO_FILE)
+                        onFinishedListener.onFailure(FailureCode.NO_DATA)
                     }
                 }
             }
@@ -106,7 +105,11 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 if (KONTO_LIST_FILE_NAME.doesFileExist()) {
                     loadKontoListFromFile(onFinishedListener)
                 } else {
-                    onFinishedListener.onFailure(FailureCode.NO_FILE)
+                    if (checkInternetConnection(context)) {
+                        onFinishedListener.onFailure(FailureCode.NO_DATA)
+                    } else {
+                        onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
+                    }
                 }
             }
         })

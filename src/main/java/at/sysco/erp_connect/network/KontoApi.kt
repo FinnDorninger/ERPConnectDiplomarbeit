@@ -1,6 +1,5 @@
 package at.sysco.erp_connect.network
 
-import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.pojo.KontoList
 import retrofit2.Call
 import retrofit2.Retrofit
@@ -14,6 +13,9 @@ interface KontoApi {
     @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
     fun getKontoList(): Call<KontoList>
 
+    @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=1&Vorlage=KontenWebservice")
+    fun getKonto(@Query("Key") kontoNummer: String): Call<KontoList>
+
     object Factory {
         fun create(): KontoApi {
             val retrofit = Retrofit.Builder()
@@ -21,7 +23,7 @@ interface KontoApi {
                 .client(UnsafeHTTPClient.getUnsafeOkHttpClient())
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build()
-            return retrofit.create<KontoApi>(KontoApi::class.java)
+            return retrofit.create(KontoApi::class.java)
         }
     }
 }

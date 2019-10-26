@@ -6,27 +6,54 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import at.sysco.erp_connect.R
+import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoDetailModel
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_detail.*
+import java.net.URLEncoder
 
 //TO-DO: Error anzeigen, wenn Daten nicht genug Daten für Funktionen vorhanden!
 class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
+    lateinit var kontoDetailPresenter: KontoDetailPresenter
+    lateinit var kontoNummer: String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_detail)
 
-        val kontoNummer = intent.getStringExtra("id")
-        val kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
+        kontoNummer = intent.getStringExtra("id")
+        kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
         kontoDetailPresenter.requestFromWS(kontoNummer)
     }
 
-    override fun showProgress() {
-        Log.w("Finn", "Loading")
+    override fun onSucess(finishCode: String) {
+        Log.w("Test", "Display")
+        showSnackbar(finishCode, false)
     }
 
-    override fun hideProgress() {
-        Log.w("Finn", "Hiding")
+    override fun onError(failureCode: String) {
+        when (failureCode) {
+            FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
+            FailureCode.NO_DATA -> showSnackbar(failureCode, true)
+            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
+            FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
+        }
+    }
+
+    private fun showSnackbar(title: String, withAction: Boolean) {
+        if (withAction) {
+            val snackbar: Snackbar =
+                Snackbar.make(findViewById(android.R.id.content), title, Snackbar.LENGTH_INDEFINITE)
+            snackbar.setAction(
+                "Retry!"
+            ) { kontoDetailPresenter.requestFromWS(kontoNummer) }
+            snackbar.show()
+        } else {
+            val snackbar: Snackbar =
+                Snackbar.make(findViewById(android.R.id.content), title, Snackbar.LENGTH_LONG)
+            snackbar.show()
+        }
     }
 
     override fun setTextData(konto: Konto) {
@@ -49,21 +76,17 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     private fun openAddress(konto: Konto) {
-        var adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet, konto.kCountry)
-        var adress = "https://www.google.com/maps/search/?api=1"
+        var adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
+        val adressIterator = adressList.iterator()
+        var url = "https://www.google.com/maps/search/?api=1&query="
+        var adress = ""
 
-        for (part in adressList) {
-            if (part != null) {
-                var newPart = part.replace(" ", "+")
-                adress += "$newPart%2C"
-            } else {
-                if (adress.endsWith("%2C")) {
-                    adress.removeSuffix("%2C")
-                }
-            }
+        while (adressIterator.hasNext()) {
+            adress += adressIterator.next() + ", "
         }
+        url += URLEncoder.encode(adress.removeSuffix(", "), "utf-8")
 
-        val webpage: Uri = Uri.parse(adress)
+        val webpage: Uri = Uri.parse(url)
         val intent = Intent(Intent.ACTION_VIEW, webpage)
         intent.setPackage("com.google.android.apps.maps")
         if (intent.resolveActivity(packageManager) != null) {

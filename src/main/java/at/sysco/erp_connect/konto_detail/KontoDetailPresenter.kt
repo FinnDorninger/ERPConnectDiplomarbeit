@@ -1,6 +1,6 @@
 package at.sysco.erp_connect.konto_detail
 
-import android.util.Log
+import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoDetailModel
 
@@ -10,17 +10,17 @@ class KontoDetailPresenter(
 ) : KontoDetailContract.Presenter, KontoDetailContract.Model.OnFinishedListener {
     var kontoDetailView: KontoDetailContract.View? = kontoListView
 
-    override fun onfinished(konto: Konto) {
+    override fun onfinished(konto: Konto, finishCode: String) {
         kontoDetailView?.setTextData(konto)
-        kontoDetailView?.hideProgress()
+        if (finishCode != FinishCode.finishedOnWeb) {
+            kontoDetailView?.onSucess(finishCode)
+        }
     }
 
-    override fun onFailureFileLoad(failureCode: String) {
-        Log.w("Presenter", "Failed loading file")
+    override fun onFailure(failureCode: String) {
+        kontoDetailView?.onError(failureCode)
     }
-
     override fun requestFromWS(kontoNummer: String) {
-        kontoDetailView?.showProgress()
         kontoDetailModel.getKontoDetail(this, kontoNummer)
     }
 
