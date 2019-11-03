@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <EditTextPreference
+        android:defaultValue="https://83.164.140.68:13443/"
+        android:key="base_url"
+        android:title="URL des Webservices"
+        app:useSimpleSummaryProvider="true"
+        android:persistent="true" />
+    <EditTextPreference
+        android:defaultValue="meso"
+        android:key="user_name"
+        android:title="Benutzername"
+        app:useSimpleSummaryProvider="true"
+        android:persistent="true" />
+    <EditTextPreference
+        android:defaultValue="meso"
+        android:key="user_password"
+        android:title="Passwort"
+        android:persistent="true" />
+</PreferenceScreen>

@@ -16,15 +16,19 @@ import kotlinx.android.synthetic.main.konto_list_item.view.*
 
 class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>(), Filterable {
-    var exampleList: ArrayList<Konto> = exampleList
-    var exampleListFull: ArrayList<Konto>
+    var kontoList: ArrayList<Konto> = exampleList
+    var kontoListFull: ArrayList<Konto>
 
     init {
-        this.exampleListFull = ArrayList(exampleList)
+        this.kontoListFull = ArrayList(exampleList)
     }
 
     override fun getItemCount(): Int {
-        return exampleList.size
+        return kontoList.size
+    }
+
+    fun removeAll() {
+        kontoListFull.removeAll(kontoListFull)
     }
 
     //Inflates the item views: ViewGroup?
@@ -39,11 +43,11 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
 
     // Binds each Konto in the ArrayList to a view
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder?.tvKontoName?.text = exampleList[position].kName
-        holder?.tvKontoNumber?.text = exampleList[position].kNumber
+        holder?.tvKontoName?.text = kontoList[position].kName
+        holder?.tvKontoNumber?.text = kontoList[position].kNumber
 
         val intent = Intent(context, KontoDetailActivity::class.java)
-        intent.putExtra("id", exampleList[position].kNumber)
+        intent.putExtra("id", kontoList[position].kNumber)
         holder?.tvHolder.setOnClickListener { v -> context.startActivity(intent) }
     }
 
@@ -56,12 +60,12 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
             var filteredList = ArrayList<Konto>()
 
             if (constraint == null || constraint.length == 0) {
-                filteredList.addAll(exampleListFull)
+                filteredList.addAll(kontoListFull)
             } else {
                 var filterPattern = constraint.toString().toLowerCase().trim()
                 Log.w("Finn", filterPattern)
 
-                for (konto in exampleListFull) {
+                for (konto in kontoListFull) {
                     if (konto.kName?.toLowerCase()!!.contains(filterPattern)) {
                         filteredList.add(konto)
                     }

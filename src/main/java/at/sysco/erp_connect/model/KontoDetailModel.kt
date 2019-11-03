@@ -3,6 +3,7 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
+import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
@@ -63,38 +64,47 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         kontoNummer: String
     ) {
         val retrofit = Retrofit.Builder()
-        val call = KontoApi.Factory.create().getKonto(kontoNummer)
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val userName = sharedPref.getString("user_name", "")
+        val userPW = sharedPref.getString("user_password", "")
+        val baseURL = sharedPref.getString("base_url", "")
 
-        call.enqueue(object : Callback<KontoList> {
-            override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
-                val responseKontoList = response.body()?.kontenList
+        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+            val call = KontoApi.Factory.create(baseURL).getKonto(userPW, userName, kontoNummer)
 
-                if (responseKontoList != null) {
-                    Log.w("Test", responseKontoList[0].kName)
-                    onFinishedListener.onfinished(responseKontoList[0], FinishCode.finishedOnWeb)
-                } else {
-                    Log.w("Test", "Not Correct")
-                    if (KONTO_FILE_NAME.doesFileExist()) {
+            call.enqueue(object : Callback<KontoList> {
+                override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
+                    val responseKontoList = response.body()?.kontenList
+
+                    if (responseKontoList != null) {
+                        Log.w("Test", responseKontoList[0].kName)
+                        onFinishedListener.onfinished(
+                            responseKontoList[0],
+                            FinishCode.finishedOnWeb
+                        )
+                    } else {
+                        Log.w("Test", "Not Correct")
+                        if (KONTO_FILE_NAME.doesFileExist()) {
+                            loadKontoDetailFromFile(onFinishedListener, kontoNummer)
+                        } else {
+                            onFinishedListener.onFailure(FailureCode.NO_DATA)
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<KontoList>, t: Throwable) {
+                    if (KONTO_LIST_FILE_NAME.doesFileExist()) {
                         loadKontoDetailFromFile(onFinishedListener, kontoNummer)
                     } else {
-                        onFinishedListener.onFailure(FailureCode.NO_DATA)
+                        if (checkInternetConnection(context)) {
+                            onFinishedListener.onFailure(FailureCode.NO_DATA)
+                        } else {
+                            onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
+                        }
                     }
                 }
-            }
-
-            override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                //When file exists load from file
-                if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-                    loadKontoDetailFromFile(onFinishedListener, kontoNummer)
-                } else {
-                    if (checkInternetConnection(context)) {
-                        onFinishedListener.onFailure(FailureCode.NO_DATA)
-                    } else {
-                        onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
-                    }
-                }
-            }
-        })
+            })
+        }
     }
 
     private fun loadKontoDetailFromFile(

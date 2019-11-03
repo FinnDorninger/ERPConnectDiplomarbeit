@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:id="@+id/layoutKonto_List">
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/search_konto"

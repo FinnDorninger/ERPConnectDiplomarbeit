@@ -5,21 +5,22 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.SimpleXmlConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface KontoApi {
     //TO-DO: "getKontoDetail(KontoNummer)" -> Darstellung KontoDetails
     //TO-DO-Später: SharedPreferences -> User/Passwort/BaseURL
-    @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
-    fun getKontoList(): Call<KontoList>
+    @GET("/ewlservice/export?User=meso&Company=300M&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
+    fun getKontoList(@Query("Password") pw: String, @Query("User") user: String): Call<KontoList>
 
     @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=1&Vorlage=KontenWebservice")
-    fun getKonto(@Query("Key") kontoNummer: String): Call<KontoList>
+    fun getKonto(@Query("Password") pw: String, @Query("User") user: String, @Query("Key") kontoNummer: String): Call<KontoList>
 
     object Factory {
-        fun create(): KontoApi {
+        fun create(baseURL: String): KontoApi {
             val retrofit = Retrofit.Builder()
-                .baseUrl("https://83.164.140.68:13443/")
+                .baseUrl(baseURL)
                 .client(UnsafeHTTPClient.getUnsafeOkHttpClient())
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build()

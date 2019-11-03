@@ -28,7 +28,6 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     override fun onSucess(finishCode: String) {
-        Log.w("Test", "Display")
         showSnackbar(finishCode, false)
     }
 
@@ -44,7 +43,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             val snackbar: Snackbar =
-                Snackbar.make(findViewById(android.R.id.content), title, Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
             snackbar.setAction(
                 "Retry!"
             ) { kontoDetailPresenter.requestFromWS(kontoNummer) }
@@ -59,7 +58,6 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     override fun setTextData(konto: Konto) {
         textName.text = konto.kName
         textKontoNumber.text = "(" + konto.kNumber + ")"
-        textPhone.text = konto.kTelMain
 
         buttonCall.setOnClickListener {
             dialNumber(konto)

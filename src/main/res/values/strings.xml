@@ -2,4 +2,5 @@
     <string name="app_name">ERP_Connect</string>
     <string name="keine_verbindung_try_again">Keine Verbindung. Try Again!</string>
     <string name="textFestnetz">Festnetz</string>
+    <string name="verbindung_einstellen">Verbindung einstellen</string>
 </resources>

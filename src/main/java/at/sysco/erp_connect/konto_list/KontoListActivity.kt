@@ -1,9 +1,8 @@
 package at.sysco.erp_connect.konto_list
 
-import android.R
+import at.sysco.erp_connect.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,32 +12,62 @@ import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoListModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_list.*
+import android.content.Intent
+import android.content.SharedPreferences
+import android.util.Log
+import android.view.*
+import androidx.preference.PreferenceManager
+import at.sysco.erp_connect.SettingsActivity
 
 
 class KontoListActivity : AppCompatActivity(),
-    KontoListContract.View {
+    KontoListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
+
     private lateinit var kontoListPresenter: KontoListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(at.sysco.erp_connect.R.layout.activity_konto_list)
+        setContentView(R.layout.activity_konto_list)
 
         initRecyclerView()
+
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
+        kontoListPresenter.requestFromWS()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .registerOnSharedPreferenceChangeListener(this)
+        Log.w("Finn", "Resume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .registerOnSharedPreferenceChangeListener(this)
+        Log.w("Finn", "Pause")
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         kontoListPresenter.requestFromWS()
     }
 
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             val snackbar: Snackbar =
-                Snackbar.make(findViewById(R.id.content), title, Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(
+                    findViewById(R.id.layoutKonto_List),
+                    title,
+                    Snackbar.LENGTH_INDEFINITE
+                )
             snackbar.setAction(
                 "Retry!"
             ) { kontoListPresenter.requestFromWS() }
             snackbar.show()
         } else {
             val snackbar: Snackbar =
-                Snackbar.make(findViewById(R.id.content), title, Snackbar.LENGTH_LONG)
+                Snackbar.make(this.layoutKonto_List, title, Snackbar.LENGTH_LONG)
             snackbar.show()
         }
     }
@@ -84,5 +113,22 @@ class KontoListActivity : AppCompatActivity(),
                 return false
             }
         })
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu to use in the action bar
+        val inflater = menuInflater
+        inflater.inflate(R.menu.settings_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        if (id == R.id.action_settings) {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

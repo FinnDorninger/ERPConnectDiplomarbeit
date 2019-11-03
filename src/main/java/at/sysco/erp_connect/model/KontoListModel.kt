@@ -15,6 +15,8 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
+import android.util.Log
+import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
 import java.lang.IllegalArgumentException
 
@@ -79,40 +81,46 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
     //TO-DO: onResponse -> Error!
     private fun loadDataFromWebservice(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        val retrofit = Retrofit.Builder()
-        val call = KontoApi.Factory.create().getKontoList()
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val userName = sharedPref.getString("user_name", "")
+        val userPW = sharedPref.getString("user_password", "")
+        val baseURL = sharedPref.getString("base_url", "")
 
-        call.enqueue(object : Callback<KontoList> {
-            override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
-                var responseKontoList = response.body()?.kontenList
-                responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
+        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+            val retrofit = Retrofit.Builder()
+            val call = KontoApi.Factory.create(baseURL).getKontoList(userName, userPW)
+            call.enqueue(object : Callback<KontoList> {
+                override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
+                    var responseKontoList = response.body()?.kontenList
+                    responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
 
-                if (responseKontoList != null) {
-                    save(responseKontoList, onFinishedListener)
-                    onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
-                } else {
+                    if (responseKontoList != null) {
+                        save(responseKontoList, onFinishedListener)
+                        onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
+                    } else {
+                        //When file exists load from file
+                        if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+                            loadKontoListFromFile(onFinishedListener)
+                        } else {
+                            onFinishedListener.onFailure(FailureCode.NO_DATA)
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<KontoList>, t: Throwable) {
                     //When file exists load from file
                     if (KONTO_LIST_FILE_NAME.doesFileExist()) {
                         loadKontoListFromFile(onFinishedListener)
                     } else {
-                        onFinishedListener.onFailure(FailureCode.NO_DATA)
+                        if (checkInternetConnection(context)) {
+                            onFinishedListener.onFailure(FailureCode.NO_DATA)
+                        } else {
+                            onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
+                        }
                     }
                 }
-            }
-
-            override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                //When file exists load from file
-                if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-                    loadKontoListFromFile(onFinishedListener)
-                } else {
-                    if (checkInternetConnection(context)) {
-                        onFinishedListener.onFailure(FailureCode.NO_DATA)
-                    } else {
-                        onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
-                    }
-                }
-            }
-        })
+            })
+        }
     }
 
     private fun save(
