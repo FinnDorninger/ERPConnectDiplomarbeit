@@ -39,17 +39,19 @@ class KontoListActivity : AppCompatActivity(),
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(this)
             .registerOnSharedPreferenceChangeListener(this)
-        Log.w("Finn", "Resume")
     }
 
     override fun onPause() {
         super.onPause()
         PreferenceManager.getDefaultSharedPreferences(this)
             .registerOnSharedPreferenceChangeListener(this)
-        Log.w("Finn", "Pause")
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (this.fileList().contains("KontoFile.xml")) {
+            this.deleteFile("KontoFile.xml")
+        }
+        rv_konto_list.visibility = View.GONE
         kontoListPresenter.requestFromWS()
     }
 
@@ -99,6 +101,7 @@ class KontoListActivity : AppCompatActivity(),
     }
 
     override fun displayKontoListInRecyclerView(kontoList: List<Konto>) {
+        rv_konto_list.visibility = View.VISIBLE
         val adapter = KontoAdapter(ArrayList(kontoList), this)
         search_konto.visibility = View.VISIBLE
         rv_konto_list.adapter = adapter

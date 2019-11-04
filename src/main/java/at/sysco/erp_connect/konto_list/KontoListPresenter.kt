@@ -27,8 +27,6 @@ class KontoListPresenter(
     override fun requestFromWS() {
         kontoListView?.showProgress()
         kontoListModel.getKontoList(this)
-
-        Log.w("Test", "Finnn")
     }
 
     override fun onDestroy() {

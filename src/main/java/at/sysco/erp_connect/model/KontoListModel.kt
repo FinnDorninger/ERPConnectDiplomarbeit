@@ -16,6 +16,7 @@ import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
 import android.util.Log
+import android.util.Patterns
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
 import java.lang.IllegalArgumentException
@@ -84,18 +85,20 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
-        val baseURL = sharedPref.getString("base_url", "")
+        var baseURL = sharedPref.getString("base_url", "")
+        baseURL = modifyURL(baseURL)
 
-        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+        if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
-            val call = KontoApi.Factory.create(baseURL).getKontoList(userName, userPW)
+
+            val call = KontoApi.Factory.create(baseURL!!).getKontoList(userName, userPW)
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     var responseKontoList = response.body()?.kontenList
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
 
                     if (responseKontoList != null) {
-                        save(responseKontoList, onFinishedListener)
+                        saveKonto(responseKontoList, onFinishedListener)
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
                         //When file exists load from file
@@ -123,7 +126,28 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         }
     }
 
-    private fun save(
+    private fun modifyURL(baseURL: String?): String? {
+        var newURL: String
+
+        if (baseURL.isNullOrEmpty()) {
+            return ""
+        } else {
+            newURL = baseURL
+            if (newURL.startsWith("http://") || newURL.startsWith("https://")) {
+                Log.w("Test", "Ich checke null")
+                return newURL
+            } else {
+                newURL = "https://".plus(newURL)
+                return newURL
+            }
+        }
+    }
+
+    private fun checkURL(baseURL: String?): Boolean {
+        return Patterns.WEB_URL.matcher(baseURL).matches()
+    }
+
+    private fun saveKonto(
         listToSave: List<Konto>,
         onFinishedListener: KontoListContract.Model.OnFinishedListener
     ) {

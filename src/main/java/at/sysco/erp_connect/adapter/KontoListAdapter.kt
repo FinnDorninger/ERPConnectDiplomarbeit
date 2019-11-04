@@ -28,7 +28,9 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     }
 
     fun removeAll() {
-        kontoListFull.removeAll(kontoListFull)
+        if (!kontoList.isEmpty()) {
+            kontoList.removeAll(kontoList)
+        }
     }
 
     //Inflates the item views: ViewGroup?

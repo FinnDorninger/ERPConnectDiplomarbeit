@@ -3,6 +3,7 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
+import android.util.Patterns
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
@@ -67,10 +68,11 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
-        val baseURL = sharedPref.getString("base_url", "")
+        var baseURL = sharedPref.getString("base_url", "")
+        baseURL = modifyURL(baseURL)
 
-        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
-            val call = KontoApi.Factory.create(baseURL).getKonto(userPW, userName, kontoNummer)
+        if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+            val call = KontoApi.Factory.create(baseURL!!).getKonto(userPW, userName, kontoNummer)
 
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
@@ -146,5 +148,26 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         when {
             KONTO_LIST_FILE_NAME.doesFileExist() -> context.deleteFile(KONTO_LIST_FILE_NAME)
         }
+    }
+
+    private fun modifyURL(baseURL: String?): String? {
+        var newURL: String
+
+        if (baseURL.isNullOrEmpty()) {
+            return ""
+        } else {
+            newURL = baseURL
+            if (newURL.startsWith("http://") || newURL.startsWith("https://")) {
+                Log.w("Test", "Ich checke null")
+                return newURL
+            } else {
+                newURL = "https://".plus(newURL)
+                return newURL
+            }
+        }
+    }
+
+    private fun checkURL(baseURL: String?): Boolean {
+        return Patterns.WEB_URL.matcher(baseURL).matches()
     }
 }
