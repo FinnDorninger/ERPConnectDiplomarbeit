@@ -1,79 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_kontoDetail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/background_dark"
-    android:orientation="vertical"
-    tools:context=".konto_list.KontoListActivity"
-    android:id="@+id/layout_kontoDetail">
+    android:fillViewport="true"
+    tools:context=".konto_list.KontoListActivity">
 
-    <TextView
-        android:id="@+id/textName"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="22sp" />
-
-    <TextView
-        android:id="@+id/textKontoNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:textColor="@android:color/white"
-        android:textSize="15sp" />
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp" />
-    <GridLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center"
-        android:orientation="horizontal"
-        android:columnCount="4"
+        android:orientation="vertical"
         android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp">
+        android:layout_marginEnd="15dp">
 
-        <ImageView
-            android:id="@+id/buttonCall"
-            android:layout_height="50dp"
-            android:layout_width="50dp"
-            android:src="@drawable/ic_phone_24px"
+        <TextView
+            android:id="@+id/textName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/textKontoNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/white"
+            android:textSize="15sp" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp" />
 
-        <ImageView
-            android:id="@+id/buttonSMS"
-            android:layout_height="50dp"
-            android:layout_width="50dp"
-            android:src="@drawable/ic_textsms_24px"
-            android:layout_marginEnd="10dp" />
+        <androidx.gridlayout.widget.GridLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            app:orientation="horizontal"
+            app:columnCount="4">
 
-        <ImageView
-            android:id="@+id/buttonMap"
-            android:layout_height="50dp"
-            android:layout_width="50dp"
-            android:src="@drawable/ic_map_24px"
-            android:layout_marginEnd="10dp" />
+            <ImageView
+                android:id="@+id/buttonCall"
+                android:layout_height="50dp"
+                android:layout_width="50dp"
+                android:src="@drawable/ic_phone_24px"
+                android:layout_marginEnd="10dp" />
 
-        <ImageView
-            android:id="@+id/buttonURL"
-            android:layout_height="50dp"
-            android:layout_width="50dp"
-            android:src="@drawable/ic_open_in_browser_24px"
-            android:layout_marginEnd="10dp" />
-    </GridLayout>
+            <ImageView
+                android:id="@+id/buttonSMS"
+                android:layout_height="50dp"
+                android:layout_width="50dp"
+                android:src="@drawable/ic_textsms_24px"
+                android:layout_marginEnd="10dp" />
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp" />
-</LinearLayout>
+            <ImageView
+                android:id="@+id/buttonMap"
+                android:layout_height="50dp"
+                android:layout_width="50dp"
+                android:src="@drawable/ic_map_24px"
+                android:layout_marginEnd="10dp" />
+
+            <ImageView
+                android:id="@+id/buttonURL"
+                android:layout_height="50dp"
+                android:layout_width="50dp"
+                android:src="@drawable/ic_open_in_browser_24px"
+                android:layout_marginEnd="10dp" />
+        </androidx.gridlayout.widget.GridLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Adresse"
+            android:textColor="#FFFFFF"
+            android:textAllCaps="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/holo_blue_light" />
+
+        <androidx.gridlayout.widget.GridLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            app:orientation="horizontal"
+            app:columnCount="2"
+            app:useDefaultMargins="true">
+
+            <TextView
+                android:id="@+id/testText"
+                android:text="Staat"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textAlignment="textEnd" />
+
+            <TextView
+                android:id="@+id/testText2"
+                android:text="A"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText4"
+                android:text="PLZ"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textAlignment="textStart" />
+
+            <TextView
+                android:id="@+id/testText3"
+                android:text="4563"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="Ort"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="Micheldorf"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="Ort"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="Micheldorf"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="Straße"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/gfjh"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_gravity="fill"
+                android:gravity="bottom"
+                android:text="Am WindfeldAmAmselWegAmWegerManfredHam"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="Vorwahl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="0123456789123456789123456789"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="Vorwahl2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="07582"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="Nummer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="62144"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="E-Mail"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="dorninger.fi@gmail.com"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText5"
+                android:text="www"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/testText413"
+                android:text="htltraun.at"
+                android:textColor="@android:color/white"
+                android:textSize="22sp" />
+        </androidx.gridlayout.widget.GridLayout>
+    </LinearLayout>
+</ScrollView>

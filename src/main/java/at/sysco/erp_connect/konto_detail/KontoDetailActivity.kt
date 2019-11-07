@@ -56,6 +56,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     override fun setTextData(konto: Konto) {
+        /*
         textName.text = konto.kName
         textKontoNumber.text = "(" + konto.kNumber + ")"
 
@@ -71,6 +72,8 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         buttonSMS.setOnClickListener {
             messageNumber(konto)
         }
+
+         */
     }
 
     private fun openAddress(konto: Konto) {
