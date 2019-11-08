@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.pojo.Konto
@@ -15,6 +16,14 @@ import java.net.URLEncoder
 
 //TO-DO: Error anzeigen, wenn Daten nicht genug Daten für Funktionen vorhanden!
 class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
+    override fun hideProgress() {
+        progressBar.visibility = View.GONE
+    }
+
+    override fun showProgress() {
+        tableDetails.visibility = View.VISIBLE
+    }
+
     lateinit var kontoDetailPresenter: KontoDetailPresenter
     lateinit var kontoNummer: String
 
@@ -56,9 +65,18 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     override fun setTextData(konto: Konto) {
-        /*
-        textName.text = konto.kName
-        textKontoNumber.text = "(" + konto.kNumber + ")"
+        textInputName.text = konto.kName
+        textInputKontoNumber.text = "(" + konto.kNumber + ")"
+        textInputStaat.text = konto.kCountry
+        textInputPLZ.text = konto.kPlz
+        textInputCity.text = konto.kCity
+        textInputStreet.text = konto.kStreet
+        textInputMail.text = konto.kMail
+        textInputWWW.text = konto.kUrl
+        textInputPrefixCountry.text = konto.kTelCountry
+        textInputPrefixCity.text = konto.kTelCity
+        textInputPhoneNumber.text = konto.kTelMain
+        textInputNote.text = konto.kNote
 
         buttonCall.setOnClickListener {
             dialNumber(konto)
@@ -72,8 +90,6 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         buttonSMS.setOnClickListener {
             messageNumber(konto)
         }
-
-         */
     }
 
     private fun openAddress(konto: Konto) {

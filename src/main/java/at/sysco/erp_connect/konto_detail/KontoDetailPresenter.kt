@@ -15,12 +15,15 @@ class KontoDetailPresenter(
         if (finishCode != FinishCode.finishedOnWeb) {
             kontoDetailView?.onSucess(finishCode)
         }
+        kontoDetailView?.hideProgress()
     }
 
     override fun onFailure(failureCode: String) {
+        kontoDetailView?.hideProgress()
         kontoDetailView?.onError(failureCode)
     }
     override fun requestFromWS(kontoNummer: String) {
+        kontoDetailView?.showProgress()
         kontoDetailModel.getKontoDetail(this, kontoNummer)
     }
 

@@ -1,6 +1,5 @@
 package at.sysco.erp_connect.konto_list
 
-import android.util.Log
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoListModel

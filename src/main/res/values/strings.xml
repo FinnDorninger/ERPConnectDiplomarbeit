@@ -3,4 +3,18 @@
     <string name="keine_verbindung_try_again">Keine Verbindung. Try Again!</string>
     <string name="textFestnetz">Festnetz</string>
     <string name="verbindung_einstellen">Verbindung einstellen</string>
+    <string name="descriptionAdresse">Adresse</string>
+    <string name="descriptionStaat">Staat</string>
+    <string name="descriptionPlz">PLZ</string>
+    <string name="descriptionOrt">Ort</string>
+    <string name="descriptionStreet">Straße</string>
+    <string name="descriptionKontakt">Kontakt</string>
+    <string name="descriptionMail">Mail</string>
+    <string name="descriptionHomepage">Homepage</string>
+    <string name="descriptionLand_vorwahl">Land-Vorwahl</string>
+    <string name="descriptionOrt_vorwahl">Ort-Vorwahl</string>
+    <string name="descriptionNummer">Nummer</string>
+    <string name="descriptionNotiz">Notiz</string>
+    <string name="text_button_ansprechpartner">Ihr Ansprechpartner</string>
+    <string name="descriptionTelefon">Telefon</string>
 </resources>

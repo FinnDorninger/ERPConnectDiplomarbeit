@@ -16,6 +16,8 @@ interface KontoDetailContract {
         fun setTextData(konto: Konto)
         fun onSucess(finishCode: String)
         fun onError(failureCode: String)
+        fun hideProgress()
+        fun showProgress()
     }
 
     interface Presenter {
