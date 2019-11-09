@@ -19,6 +19,7 @@ import android.util.Log
 import android.util.Patterns
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
+import org.jetbrains.anko.doAsync
 import java.lang.IllegalArgumentException
 
 
@@ -98,7 +99,6 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
 
                     if (responseKontoList != null) {
-                        //saveKonto(responseKontoList, onFinishedListener)
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
                         //When file exists load from file
@@ -151,115 +151,115 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         listToSave: List<Konto>,
         onFinishedListener: KontoListContract.Model.OnFinishedListener
     ) {
-        var fileWriter: FileWriter? = null
         val writer = StringWriter()
+        lateinit var fileWriter: FileWriter
         val serializer = Xml.newSerializer()
         serializer.setOutput(writer)
+        doAsync {
+            try {
+                val file = File(context.filesDir, KONTO_LIST_FILE_NAME)
+                fileWriter = FileWriter(file, false)
+                serializer.startTag("", "MESOWebService")
+                for (konto in listToSave) {
+                    serializer.startTag("", "KontenWebservice")
+                    if (konto.kNumber != null) {
+                        serializer.startTag("", "Kontonummer")
+                        serializer.text(konto.kNumber)
+                        serializer.endTag("", "Kontonummer")
+                    }
+                    if (konto.kName != null) {
+                        serializer.startTag("", "Kontoname")
+                        serializer.text(konto.kName)
+                        serializer.endTag("", "Kontoname")
+                    }
+                    if (konto.kCountry != null) {
+                        serializer.startTag("", "Staat")
+                        serializer.text(konto.kCountry)
+                        serializer.endTag("", "Staat")
+                    }
+                    if (konto.kPlz != null) {
+                        serializer.startTag("", "Postleitzahl")
+                        serializer.text(konto.kPlz)
+                        serializer.endTag("", "Postleitzahl")
+                    }
+                    if (konto.kCity != null) {
+                        serializer.startTag("", "Ort")
+                        serializer.text(konto.kCity)
+                        serializer.endTag("", "Ort")
+                    }
+                    if (konto.kStreet != null) {
+                        serializer.startTag("", "Strasse")
+                        serializer.text(konto.kStreet)
+                        serializer.endTag("", "Strasse")
+                    }
+                    if (konto.kTelCountry != null) {
+                        serializer.startTag("", "Landesvorwahl")
+                        serializer.text(konto.kTelCountry)
+                        serializer.endTag("", "Landesvorwahl")
+                    }
+                    if (konto.kTelCity != null) {
+                        serializer.startTag("", "Ortsvorwahl")
+                        serializer.text(konto.kTelCity)
+                        serializer.endTag("", "Ortsvorwahl")
+                    }
+                    if (konto.kTelMain != null) {
+                        serializer.startTag("", "Telefon")
+                        serializer.text(konto.kTelMain)
+                        serializer.endTag("", "Telefon")
+                    }
+                    if (konto.kMobilCountry != null) {
+                        serializer.startTag("", "LandesvorwahlMobiltelefonnummer")
+                        serializer.text(konto.kMobilCountry)
+                        serializer.endTag("", "LandesvorwahlMobiltelefonnummer")
+                    }
+                    if (konto.kMobilOperatorTel != null) {
+                        serializer.startTag("", "BetreibervorwahlMobiltelefonnummer")
+                        serializer.text(konto.kMobilOperatorTel)
+                        serializer.endTag("", "BetreibervorwahlMobiltelefonnummer")
+                    }
+                    if (konto.kMobilOperatorTel != null) {
+                        serializer.startTag("", "Mobiltelefonnummer")
+                        serializer.text(konto.kMobilTel)
+                        serializer.endTag("", "Mobiltelefonnummer")
+                    }
+                    if (konto.kMail != null) {
+                        serializer.startTag("", "E-Mail-Adresse")
+                        serializer.text(konto.kMail)
+                        serializer.endTag("", "E-Mail-Adresse")
+                    }
+                    if (konto.kUrl != null) {
+                        serializer.startTag("", "WWW-Adresse")
+                        serializer.text(konto.kUrl)
+                        serializer.endTag("", "WWW-Adresse")
+                    }
+                    if (konto.kNote != null) {
+                        serializer.startTag("", "Notiz")
+                        serializer.text(konto.kNote)
+                        serializer.endTag("", "Notiz")
+                    }
+                    serializer.endTag("", "KontenWebservice")
+                }
+                serializer.endTag("", "MESOWebService")
+                serializer.endDocument()
 
-        try {
-            val file = File(context.filesDir, KONTO_LIST_FILE_NAME)
-            fileWriter = FileWriter(file, false)
-
-            serializer.startTag("", "MESOWebService")
-            for (konto in listToSave) {
-                serializer.startTag("", "KontenWebservice")
-                if (konto.kNumber != null) {
-                    serializer.startTag("", "Kontonummer")
-                    serializer.text(konto.kNumber)
-                    serializer.endTag("", "Kontonummer")
+                val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
+                if (context.filesDir.freeSpace > bytesOfFile) {
+                    fileWriter.write(writer.toString())
+                } else {
+                    onFinishedListener.onFailure(FailureCode.NOT_ENOUGH_SPACE)
                 }
-                if (konto.kName != null) {
-                    serializer.startTag("", "Kontoname")
-                    serializer.text(konto.kName)
-                    serializer.endTag("", "Kontoname")
-                }
-                if (konto.kCountry != null) {
-                    serializer.startTag("", "Staat")
-                    serializer.text(konto.kCountry)
-                    serializer.endTag("", "Staat")
-                }
-                if (konto.kPlz != null) {
-                    serializer.startTag("", "Postleitzahl")
-                    serializer.text(konto.kPlz)
-                    serializer.endTag("", "Postleitzahl")
-                }
-                if (konto.kCity != null) {
-                    serializer.startTag("", "Ort")
-                    serializer.text(konto.kCity)
-                    serializer.endTag("", "Ort")
-                }
-                if (konto.kStreet != null) {
-                    serializer.startTag("", "Strasse")
-                    serializer.text(konto.kStreet)
-                    serializer.endTag("", "Strasse")
-                }
-                if (konto.kTelCountry != null) {
-                    serializer.startTag("", "Landesvorwahl")
-                    serializer.text(konto.kTelCountry)
-                    serializer.endTag("", "Landesvorwahl")
-                }
-                if (konto.kTelCity != null) {
-                    serializer.startTag("", "Ortsvorwahl")
-                    serializer.text(konto.kTelCity)
-                    serializer.endTag("", "Ortsvorwahl")
-                }
-                if (konto.kTelMain != null) {
-                    serializer.startTag("", "Telefon")
-                    serializer.text(konto.kTelMain)
-                    serializer.endTag("", "Telefon")
-                }
-                if (konto.kMobilCountry != null) {
-                    serializer.startTag("", "LandesvorwahlMobiltelefonnummer")
-                    serializer.text(konto.kMobilCountry)
-                    serializer.endTag("", "LandesvorwahlMobiltelefonnummer")
-                }
-                if (konto.kMobilOperatorTel != null) {
-                    serializer.startTag("", "BetreibervorwahlMobiltelefonnummer")
-                    serializer.text(konto.kMobilOperatorTel)
-                    serializer.endTag("", "BetreibervorwahlMobiltelefonnummer")
-                }
-                if (konto.kMobilOperatorTel != null) {
-                    serializer.startTag("", "Mobiltelefonnummer")
-                    serializer.text(konto.kMobilTel)
-                    serializer.endTag("", "Mobiltelefonnummer")
-                }
-                if (konto.kMail != null) {
-                    serializer.startTag("", "E-Mail-Adresse")
-                    serializer.text(konto.kMail)
-                    serializer.endTag("", "E-Mail-Adresse")
-                }
-                if (konto.kUrl != null) {
-                    serializer.startTag("", "WWW-Adresse")
-                    serializer.text(konto.kUrl)
-                    serializer.endTag("", "WWW-Adresse")
-                }
-                if (konto.kNote != null) {
-                    serializer.startTag("", "Notiz")
-                    serializer.text(konto.kNote)
-                    serializer.endTag("", "Notiz")
-                }
-                serializer.endTag("", "KontenWebservice")
+            } catch (e: IOException) {
+                removeFile()
+                onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
+            } catch (e: IllegalArgumentException) {
+                removeFile()
+                onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
+            } catch (e: IllegalStateException) {
+                removeFile()
+                onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
+            } finally {
+                fileWriter.close()
             }
-            serializer.endTag("", "MESOWebService")
-            serializer.endDocument()
-
-            val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
-            if (context.filesDir.freeSpace > bytesOfFile) {
-                fileWriter.write(writer.toString())
-            } else {
-                onFinishedListener.onFailure(FailureCode.NOT_ENOUGH_SPACE)
-            }
-        } catch (e: IOException) {
-            removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
-        } catch (e: IllegalArgumentException) {
-            removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
-        } catch (e: IllegalStateException) {
-            removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
-        } finally {
-            fileWriter?.close()
         }
     }
 

@@ -83,7 +83,7 @@ class KontoListActivity : AppCompatActivity(),
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
-            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
+            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
         }
     }
