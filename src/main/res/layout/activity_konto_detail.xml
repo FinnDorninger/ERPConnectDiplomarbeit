@@ -16,14 +16,15 @@
         android:layout_marginEnd="10dp">
         <TextView
             android:id="@+id/textInputName"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+            android:textColor="@android:color/white" />
 
         <TextView
             android:id="@+id/textInputKontoNumber"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -105,6 +106,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/descriptionAdresse"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textColor="#FFFFFF"
                     android:textAllCaps="true" />
             </TableRow>
@@ -130,18 +132,18 @@
 
                 <TextView
                     android:id="@+id/textStaat"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionStaat"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                android:textColor="@android:color/white"
-                    android:textSize="14sp" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:id="@+id/textInputStaat"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
-                    android:textSize="14sp"
                     android:textStyle="bold" />
             </TableRow>
 
@@ -153,6 +155,7 @@
 
                 <TextView
                     android:id="@+id/textPLZ"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionPlz"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -160,6 +163,7 @@
 
                 <TextView
                     android:id="@+id/textInputPLZ"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -174,6 +178,7 @@
 
                 <TextView
                     android:id="@+id/textCity"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionOrt"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -181,6 +186,7 @@
 
                 <TextView
                     android:id="@+id/textInputCity"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -195,6 +201,7 @@
 
                 <TextView
                     android:id="@+id/textStreet"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionStreet"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -202,6 +209,7 @@
 
                 <TextView
                     android:id="@+id/textInputStreet"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -211,9 +219,11 @@
             <TableRow
                 android:id="@+id/headlineContact"
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent">
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp">
 
                 <TextView
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/descriptionKontakt"
@@ -225,7 +235,8 @@
                 android:id="@+id/lineContact"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_weight="2">
+                android:layout_weight="2"
+                android:layout_marginBottom="5dp">
 
                 <View
                     android:layout_width="match_parent"
@@ -242,6 +253,7 @@
 
                 <TextView
                     android:id="@+id/textMail"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionMail"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -249,6 +261,7 @@
 
                 <TextView
                     android:id="@+id/textInputMail"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -263,6 +276,7 @@
 
                 <TextView
                     android:id="@+id/textWWW"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionHomepage"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -270,6 +284,7 @@
 
                 <TextView
                     android:id="@+id/textInputWWW"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -279,9 +294,11 @@
             <TableRow
                 android:id="@+id/headlinePhone"
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent">
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp">
 
                 <TextView
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/descriptionTelefon"
@@ -299,7 +316,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_weight="2"
-                    android:background="@android:color/holo_blue_light" />
+                    android:background="@android:color/holo_blue_light"
+                    android:layout_marginBottom="5dp" />
             </TableRow>
 
             <TableRow
@@ -310,6 +328,7 @@
 
                 <TextView
                     android:id="@+id/textPrefixCountry"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionLand_vorwahl"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -317,6 +336,7 @@
 
                 <TextView
                     android:id="@+id/textInputPrefixCountry"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -331,6 +351,7 @@
 
                 <TextView
                     android:id="@+id/textPrefixCity"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionOrt_vorwahl"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -338,6 +359,7 @@
 
                 <TextView
                     android:id="@+id/textInputPrefixCity"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -352,6 +374,7 @@
 
                 <TextView
                     android:id="@+id/textPhoneNumber"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/descriptionNummer"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -359,6 +382,7 @@
 
                 <TextView
                     android:id="@+id/textInputPhoneNumber"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -369,9 +393,11 @@
             <TableRow
                 android:id="@+id/headlineNote"
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent">
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp">
 
                 <TextView
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/descriptionNotiz"
@@ -383,7 +409,8 @@
                 android:id="@+id/lineNote"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_weight="2">
+                android:layout_weight="2"
+                android:layout_marginBottom="5dp">
 
                 <View
                     android:layout_width="match_parent"
@@ -400,6 +427,7 @@
 
                 <TextView
                     android:id="@+id/textInputNote"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="2"

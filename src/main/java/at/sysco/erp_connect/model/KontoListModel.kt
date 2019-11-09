@@ -97,7 +97,6 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     var responseKontoList = response.body()?.kontenList
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
-
                     if (responseKontoList != null) {
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
