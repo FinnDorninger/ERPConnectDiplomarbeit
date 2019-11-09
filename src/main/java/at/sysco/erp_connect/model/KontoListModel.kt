@@ -98,7 +98,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
 
                     if (responseKontoList != null) {
-                        saveKonto(responseKontoList, onFinishedListener)
+                        //saveKonto(responseKontoList, onFinishedListener)
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
                         //When file exists load from file
@@ -147,7 +147,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         return Patterns.WEB_URL.matcher(baseURL).matches()
     }
 
-    private fun saveKonto(
+    fun saveKonto(
         listToSave: List<Konto>,
         onFinishedListener: KontoListContract.Model.OnFinishedListener
     ) {

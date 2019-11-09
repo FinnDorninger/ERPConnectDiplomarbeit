@@ -15,6 +15,8 @@ class KontoListPresenter(
         kontoListView?.hideProgress()
         if (finishCode != FinishCode.finishedOnWeb) {
             kontoListView?.onSucess(finishCode)
+        } else {
+            kontoListModel.saveKonto(kontoArrayList, this)
         }
     }
 

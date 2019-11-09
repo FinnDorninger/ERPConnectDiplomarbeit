@@ -14,7 +14,6 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import android.view.*
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.SettingsActivity
@@ -24,6 +23,7 @@ class KontoListActivity : AppCompatActivity(),
     KontoListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var kontoListPresenter: KontoListPresenter
+    var snackbar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,10 +41,11 @@ class KontoListActivity : AppCompatActivity(),
             .registerOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         PreferenceManager.getDefaultSharedPreferences(this)
-            .registerOnSharedPreferenceChangeListener(this)
+            .unregisterOnSharedPreferenceChangeListener(this)
+        kontoListPresenter.onDestroy()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -53,25 +54,25 @@ class KontoListActivity : AppCompatActivity(),
         }
         rv_konto_list.visibility = View.GONE
         kontoListPresenter.requestFromWS()
+        snackbar?.dismiss()
     }
 
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
-            val snackbar: Snackbar =
+            snackbar =
                 Snackbar.make(
                     findViewById(R.id.layoutKonto_List),
                     title,
                     Snackbar.LENGTH_INDEFINITE
                 )
-            snackbar.setAction(
+            snackbar?.setAction(
                 "Retry!"
             ) { kontoListPresenter.requestFromWS() }
-            snackbar.show()
         } else {
-            val snackbar: Snackbar =
+            snackbar =
                 Snackbar.make(this.layoutKonto_List, title, Snackbar.LENGTH_LONG)
-            snackbar.show()
         }
+        snackbar?.show()
     }
 
     override fun onSucess(finishCode: String) {
