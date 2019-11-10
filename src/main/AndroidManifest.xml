@@ -14,7 +14,9 @@
         android:theme="@style/AppTheme">
         <activity android:name=".konto_detail.KontoDetailActivity"></activity>
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".konto_list.KontoListActivity">
+        <activity
+            android:name=".konto_list.KontoListActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_Konten"
+        app:showAsAction="ifRoom"
+        android:enabled="true"
+        android:icon="@drawable/ic_phone_24px"
+        android:title="@string/nav_title_konten" />
+    <item
+        android:id="@+id/action_Kontakte"
+        app:showAsAction="ifRoom"
+        android:enabled="true"
+        android:icon="@drawable/ic_open_in_browser_24px"
+        android:title="@string/nav_title_kontakte" />
+</menu>

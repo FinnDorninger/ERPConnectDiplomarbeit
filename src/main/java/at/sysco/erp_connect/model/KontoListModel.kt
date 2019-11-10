@@ -100,28 +100,29 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                     if (responseKontoList != null) {
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
-                        //When file exists load from file
-                        if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-                            loadKontoListFromFile(onFinishedListener)
-                        } else {
-                            onFinishedListener.onFailure(FailureCode.NO_DATA)
-                        }
+                        tryLoadingFromFile(onFinishedListener)
                     }
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
                     //When file exists load from file
-                    if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-                        loadKontoListFromFile(onFinishedListener)
-                    } else {
-                        if (checkInternetConnection(context)) {
-                            onFinishedListener.onFailure(FailureCode.NO_DATA)
-                        } else {
-                            onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
-                        }
-                    }
+                    tryLoadingFromFile(onFinishedListener)
                 }
             })
+        } else {
+            tryLoadingFromFile(onFinishedListener)
+        }
+    }
+
+    private fun tryLoadingFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
+        if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+            loadKontoListFromFile(onFinishedListener)
+        } else {
+            if (checkInternetConnection(context)) {
+                onFinishedListener.onFailure(FailureCode.NO_DATA)
+            } else {
+                onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
+            }
         }
     }
 

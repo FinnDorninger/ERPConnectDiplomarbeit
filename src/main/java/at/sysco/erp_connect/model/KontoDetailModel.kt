@@ -85,27 +85,31 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                             FinishCode.finishedOnWeb
                         )
                     } else {
-                        Log.w("Test", "Not Correct")
-                        if (KONTO_FILE_NAME.doesFileExist()) {
-                            loadKontoDetailFromFile(onFinishedListener, kontoNummer)
-                        } else {
-                            onFinishedListener.onFailure(FailureCode.NO_DATA)
-                        }
+                        tryLoadingFromFile(onFinishedListener, kontoNummer)
                     }
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                    if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-                        loadKontoDetailFromFile(onFinishedListener, kontoNummer)
-                    } else {
-                        if (checkInternetConnection(context)) {
-                            onFinishedListener.onFailure(FailureCode.NO_DATA)
-                        } else {
-                            onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
-                        }
-                    }
+                    tryLoadingFromFile(onFinishedListener, kontoNummer)
                 }
             })
+        } else {
+            tryLoadingFromFile(onFinishedListener, kontoNummer)
+        }
+    }
+
+    private fun tryLoadingFromFile(
+        onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
+        kontoNummer: String
+    ) {
+        if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+            loadKontoDetailFromFile(onFinishedListener, kontoNummer)
+        } else {
+            if (checkInternetConnection(context)) {
+                onFinishedListener.onFailure(FailureCode.NO_DATA)
+            } else {
+                onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
+            }
         }
     }
 

@@ -17,4 +17,6 @@
     <string name="descriptionNotiz">Notiz</string>
     <string name="text_button_ansprechpartner">Ihre Ansprechpartner</string>
     <string name="descriptionTelefon">Telefon</string>
+    <string name="nav_title_konten">Konten</string>
+    <string name="nav_title_kontakte">Kontakte</string>
 </resources>

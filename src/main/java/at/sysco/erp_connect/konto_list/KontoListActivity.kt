@@ -14,9 +14,11 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import android.view.*
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.SettingsActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class KontoListActivity : AppCompatActivity(),
@@ -24,6 +26,7 @@ class KontoListActivity : AppCompatActivity(),
 
     private lateinit var kontoListPresenter: KontoListPresenter
     var snackbar: Snackbar? = null
+    var adapterRV: KontoAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +36,22 @@ class KontoListActivity : AppCompatActivity(),
 
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
         kontoListPresenter.requestFromWS()
+
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
+
+    private val mOnNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.action_Kontakte -> {
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.action_Konten -> {
+                    return@OnNavigationItemSelectedListener true
+                }
+            }
+            false
+        }
 
     override fun onResume() {
         super.onResume()
@@ -52,7 +70,7 @@ class KontoListActivity : AppCompatActivity(),
         if (this.fileList().contains("KontoFile.xml")) {
             this.deleteFile("KontoFile.xml")
         }
-        rv_konto_list.visibility = View.GONE
+        adapterRV?.clearAll()
         kontoListPresenter.requestFromWS()
         snackbar?.dismiss()
     }
@@ -103,9 +121,9 @@ class KontoListActivity : AppCompatActivity(),
 
     override fun displayKontoListInRecyclerView(kontoList: List<Konto>) {
         rv_konto_list.visibility = View.VISIBLE
-        val adapter = KontoAdapter(ArrayList(kontoList), this)
+        adapterRV = KontoAdapter(ArrayList(kontoList), this)
         search_konto.visibility = View.VISIBLE
-        rv_konto_list.adapter = adapter
+        rv_konto_list.adapter = adapterRV
 
         search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -113,7 +131,7 @@ class KontoListActivity : AppCompatActivity(),
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
+                adapterRV?.filter?.filter(newText)
                 return false
             }
         })
