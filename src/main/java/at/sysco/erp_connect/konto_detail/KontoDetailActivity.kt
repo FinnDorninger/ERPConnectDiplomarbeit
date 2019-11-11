@@ -137,13 +137,11 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         val telNumberCity = konto.kTelCity
         val telNumberCountry = konto.kTelCountry
 
-        if (telNumber != null) {
-            if (telNumberCity != null) {
-                telNumber = "$telNumberCity$telNumber"
-                if (telNumberCountry != null) {
-                    telNumber = "$telNumberCountry$telNumber"
-                    Log.w("Finn", "Du Depp")
-                }
+        if (telNumber != null && telNumberCity != null) {
+            telNumber = "$telNumberCity$telNumber"
+            if (telNumberCountry != null) {
+                telNumber = "$telNumberCountry$telNumber"
+                Log.w("Finn", "Du Depp")
             }
             val intent = Intent(Intent.ACTION_DIAL).apply {
                 data = Uri.parse("tel:$telNumber")

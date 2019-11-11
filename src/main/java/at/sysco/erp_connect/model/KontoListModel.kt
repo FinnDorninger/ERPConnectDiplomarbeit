@@ -21,6 +21,7 @@ import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
 import org.jetbrains.anko.doAsync
 import java.lang.IllegalArgumentException
+import java.util.*
 
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
@@ -91,21 +92,34 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
         if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
-
+            var isSucceed = false
             val call = KontoApi.Factory.create(baseURL!!).getKontoList(userName, userPW)
+
+            val timer = Timer()
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
+                        loadKontoListFromFile(onFinishedListener)
+                    }
+                }
+            }, 5000)
+
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     var responseKontoList = response.body()?.kontenList
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
                     if (responseKontoList != null) {
+                        timer.cancel()
+                        isSucceed = true
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
+                        timer.cancel()
                         tryLoadingFromFile(onFinishedListener)
                     }
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                    //When file exists load from file
+                    timer.cancel()
                     tryLoadingFromFile(onFinishedListener)
                 }
             })
@@ -127,20 +141,16 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     }
 
     private fun modifyURL(baseURL: String?): String? {
-        var newURL: String
-
-        if (baseURL.isNullOrEmpty()) {
-            return ""
-        } else {
-            newURL = baseURL
-            if (newURL.startsWith("http://") || newURL.startsWith("https://")) {
-                Log.w("Test", "Ich checke null")
-                return newURL
-            } else {
-                newURL = "https://".plus(newURL)
-                return newURL
+        var newURL = baseURL
+        when {
+            newURL.isNullOrEmpty() -> {
             }
+            newURL.startsWith("https://") -> {
+            }
+            newURL.startsWith("http://") -> newURL = newURL.replace("http://", "https://")
+            else -> newURL = "https://".plus(baseURL)
         }
+        return newURL
     }
 
     private fun checkURL(baseURL: String?): Boolean {

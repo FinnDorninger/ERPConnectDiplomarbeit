@@ -20,6 +20,7 @@ import retrofit2.Retrofit
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.util.*
 
 const val KONTO_FILE_NAME = "KontoFile.xml"
 
@@ -72,24 +73,36 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         baseURL = modifyURL(baseURL)
 
         if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+            var isSucceed = false
             val call = KontoApi.Factory.create(baseURL!!).getKonto(userPW, userName, kontoNummer)
+            val timer = Timer()
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
+                        loadKontoDetailFromFile(onFinishedListener, kontoNummer)
+                    }
+                }
+            }, 5000)
 
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     val responseKontoList = response.body()?.kontenList
 
                     if (responseKontoList != null) {
-                        Log.w("Test", responseKontoList[0].kName)
+                        timer.cancel()
+                        isSucceed = true
                         onFinishedListener.onfinished(
                             responseKontoList[0],
                             FinishCode.finishedOnWeb
                         )
                     } else {
+                        timer.cancel()
                         tryLoadingFromFile(onFinishedListener, kontoNummer)
                     }
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
+                    timer.cancel()
                     tryLoadingFromFile(onFinishedListener, kontoNummer)
                 }
             })
@@ -155,20 +168,16 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
     }
 
     private fun modifyURL(baseURL: String?): String? {
-        var newURL: String
-
-        if (baseURL.isNullOrEmpty()) {
-            return ""
-        } else {
-            newURL = baseURL
-            if (newURL.startsWith("http://") || newURL.startsWith("https://")) {
-                Log.w("Test", "Ich checke null")
-                return newURL
-            } else {
-                newURL = "https://".plus(newURL)
-                return newURL
+        var newURL = baseURL
+        when {
+            newURL.isNullOrEmpty() -> {
             }
+            newURL.startsWith("https://") -> {
+            }
+            newURL.startsWith("http://") -> newURL = newURL.replace("http://", "https://")
+            else -> newURL = "https://".plus(baseURL)
         }
+        return newURL
     }
 
     private fun checkURL(baseURL: String?): Boolean {

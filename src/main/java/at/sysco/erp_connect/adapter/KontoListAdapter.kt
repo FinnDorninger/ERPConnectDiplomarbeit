@@ -52,9 +52,10 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     }
 
     fun clearAll() {
-        val size = kontoList.size
+        val sizeListFull = kontoListFull.size
         kontoList.clear()
-        notifyItemRangeRemoved(0, size)
+        kontoListFull.clear()
+        notifyItemRangeRemoved(0, sizeListFull)
     }
 
     private var exampleFilter: Filter = object : Filter() {
