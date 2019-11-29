@@ -15,8 +15,6 @@ class KontakteListPresenter(
         kontakteListView?.hideProgress()
         if (finishCode != FinishCode.finishedOnWeb) {
             kontakteListView?.onSucess(finishCode)
-        } else {
-            kontakteListModel.saveKontakte(kontaktArrayList, this)
         }
     }
 

@@ -17,8 +17,10 @@ import android.content.SharedPreferences
 import android.util.Log
 import android.view.*
 import androidx.preference.PreferenceManager
+import androidx.transition.Slide
 import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
+import at.sysco.erp_connect.model.KontakteListModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
@@ -32,12 +34,9 @@ class KontoListActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_list)
-
         initRecyclerView()
-
-        kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
+        kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         kontoListPresenter.requestFromWS()
-
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
@@ -50,7 +49,7 @@ class KontoListActivity : AppCompatActivity(),
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.action_Konten -> {
-                    return@OnNavigationItemSelectedListener true
+                    return@OnNavigationItemSelectedListener false
                 }
             }
             false
@@ -60,6 +59,7 @@ class KontoListActivity : AppCompatActivity(),
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(this)
             .registerOnSharedPreferenceChangeListener(this)
+        bottomNavigation.menu.findItem(R.id.action_Konten).isChecked = true
     }
 
     override fun onDestroy() {
@@ -146,7 +146,6 @@ class KontoListActivity : AppCompatActivity(),
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu to use in the action bar
         val inflater = menuInflater
         inflater.inflate(R.menu.settings_menu, menu)
         return true

@@ -39,14 +39,13 @@ class KontakteListActivity : AppCompatActivity(),
         kontakteListPresenter.requestFromWS()
 
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-        bottomNavigation.menu.findItem(R.id.action_Kontakte).isChecked = true
     }
 
     private val mOnNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.action_Kontakte -> {
-                    return@OnNavigationItemSelectedListener true
+                    return@OnNavigationItemSelectedListener false
                 }
                 R.id.action_Konten -> {
                     finish()
@@ -60,6 +59,7 @@ class KontakteListActivity : AppCompatActivity(),
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(this)
             .registerOnSharedPreferenceChangeListener(this)
+        bottomNavigation.menu.findItem(R.id.action_Kontakte).isChecked = true
     }
 
     override fun onDestroy() {

@@ -35,7 +35,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
     private fun checkInternetConnection(context: Context): Boolean {
         val connectivity =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val info = connectivity.allNetworks
         for (i in info.indices) {
             if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
@@ -64,17 +64,17 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(
-                    call: Call<KontakteList>,
-                    response: Response<KontakteList>
+                        call: Call<KontakteList>,
+                        response: Response<KontakteList>
                 ) {
                     var responseKontakteList = response.body()?.kontakteList
                     responseKontakteList =
-                        responseKontakteList?.sortedWith(compareBy({ it.kNumber }))
+                            responseKontakteList?.sortedWith(compareBy({ it.kNumber }))
                     if (responseKontakteList != null) {
                         isSucceed = true
                         onFinishedListener.onfinished(
-                            responseKontakteList,
-                            FinishCode.finishedOnWeb
+                                responseKontakteList,
+                                FinishCode.finishedOnWeb
                         )
                     } else {
                         tryLoadingFromFile(onFinishedListener)
@@ -131,134 +131,130 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         }
     }
 
-    fun saveKontakte(
-        listToSave: List<Kontakt>,
-        onFinishedListener: KontakteListContract.Model.OnFinishedListener
-    ) {
+    fun saveKontakte(listToSave: List<Kontakt>): String {
         val writer = StringWriter()
         lateinit var fileWriter: FileWriter
         val serializer = Xml.newSerializer()
         serializer.setOutput(writer)
-        doAsync {
-            try {
-                val file = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
-                fileWriter = FileWriter(file, false)
-                serializer.startTag("", "MESOWebService")
-                for (kontakt in listToSave) {
-                    serializer.startTag("", "KontakteWebservice")
-                    if (kontakt.kKontaktNumber != null) {
-                        serializer.startTag("", "Kontaktnummer")
-                        serializer.text(kontakt.kKontaktNumber)
-                        serializer.endTag("", "Kontaktnummer")
-                    }
-                    if (kontakt.kLastName != null) {
-                        serializer.startTag("", "Name")
-                        serializer.text(kontakt.kLastName)
-                        serializer.endTag("", "Name")
-                    }
-                    if (kontakt.kNumber != null) {
-                        serializer.startTag("", "Kontonummer")
-                        serializer.text(kontakt.kNumber)
-                        serializer.endTag("", "Kontonummer")
-                    }
-                    if (kontakt.kFirstName != null) {
-                        serializer.startTag("", "Vorname")
-                        serializer.text(kontakt.kFirstName)
-                        serializer.endTag("", "Vorname")
-                    }
-                    if (kontakt.kFunction != null) {
-                        serializer.startTag("", "Funktion")
-                        serializer.text(kontakt.kFunction)
-                        serializer.endTag("", "Funktion")
-                    }
-                    if (kontakt.kSex != null) {
-                        serializer.startTag("", "Geschlecht")
-                        serializer.text(kontakt.kSex)
-                        serializer.endTag("", "Geschlecht")
-                    }
-                    if (kontakt.kAbteilung != null) {
-                        serializer.startTag("", "Abteilung")
-                        serializer.text(kontakt.kAbteilung)
-                        serializer.endTag("", "Abteilung")
-                    }
-                    if (kontakt.kTelCountry != null) {
-                        serializer.startTag("", "Landesvorwahl")
-                        serializer.text(kontakt.kTelCountry)
-                        serializer.endTag("", "Landesvorwahl")
-                    }
-                    if (kontakt.kTelCity != null) {
-                        serializer.startTag("", "Ortsvorwahl")
-                        serializer.text(kontakt.kTelCity)
-                        serializer.endTag("", "Ortsvorwahl")
-                    }
-                    if (kontakt.kTelCountry != null) {
-                        serializer.startTag("", "Telefon1Land")
-                        serializer.text(kontakt.kTelCountry)
-                        serializer.endTag("", "Telefon1Land")
-                    }
-                    if (kontakt.kMobilCountry != null) {
-                        serializer.startTag("", "LandesvorwahlMobiltelefonnummer")
-                        serializer.text(kontakt.kMobilCountry)
-                        serializer.endTag("", "LandesvorwahlMobiltelefonnummer")
-                    }
-                    if (kontakt.kTelCity != null) {
-                        serializer.startTag("", "Telefon1Vorwahl")
-                        serializer.text(kontakt.kTelCity)
-                        serializer.endTag("", "Telefon1Vorwahl")
-                    }
-                    if (kontakt.kTelNumber != null) {
-                        serializer.startTag("", "Telefon1Durchwahl")
-                        serializer.text(kontakt.kTelNumber)
-                        serializer.endTag("", "Telefon1Durchwahl")
-                    }
-                    if (kontakt.kMobilCountry != null) {
-                        serializer.startTag("", "MobiltelefonLand")
-                        serializer.text(kontakt.kMobilCountry)
-                        serializer.endTag("", "MobiltelefonLand")
-                    }
-                    if (kontakt.kMobilOperator != null) {
-                        serializer.startTag("", "MobiltelefonVorwahl")
-                        serializer.text(kontakt.kMobilOperator)
-                        serializer.endTag("", "MobiltelefonVorwahl")
-                    }
-                    if (kontakt.kMobilNumber != null) {
-                        serializer.startTag("", "MobiltelefonNummer")
-                        serializer.text(kontakt.kMobilNumber)
-                        serializer.endTag("", "MobiltelefonNummer")
-                    }
-                    if (kontakt.kMail != null) {
-                        serializer.startTag("", "eMailadresse")
-                        serializer.text(kontakt.kMail)
-                        serializer.endTag("", "eMailadresse")
-                    }
-                    if (kontakt.kURL != null) {
-                        serializer.startTag("", "Homepage")
-                        serializer.text(kontakt.kURL)
-                        serializer.endTag("", "Homepage")
-                    }
-                    serializer.endTag("", "KontakteWebservice")
+        try {
+            val file = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
+            fileWriter = FileWriter(file, false)
+            serializer.startTag("", "MESOWebService")
+            for (kontakt in listToSave) {
+                serializer.startTag("", "KontakteWebservice")
+                if (kontakt.kKontaktNumber != null) {
+                    serializer.startTag("", "Kontaktnummer")
+                    serializer.text(kontakt.kKontaktNumber)
+                    serializer.endTag("", "Kontaktnummer")
                 }
-                serializer.endTag("", "MESOWebService")
-                serializer.endDocument()
-
-                val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
-                if (context.filesDir.freeSpace > bytesOfFile) {
-                    fileWriter.write(writer.toString())
-                } else {
-                    onFinishedListener.onFailure(FailureCode.NOT_ENOUGH_SPACE)
+                if (kontakt.kLastName != null) {
+                    serializer.startTag("", "Name")
+                    serializer.text(kontakt.kLastName)
+                    serializer.endTag("", "Name")
                 }
-            } catch (e: IOException) {
-                removeFile()
-                onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
-            } catch (e: IllegalArgumentException) {
-                removeFile()
-                onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
-            } catch (e: IllegalStateException) {
-                removeFile()
-                onFinishedListener.onFailure(FailureCode.ERROR_SAVING_FILE)
-            } finally {
-                fileWriter.close()
+                if (kontakt.kNumber != null) {
+                    serializer.startTag("", "Kontonummer")
+                    serializer.text(kontakt.kNumber)
+                    serializer.endTag("", "Kontonummer")
+                }
+                if (kontakt.kFirstName != null) {
+                    serializer.startTag("", "Vorname")
+                    serializer.text(kontakt.kFirstName)
+                    serializer.endTag("", "Vorname")
+                }
+                if (kontakt.kFunction != null) {
+                    serializer.startTag("", "Funktion")
+                    serializer.text(kontakt.kFunction)
+                    serializer.endTag("", "Funktion")
+                }
+                if (kontakt.kSex != null) {
+                    serializer.startTag("", "Geschlecht")
+                    serializer.text(kontakt.kSex)
+                    serializer.endTag("", "Geschlecht")
+                }
+                if (kontakt.kAbteilung != null) {
+                    serializer.startTag("", "Abteilung")
+                    serializer.text(kontakt.kAbteilung)
+                    serializer.endTag("", "Abteilung")
+                }
+                if (kontakt.kTelCountry != null) {
+                    serializer.startTag("", "Landesvorwahl")
+                    serializer.text(kontakt.kTelCountry)
+                    serializer.endTag("", "Landesvorwahl")
+                }
+                if (kontakt.kTelCity != null) {
+                    serializer.startTag("", "Ortsvorwahl")
+                    serializer.text(kontakt.kTelCity)
+                    serializer.endTag("", "Ortsvorwahl")
+                }
+                if (kontakt.kTelCountry != null) {
+                    serializer.startTag("", "Telefon1Land")
+                    serializer.text(kontakt.kTelCountry)
+                    serializer.endTag("", "Telefon1Land")
+                }
+                if (kontakt.kMobilCountry != null) {
+                    serializer.startTag("", "LandesvorwahlMobiltelefonnummer")
+                    serializer.text(kontakt.kMobilCountry)
+                    serializer.endTag("", "LandesvorwahlMobiltelefonnummer")
+                }
+                if (kontakt.kTelCity != null) {
+                    serializer.startTag("", "Telefon1Vorwahl")
+                    serializer.text(kontakt.kTelCity)
+                    serializer.endTag("", "Telefon1Vorwahl")
+                }
+                if (kontakt.kTelNumber != null) {
+                    serializer.startTag("", "Telefon1Durchwahl")
+                    serializer.text(kontakt.kTelNumber)
+                    serializer.endTag("", "Telefon1Durchwahl")
+                }
+                if (kontakt.kMobilCountry != null) {
+                    serializer.startTag("", "MobiltelefonLand")
+                    serializer.text(kontakt.kMobilCountry)
+                    serializer.endTag("", "MobiltelefonLand")
+                }
+                if (kontakt.kMobilOperator != null) {
+                    serializer.startTag("", "MobiltelefonVorwahl")
+                    serializer.text(kontakt.kMobilOperator)
+                    serializer.endTag("", "MobiltelefonVorwahl")
+                }
+                if (kontakt.kMobilNumber != null) {
+                    serializer.startTag("", "MobiltelefonNummer")
+                    serializer.text(kontakt.kMobilNumber)
+                    serializer.endTag("", "MobiltelefonNummer")
+                }
+                if (kontakt.kMail != null) {
+                    serializer.startTag("", "eMailadresse")
+                    serializer.text(kontakt.kMail)
+                    serializer.endTag("", "eMailadresse")
+                }
+                if (kontakt.kURL != null) {
+                    serializer.startTag("", "Homepage")
+                    serializer.text(kontakt.kURL)
+                    serializer.endTag("", "Homepage")
+                }
+                serializer.endTag("", "KontakteWebservice")
             }
+            serializer.endTag("", "MESOWebService")
+            serializer.endDocument()
+
+            val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
+            if (context.filesDir.freeSpace > bytesOfFile) {
+                fileWriter.write(writer.toString())
+                return FinishCode.finishedSavingKontakte
+            } else {
+                return FailureCode.NOT_ENOUGH_SPACE
+            }
+        } catch (e: IOException) {
+            removeFile()
+            return FailureCode.ERROR_SAVING_FILE
+        } catch (e: IllegalArgumentException) {
+            removeFile()
+            return FailureCode.ERROR_SAVING_FILE
+        } catch (e: IllegalStateException) {
+            removeFile()
+            return FailureCode.ERROR_SAVING_FILE
+        } finally {
+            fileWriter.close()
         }
     }
 
