@@ -10,6 +10,7 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import at.sysco.erp_connect.R
+import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.konto_detail.KontoDetailActivity
 import at.sysco.erp_connect.pojo.Konto
 import kotlinx.android.synthetic.main.konto_list_item.view.*

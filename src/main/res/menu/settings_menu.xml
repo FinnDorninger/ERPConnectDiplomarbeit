@@ -6,4 +6,9 @@
         android:title="Verbindungs-Eigenschaften"
         android:orderInCategory="100"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_retry"
+        android:title="Retry"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
 </menu>

@@ -2,6 +2,7 @@ package at.sysco.erp_connect.model
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.os.Handler
 import android.util.Log
 import android.util.Patterns
 import androidx.preference.PreferenceManager
@@ -10,7 +11,9 @@ import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
 import at.sysco.erp_connect.konto_list.KontoListContract
 import at.sysco.erp_connect.network.KontoApi
+import at.sysco.erp_connect.network.UnsafeHTTPClient
 import at.sysco.erp_connect.pojo.KontoList
+import okhttp3.OkHttpClient
 import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
@@ -66,6 +69,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         kontoNummer: String
     ) {
         val retrofit = Retrofit.Builder()
+
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
@@ -75,12 +79,10 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             var isSucceed = false
             val call = KontoApi.Factory.create(baseURL!!).getKonto(userPW, userName, kontoNummer)
-            val timer = Timer()
-            timer.schedule(object : TimerTask() {
-                override fun run() {
-                    if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
-                        loadKontoDetailFromFile(onFinishedListener, kontoNummer)
-                    }
+
+            Handler().postDelayed({
+                if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
+                    call.cancel()
                 }
             }, 5000)
 
@@ -89,20 +91,17 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                     val responseKontoList = response.body()?.kontenList
 
                     if (responseKontoList != null) {
-                        timer.cancel()
                         isSucceed = true
                         onFinishedListener.onfinished(
                             responseKontoList[0],
                             FinishCode.finishedOnWeb
                         )
                     } else {
-                        timer.cancel()
                         tryLoadingFromFile(onFinishedListener, kontoNummer)
                     }
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                    timer.cancel()
                     tryLoadingFromFile(onFinishedListener, kontoNummer)
                 }
             })

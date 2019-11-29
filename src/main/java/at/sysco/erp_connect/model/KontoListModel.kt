@@ -15,14 +15,15 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
+import android.os.Handler
 import android.util.Log
 import android.util.Patterns
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
+import at.sysco.erp_connect.pojo.KontakteList
 import org.jetbrains.anko.doAsync
 import java.lang.IllegalArgumentException
-import java.util.*
-
+import javax.xml.transform.Templates
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
@@ -82,7 +83,6 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         }
     }
 
-    //TO-DO: onResponse -> Error!
     private fun loadDataFromWebservice(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
@@ -95,12 +95,9 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             var isSucceed = false
             val call = KontoApi.Factory.create(baseURL!!).getKontoList(userName, userPW)
 
-            val timer = Timer()
-            timer.schedule(object : TimerTask() {
-                override fun run() {
-                    if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
-                        loadKontoListFromFile(onFinishedListener)
-                    }
+            Handler().postDelayed({
+                if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
+                    call.cancel()
                 }
             }, 5000)
 
@@ -109,17 +106,14 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                     var responseKontoList = response.body()?.kontenList
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
                     if (responseKontoList != null) {
-                        timer.cancel()
                         isSucceed = true
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
-                        timer.cancel()
                         tryLoadingFromFile(onFinishedListener)
                     }
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                    timer.cancel()
                     tryLoadingFromFile(onFinishedListener)
                 }
             })

@@ -1,4 +1,4 @@
-package at.sysco.erp_connect.konto_list
+package at.sysco.erp_connect.kontakte_list
 
 import at.sysco.erp_connect.R
 import androidx.appcompat.app.AppCompatActivity
@@ -6,50 +6,50 @@ import android.os.Bundle
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import at.sysco.erp_connect.adapter.KontoAdapter
 import at.sysco.erp_connect.constants.FailureCode
-import at.sysco.erp_connect.pojo.Konto
-import at.sysco.erp_connect.model.KontoListModel
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import android.view.*
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.SettingsActivity
-import at.sysco.erp_connect.kontakte_list.KontakteListActivity
+import at.sysco.erp_connect.adapter.KontakteListAdapter
+import at.sysco.erp_connect.konto_list.KontoListActivity
+import at.sysco.erp_connect.model.KontakteListModel
+import at.sysco.erp_connect.pojo.Kontakt
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_kontakte_list.*
 
 
-class KontoListActivity : AppCompatActivity(),
-    KontoListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
+class KontakteListActivity : AppCompatActivity(),
+    KontakteListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private lateinit var kontoListPresenter: KontoListPresenter
+    private lateinit var kontakteListPresenter: KontakteListPresenter
     var snackbar: Snackbar? = null
-    var adapterRV: KontoAdapter? = null
+    var adapterRV: KontakteListAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_konto_list)
+        setContentView(R.layout.activity_kontakte_list)
 
         initRecyclerView()
 
-        kontoListPresenter = KontoListPresenter(this, KontoListModel(this))
-        kontoListPresenter.requestFromWS()
+        kontakteListPresenter = KontakteListPresenter(this, KontakteListModel(this))
+        kontakteListPresenter.requestFromWS()
 
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        bottomNavigation.menu.findItem(R.id.action_Kontakte).isChecked = true
     }
 
     private val mOnNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.action_Kontakte -> {
-                    val intent = Intent(this, KontakteListActivity::class.java)
-                    startActivity(intent)
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.action_Konten -> {
+                    finish()
                     return@OnNavigationItemSelectedListener true
                 }
             }
@@ -64,18 +64,17 @@ class KontoListActivity : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.w("Test", "ondestroy")
         PreferenceManager.getDefaultSharedPreferences(this)
             .unregisterOnSharedPreferenceChangeListener(this)
-        kontoListPresenter.onDestroy()
+        kontakteListPresenter.onDestroy()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (this.fileList().contains("KontoFile.xml")) {
-            this.deleteFile("KontoFile.xml")
+        if (this.fileList().contains("KontakteFile.xml")) {
+            this.deleteFile("KontakteFile.xml")
         }
         clearResults()
-        kontoListPresenter.requestFromWS()
+        kontakteListPresenter.requestFromWS()
     }
 
     fun clearResults() {
@@ -87,16 +86,16 @@ class KontoListActivity : AppCompatActivity(),
         if (withAction) {
             snackbar =
                 Snackbar.make(
-                    findViewById(R.id.layoutKonto_List),
+                    findViewById(R.id.layoutKontakte_List),
                     title,
                     Snackbar.LENGTH_INDEFINITE
                 )
             snackbar?.setAction(
                 "Retry!"
-            ) { kontoListPresenter.requestFromWS() }
+            ) { kontakteListPresenter.requestFromWS() }
         } else {
             snackbar =
-                Snackbar.make(this.layoutKonto_List, title, Snackbar.LENGTH_LONG)
+                Snackbar.make(this.layoutKontakte_List, title, Snackbar.LENGTH_LONG)
         }
         snackbar?.show()
     }
@@ -123,15 +122,15 @@ class KontoListActivity : AppCompatActivity(),
     }
 
     private fun initRecyclerView() {
-        rv_konto_list.layoutManager = LinearLayoutManager(this)
-        rv_konto_list.addItemDecoration(DividerItemDecoration(rv_konto_list.context, 1))
+        rv_kontakte_list.layoutManager = LinearLayoutManager(this)
+        rv_kontakte_list.addItemDecoration(DividerItemDecoration(rv_kontakte_list.context, 1))
     }
 
-    override fun displayKontoListInRecyclerView(kontoList: List<Konto>) {
-        rv_konto_list.visibility = View.VISIBLE
-        adapterRV = KontoAdapter(ArrayList(kontoList), this)
+    override fun displayKontakteListInRecyclerView(kontakteList: List<Kontakt>) {
+        rv_kontakte_list.visibility = View.VISIBLE
+        adapterRV = KontakteListAdapter(ArrayList(kontakteList), this)
         search_konto.visibility = View.VISIBLE
-        rv_konto_list.adapter = adapterRV
+        rv_kontakte_list.adapter = adapterRV
 
         search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -160,7 +159,7 @@ class KontoListActivity : AppCompatActivity(),
             return true
         }
         if (id == R.id.action_retry) {
-            kontoListPresenter.requestFromWS()
+            kontakteListPresenter.requestFromWS()
         }
         return super.onOptionsItemSelected(item)
     }
