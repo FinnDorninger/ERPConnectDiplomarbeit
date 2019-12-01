@@ -16,14 +16,10 @@ import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
 import android.os.Handler
-import android.util.Log
 import android.util.Patterns
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
-import at.sysco.erp_connect.pojo.KontakteList
-import org.jetbrains.anko.doAsync
 import java.lang.IllegalArgumentException
-import javax.xml.transform.Templates
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
@@ -155,6 +151,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val writer = StringWriter()
         lateinit var fileWriter: FileWriter
         val serializer = Xml.newSerializer()
+
         serializer.setOutput(writer)
         try {
             val file = File(context.filesDir, KONTO_LIST_FILE_NAME)

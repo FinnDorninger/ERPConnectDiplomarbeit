@@ -20,7 +20,6 @@ import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.pojo.Kontakt
 import at.sysco.erp_connect.pojo.KontakteList
-import org.jetbrains.anko.doAsync
 
 const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
@@ -67,9 +66,10 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                         call: Call<KontakteList>,
                         response: Response<KontakteList>
                 ) {
+                    Log.w("Stop", "onResponse")
                     var responseKontakteList = response.body()?.kontakteList
                     responseKontakteList =
-                            responseKontakteList?.sortedWith(compareBy({ it.kNumber }))
+                        responseKontakteList?.sortedWith(compareBy { it.kFirstName })
                     if (responseKontakteList != null) {
                         isSucceed = true
                         onFinishedListener.onfinished(
@@ -82,6 +82,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                 }
 
                 override fun onFailure(call: Call<KontakteList>, t: Throwable) {
+                    Log.w("Stop", "onFailure")
                     tryLoadingFromFile(onFinishedListener)
                 }
             })

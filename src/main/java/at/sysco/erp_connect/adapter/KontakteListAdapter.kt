@@ -27,7 +27,7 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
         if (name.isNullOrEmpty()) {
             name = kontaktList[position].kLastName
         } else if (!kontaktList[position].kLastName.isNullOrEmpty()) {
-            name = name.plus(kontaktList[position].kLastName)
+            name = name.plus(" ").plus(kontaktList[position].kLastName)
         }
 
         if (task.isNullOrEmpty()) {
@@ -101,7 +101,6 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
 }
 
 class ViewHolderKontakt(view: View) : RecyclerView.ViewHolder(view) {
-    // Holds the TextView that will add each konto to
     val tvKontaktName = view.tv_kontakt_name
     val tvKontaktFunction = view.tv_kontakt_function
 }
