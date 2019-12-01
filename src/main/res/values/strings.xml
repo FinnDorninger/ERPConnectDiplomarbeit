@@ -19,4 +19,10 @@
     <string name="descriptionTelefon">Telefon</string>
     <string name="nav_title_konten">Konten</string>
     <string name="nav_title_kontakte">Kontakte</string>
+    <string name="desc_callbutton">Call-Button</string>
+    <string name="desc_smsbutton">SMS Button</string>
+    <string name="desc_butMaps">Button Google Maps</string>
+    <string name="desc_openBrowser">Open in Browser</string>
+    <string name="text_menu_connection">Verbindungs-Eigenschaften</string>
+    <string name="menu_retry">Retry</string>
 </resources>

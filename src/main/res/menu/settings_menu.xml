@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_settings"
-        android:title="Verbindungs-Eigenschaften"
+        android:title="@string/text_menu_connection"
         android:orderInCategory="100"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_retry"
-        android:title="Retry"
+        android:title="@string/menu_retry"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

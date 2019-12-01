@@ -31,7 +31,10 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_detail)
 
-        kontoNummer = intent.getStringExtra("id")
+        val extra = intent.getStringExtra("id")
+        if (extra != null) {
+            kontoNummer = extra
+        }
         kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
         kontoDetailPresenter.requestFromWS(kontoNummer)
     }
@@ -66,7 +69,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
 
     override fun setTextData(konto: Konto) {
         textInputName.text = konto.kName
-        textInputKontoNumber.text = "(" + konto.kNumber + ")"
+        textInputKontoNumber.text = "(".plus(konto.kNumber).plus(")")
         textInputStaat.text = konto.kCountry
         textInputPLZ.text = konto.kPlz
         textInputCity.text = konto.kCity
@@ -93,7 +96,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     private fun openAddress(konto: Konto) {
-        var adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
+        val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
         val adressIterator = adressList.iterator()
         var url = "https://www.google.com/maps/search/?api=1&query="
         var adress = ""

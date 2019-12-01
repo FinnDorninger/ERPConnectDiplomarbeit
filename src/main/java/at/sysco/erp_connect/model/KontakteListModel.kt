@@ -51,7 +51,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     private fun loadDataFromWebservice(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
-        var baseURL = sharedPref.getString("base_url", "")
+        val baseURL = sharedPref.getString("base_url", "")
 
         if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()

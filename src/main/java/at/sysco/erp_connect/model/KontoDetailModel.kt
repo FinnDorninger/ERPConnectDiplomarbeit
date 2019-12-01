@@ -73,7 +73,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
-        var baseURL = sharedPref.getString("base_url", "")
+        val baseURL = sharedPref.getString("base_url", "")
 
         if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val call = KontoApi.Factory.create(baseURL).getKonto(userPW, userName, kontoNummer)

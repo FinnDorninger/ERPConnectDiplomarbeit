@@ -37,7 +37,7 @@ class KontoListActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_list)
         initRecyclerView()
-        PreferenceManager.setDefaultValues(this, R.xml.settings_pref, false);
+        PreferenceManager.setDefaultValues(this, R.xml.settings_pref, false)
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         kontoListPresenter.requestFromWS()
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
@@ -67,7 +67,6 @@ class KontoListActivity : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.w("Test", "ondestroy")
         PreferenceManager.getDefaultSharedPreferences(this)
             .unregisterOnSharedPreferenceChangeListener(this)
         kontoListPresenter.onDestroy()
