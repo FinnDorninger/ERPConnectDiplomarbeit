@@ -19,6 +19,7 @@ import android.os.Handler
 import android.util.Patterns
 import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
+import at.sysco.erp_connect.network.UnsafeHTTPClient
 import java.lang.IllegalArgumentException
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
@@ -84,25 +85,16 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
         var baseURL = sharedPref.getString("base_url", "")
-        baseURL = modifyURL(baseURL)
 
-        if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
-            var isSucceed = false
-            val call = KontoApi.Factory.create(baseURL!!).getKontoList(userName, userPW)
-
-            Handler().postDelayed({
-                if (KONTO_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
-                    call.cancel()
-                }
-            }, 5000)
+            val call = KontoApi.Factory.create(baseURL).getKontoList(userName, userPW)
 
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     var responseKontoList = response.body()?.kontenList
                     responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
                     if (responseKontoList != null) {
-                        isSucceed = true
                         onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
                     } else {
                         tryLoadingFromFile(onFinishedListener)
@@ -128,23 +120,6 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
             }
         }
-    }
-
-    private fun modifyURL(baseURL: String?): String? {
-        var newURL = baseURL
-        when {
-            newURL.isNullOrEmpty() -> {
-            }
-            newURL.startsWith("https://") -> {
-            }
-            newURL.startsWith("http://") -> newURL = newURL.replace("http://", "https://")
-            else -> newURL = "https://".plus(baseURL)
-        }
-        return newURL
-    }
-
-    private fun checkURL(baseURL: String?): Boolean {
-        return Patterns.WEB_URL.matcher(baseURL).matches()
     }
 
     fun saveKonto(listToSave: List<Konto>): String {

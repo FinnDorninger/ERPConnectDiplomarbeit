@@ -18,4 +18,18 @@
         android:key="user_password"
         android:title="Passwort"
         android:persistent="true" />
+    <EditTextPreference
+        android:defaultValue="2"
+        android:key="timeoutCon"
+        android:title="Timeout: Connection (1-60s)"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        android:defaultValue="2"
+        android:key="timeoutRead"
+        android:title="Timeout: Read (1-60s)"
+        app:useSimpleSummaryProvider="true" />
+    <CheckBoxPreference
+        android:key="auto_sync"
+        android:title="Synchronisieren von Kontakte bei Start?"
+        android:defaultValue="true" />
 </PreferenceScreen>

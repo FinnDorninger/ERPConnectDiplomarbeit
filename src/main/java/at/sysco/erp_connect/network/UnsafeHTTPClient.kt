@@ -8,9 +8,10 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-//TO-DO: Absichern!
 class UnsafeHTTPClient {
     companion object {
+        var conTimeout: Long = 5
+        var readTimeout: Long = 5
         fun getUnsafeOkHttpClient(): OkHttpClient {
             try {
                 // Create a trust manager that does not validate certificate chains
@@ -46,9 +47,8 @@ class UnsafeHTTPClient {
                 builder.hostnameVerifier { hostname, session -> true }
 
                 return builder
-                    .connectTimeout(15, TimeUnit.SECONDS)
-                    .writeTimeout(15, TimeUnit.SECONDS)
-                    .readTimeout(15, TimeUnit.SECONDS)
+                    .connectTimeout(conTimeout, TimeUnit.SECONDS)
+                    .readTimeout(readTimeout, TimeUnit.SECONDS)
                     .build()
             } catch (e: Exception) {
                 throw RuntimeException(e)

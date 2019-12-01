@@ -1,6 +1,7 @@
 package at.sysco.erp_connect.model
 
 import android.content.Context
+import android.content.SharedPreferences
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.network.KontoApi
 import org.simpleframework.xml.core.PersistenceException
@@ -24,6 +25,9 @@ import at.sysco.erp_connect.pojo.KontakteList
 const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
 class KontakteListModel(val context: Context) : KontakteListContract.Model {
+    val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    var autoSync = sharedPref.getBoolean("auto_sync", true)
+
     override fun getKontakteList(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
@@ -34,7 +38,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
     private fun checkInternetConnection(context: Context): Boolean {
         val connectivity =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val info = connectivity.allNetworks
         for (i in info.indices) {
             if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
@@ -45,36 +49,27 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     }
 
     private fun loadDataFromWebservice(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
         var baseURL = sharedPref.getString("base_url", "")
-        baseURL = modifyURL(baseURL)
-        if (checkURL(baseURL) && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
-            val retrofit = Retrofit.Builder()
-            var isSucceed = false
-            val call = KontoApi.Factory.create(baseURL!!).getKontakteList()
 
-            Handler().postDelayed({
-                if (KONTAKTE_LIST_FILE_NAME.doesFileExist() && !isSucceed) {
-                    call.cancel()
-                }
-            }, 5000)
+        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+            val retrofit = Retrofit.Builder()
+            val call = KontoApi.Factory.create(baseURL).getKontakteList()
 
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(
-                        call: Call<KontakteList>,
-                        response: Response<KontakteList>
+                    call: Call<KontakteList>,
+                    response: Response<KontakteList>
                 ) {
                     Log.w("Stop", "onResponse")
                     var responseKontakteList = response.body()?.kontakteList
                     responseKontakteList =
                         responseKontakteList?.sortedWith(compareBy { it.kFirstName })
                     if (responseKontakteList != null) {
-                        isSucceed = true
                         onFinishedListener.onfinished(
-                                responseKontakteList,
-                                FinishCode.finishedOnWeb
+                            responseKontakteList,
+                            FinishCode.finishedOnWeb
                         )
                     } else {
                         tryLoadingFromFile(onFinishedListener)
@@ -270,22 +265,5 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
             return true
         }
         return false
-    }
-
-    private fun modifyURL(baseURL: String?): String? {
-        var newURL = baseURL
-        when {
-            newURL.isNullOrEmpty() -> {
-            }
-            newURL.startsWith("https://") -> {
-            }
-            newURL.startsWith("http://") -> newURL = newURL.replace("http://", "https://")
-            else -> newURL = "https://".plus(baseURL)
-        }
-        return newURL
-    }
-
-    private fun checkURL(baseURL: String?): Boolean {
-        return Patterns.WEB_URL.matcher(baseURL).matches()
     }
 }

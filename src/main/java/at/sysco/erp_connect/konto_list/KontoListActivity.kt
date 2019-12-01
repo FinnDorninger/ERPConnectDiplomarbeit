@@ -21,7 +21,9 @@ import androidx.transition.Slide
 import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
+import at.sysco.erp_connect.network.UnsafeHTTPClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.util.concurrent.TimeUnit
 
 
 class KontoListActivity : AppCompatActivity(),
@@ -35,6 +37,7 @@ class KontoListActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_list)
         initRecyclerView()
+        PreferenceManager.setDefaultValues(this, R.xml.settings_pref, false);
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         kontoListPresenter.requestFromWS()
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
@@ -70,6 +73,7 @@ class KontoListActivity : AppCompatActivity(),
         kontoListPresenter.onDestroy()
     }
 
+    //To-Do: Diese Methode wird nicht mehr aufgerufen -> Wegen Finish
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (this.fileList().contains("KontoFile.xml")) {
             this.deleteFile("KontoFile.xml")
@@ -91,9 +95,7 @@ class KontoListActivity : AppCompatActivity(),
                     title,
                     Snackbar.LENGTH_INDEFINITE
                 )
-            snackbar?.setAction(
-                "Retry!"
-            ) { kontoListPresenter.requestFromWS() }
+            snackbar?.setAction("Retry!") { kontoListPresenter.requestFromWS() }
         } else {
             snackbar =
                 Snackbar.make(this.layoutKonto_List, title, Snackbar.LENGTH_LONG)

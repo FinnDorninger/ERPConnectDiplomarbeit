@@ -30,7 +30,7 @@ class KontoListPresenter(
         val message: String
         if (kontoArrayList != null) {
             message = kontoListModel.saveKonto(kontoArrayList)
-            if (message == FinishCode.finishedSavingKonto) {
+            if (message == FinishCode.finishedSavingKonto && kontaktListModel.autoSync) {
                 kontaktListModel.getKontakteList(object : KontakteListContract.Model.OnFinishedListener {
                     override fun onfinished(kontaktArrayList: List<Kontakt>, finishCode: String) {
                         if (finishCode != FinishCode.finishedOnWeb) {
