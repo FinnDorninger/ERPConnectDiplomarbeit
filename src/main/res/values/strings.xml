@@ -33,7 +33,7 @@
     <string name="descFunktion">Funktion</string>
     <string name="descMobiltelefon">Mobiltelefon</string>
     <string name="descMobilBetreiber">Mobil-Betreiber</string>
-    <string name="sexWeiblich">weiblich</string>
+    <string name="sexWeiblich">Weiblich</string>
     <string name="sexMännlich">Männlich</string>
     <string name="desc_butMail">Button for mail</string>
 </resources>

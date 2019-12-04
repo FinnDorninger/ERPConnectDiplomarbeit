@@ -97,6 +97,8 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
             textInputSex.text = getString(R.string.sexWeiblich)
         } else if (kontakt.kSex == "0") {
             textInputSex.text = getString(R.string.sexMännlich)
+        } else {
+            textInputSex.text = "/"
         }
 
         buttonCall.setOnClickListener {
