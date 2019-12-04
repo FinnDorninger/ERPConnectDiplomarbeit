@@ -17,11 +17,19 @@ import java.lang.NumberFormatException
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_pref, rootKey)
-        val editTextPreference: EditTextPreference? = findPreference("user_password")
         val editConTimeoutPreference: EditTextPreference? = findPreference("timeoutCon")
         val editReadTimeoutPreference: EditTextPreference? = findPreference("timeoutRead")
         val editURLPreference: EditTextPreference? = findPreference("base_url")
+        val editPwPreference: EditTextPreference? = findPreference("user_password")
+        val editUserPreference: EditTextPreference? = findPreference("user_name")
 
+        val listenerPasswordOrNameChanger: Preference.OnPreferenceChangeListener =
+            object : Preference.OnPreferenceChangeListener {
+                override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
+                    removeFiles()
+                    return true
+                }
+            }
         val preferenceListenerConnection: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
@@ -74,6 +82,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     if (Patterns.WEB_URL.matcher(newURL).matches()) {
                         PreferenceManager.getDefaultSharedPreferences(requireContext().applicationContext)
                             .edit().putString("base_url", newURL).apply()
+                        removeFiles()
                         return true
                     }
                     Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
@@ -81,13 +90,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 }
             }
 
-        editTextPreference?.setOnBindEditTextListener { editText ->
+        editPwPreference?.setOnBindEditTextListener { editText ->
             editText.inputType =
                 InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
         }
-
         editConTimeoutPreference?.onPreferenceChangeListener = preferenceListenerConnection
         editReadTimeoutPreference?.onPreferenceChangeListener = preferenceListenerReading
         editURLPreference?.onPreferenceChangeListener = preferenceURLListener
+        editPwPreference?.onPreferenceChangeListener = listenerPasswordOrNameChanger
+        editUserPreference?.onPreferenceChangeListener = listenerPasswordOrNameChanger
+    }
+
+    private fun removeFiles() {
+        if (requireContext().fileList().contains("KontoFile.xml")) {
+            requireContext().deleteFile("KontoFile.xml")
+        } else if (requireContext().fileList().contains("KontakteFile.xml")) {
+            requireContext().deleteFile("KontakteFile.xml")
+        }
     }
 }

@@ -72,13 +72,11 @@ class KontoListActivity : AppCompatActivity(),
         kontoListPresenter.onDestroy()
     }
 
-    //To-Do: Diese Methode wird nicht mehr aufgerufen -> Wegen Finish
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (this.fileList().contains("KontoFile.xml")) {
-            this.deleteFile("KontoFile.xml")
+        if (!this.fileList().contains("KontoFile.xml") or !this.fileList().contains("KontakteFile.xml")) {
+            clearResults()
+            kontoListPresenter.requestFromWS()
         }
-        clearResults()
-        kontoListPresenter.requestFromWS()
     }
 
     fun clearResults() {
