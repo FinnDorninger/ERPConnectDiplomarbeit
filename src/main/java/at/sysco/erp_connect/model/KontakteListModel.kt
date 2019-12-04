@@ -55,7 +55,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
         if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
-            val call = KontoApi.Factory.create(baseURL).getKontakteList()
+            val call = KontoApi.Factory.create(baseURL).getKontakteList(userPW, userName)
 
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(
@@ -65,7 +65,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                     Log.w("Stop", "onResponse")
                     var responseKontakteList = response.body()?.kontakteList
                     responseKontakteList =
-                        responseKontakteList?.sortedWith(compareBy { it.kFirstName })
+                        responseKontakteList?.sortedWith(compareBy { it.kLastName })
                     if (responseKontakteList != null) {
                         onFinishedListener.onfinished(
                             responseKontakteList,

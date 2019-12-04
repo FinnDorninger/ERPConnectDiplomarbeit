@@ -8,12 +8,14 @@
     android:background="@android:color/background_dark"
     android:fillViewport="true"
     tools:context=".konto_list.KontoListActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp">
+
         <TextView
             android:id="@+id/textInputName"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
@@ -22,20 +24,6 @@
             android:layout_gravity="center"
             android:textColor="@android:color/white" />
 
-        <TextView
-            android:id="@+id/textInputKontoNumber"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@android:color/white"
-            android:textSize="15sp" />
-
-        <Button
-            android:id="@+id/buttonAnsprechpartner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/text_button_ansprechpartner" />
         <View
             android:layout_width="fill_parent"
             android:layout_height="2dip"
@@ -63,20 +51,12 @@
                 android:contentDescription="@string/desc_callbutton" />
 
             <ImageView
-                android:id="@+id/buttonSMS"
+                android:id="@+id/buttonMail"
                 android:layout_height="50dp"
                 android:layout_width="50dp"
-                android:src="@drawable/ic_textsms_24px"
+                android:src="@drawable/mail"
                 android:layout_marginEnd="10dp"
-                android:contentDescription="@string/desc_smsbutton" />
-
-            <ImageView
-                android:id="@+id/buttonMap"
-                android:layout_height="50dp"
-                android:layout_width="50dp"
-                android:src="@drawable/ic_map_24px"
-                android:layout_marginEnd="10dp"
-                android:contentDescription="@string/desc_butMaps" />
+                android:contentDescription="@string/desc_butMail" />
 
             <ImageView
                 android:id="@+id/buttonURL"
@@ -103,21 +83,21 @@
             android:visibility="gone">
 
             <TableRow
-                android:id="@+id/headlineAdresse"
+                android:id="@+id/headlinePerson"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/descriptionAdresse"
+                    android:text="@string/descPerson"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textColor="#FFFFFF"
                     android:textAllCaps="true" />
             </TableRow>
 
             <TableRow
-                android:id="@+id/lineAdresse"
+                android:id="@+id/linePerson"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:layout_weight="2">
@@ -130,22 +110,22 @@
             </TableRow>
 
             <TableRow
-                android:id="@+id/rowCountry"
-            android:layout_height="wrap_content"
+                android:id="@+id/rowPersonVorname"
+                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:weightSum="2">
 
                 <TextView
-                    android:id="@+id/textStaat"
+                    android:id="@+id/textVorname"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:text="@string/descriptionStaat"
+                    android:text="@string/descVorname"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white" />
 
                 <TextView
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:id="@+id/textInputStaat"
+                    android:id="@+id/textInputVorname"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
@@ -153,21 +133,44 @@
             </TableRow>
 
             <TableRow
-                android:id="@+id/rowPLZ"
+                android:id="@+id/rowPersonNachname"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:weightSum="2">
 
                 <TextView
-                    android:id="@+id/textPLZ"
+                    android:id="@+id/textNachname"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:text="@string/descriptionPlz"
+                    android:text="@string/descNachname"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white" />
 
                 <TextView
-                    android:id="@+id/textInputPLZ"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:id="@+id/textInputNachname"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/rowSex"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/textSex"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:text="@string/descSex"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/textInputSex"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold"
                     android:layout_width="0dp"
@@ -176,49 +179,49 @@
             </TableRow>
 
             <TableRow
-                android:id="@+id/rowCity"
+                android:id="@+id/rowPersonAbteilung"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:weightSum="2">
 
                 <TextView
-                    android:id="@+id/textCity"
+                    android:id="@+id/textAbteilung"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:text="@string/descriptionOrt"
+                    android:text="@string/descAbteilung"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white" />
 
                 <TextView
-                    android:id="@+id/textInputCity"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
+                    android:id="@+id/textInputAbteilung"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
             </TableRow>
 
             <TableRow
-                android:id="@+id/rowStreet"
+                android:id="@+id/rowPersonFunktion"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:weightSum="2">
 
                 <TextView
-                    android:id="@+id/textStreet"
+                    android:id="@+id/textFunktion"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:text="@string/descriptionStreet"
+                    android:text="@string/descFunktion"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white" />
 
                 <TextView
-                    android:id="@+id/textInputStreet"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
+                    android:id="@+id/textInputFunktion"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
             </TableRow>
 
             <TableRow
@@ -295,6 +298,103 @@
                     android:layout_weight="1"
                     android:textColor="@android:color/white" />
             </TableRow>
+
+            <TableRow
+                android:id="@+id/headlineMobilPhone"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginTop="5dp">
+
+                <TextView
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/descMobiltelefon"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="true" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/lineMobil"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_weight="2">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_weight="2"
+                    android:background="@android:color/holo_blue_light"
+                    android:layout_marginBottom="5dp" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/rowMobilPrefixCountry"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/textMobilPrefixCountry"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:text="@string/descriptionLand_vorwahl"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/textInputMobilPrefixCountry"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/rowPrefixMobilOperator"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/textPrefixMobilOperator"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:text="@string/descMobilBetreiber"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/textInputPrefixMobilOperator"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textStyle="bold"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/white" />
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/rowMobilePhoneNumber"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:weightSum="2" />
+
+            <TextView
+                android:id="@+id/textMobilePhoneNumber"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:text="@string/descriptionNummer"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/textInputMobilPhoneNumber"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textStyle="bold"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textColor="@android:color/white" />
 
             <TableRow
                 android:id="@+id/headlinePhone"
@@ -391,51 +491,6 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
-            </TableRow>
-
-
-            <TableRow
-                android:id="@+id/headlineNote"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_marginTop="5dp">
-
-                <TextView
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/descriptionNotiz"
-                    android:textColor="#FFFFFF"
-                    android:textAllCaps="true" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/lineNote"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_weight="2"
-                android:layout_marginBottom="5dp">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_weight="2"
-                    android:background="@android:color/holo_blue_light" />
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/rowNote"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:layout_weight="2">
-
-                <TextView
-                    android:id="@+id/textInputNote"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textStyle="bold"
-                    android:layout_width="0dp"
-                    android:layout_weight="2"
                     android:textColor="@android:color/white" />
             </TableRow>
         </TableLayout>

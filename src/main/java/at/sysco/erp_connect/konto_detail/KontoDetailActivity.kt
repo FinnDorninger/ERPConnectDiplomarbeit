@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.constants.FailureCode
+import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.model.KontoDetailModel
 import com.google.android.material.snackbar.Snackbar
@@ -16,14 +17,6 @@ import java.net.URLEncoder
 
 //TO-DO: Error anzeigen, wenn Daten nicht genug Daten für Funktionen vorhanden!
 class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
-    override fun hideProgress() {
-        progressBar.visibility = View.GONE
-    }
-
-    override fun showProgress() {
-        tableDetails.visibility = View.VISIBLE
-    }
-
     lateinit var kontoDetailPresenter: KontoDetailPresenter
     lateinit var kontoNummer: String
 
@@ -37,6 +30,18 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
         kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
         kontoDetailPresenter.requestFromWS(kontoNummer)
+
+        buttonAnsprechpartner.setOnClickListener {
+            startKontakte(kontoNummer)
+        }
+    }
+
+    override fun hideProgress() {
+        progressBar.visibility = View.GONE
+    }
+
+    override fun showProgress() {
+        tableDetails.visibility = View.VISIBLE
     }
 
     override fun onSucess(finishCode: String) {
@@ -95,6 +100,12 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    private fun startKontakte(kontoNumber: String) {
+        val intent = Intent(this, KontakteListActivity::class.java)
+        intent.putExtra("searchdetail", kontoNumber)
+        startActivity(intent)
+    }
+
     private fun openAddress(konto: Konto) {
         val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
         val adressIterator = adressList.iterator()
@@ -115,22 +126,12 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     private fun openURL(konto: Konto) {
-        var url = konto.kUrl
-
-        if (url != null) {
-            if (url.startsWith("http:") or url.startsWith("https:")) {
-                val webpage: Uri = Uri.parse(url)
-                val intent = Intent(Intent.ACTION_VIEW, webpage)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
-            } else {
-                url = "https:$url"
-                val webpage: Uri = Uri.parse(url)
-                val intent = Intent(Intent.ACTION_VIEW, webpage)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
+        val url = konto.kUrl
+        if (url != null && android.util.Patterns.WEB_URL.matcher(url).matches()) {
+            val webpage: Uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
             }
         }
     }

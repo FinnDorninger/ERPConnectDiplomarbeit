@@ -1,6 +1,8 @@
 package at.sysco.erp_connect.adapter
 
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +10,9 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import at.sysco.erp_connect.R
+import at.sysco.erp_connect.kontakte_detail.KontakteDetailActivity
 import at.sysco.erp_connect.pojo.Kontakt
+import kotlinx.android.synthetic.main.activity_kontakte_detail.*
 import kotlinx.android.synthetic.main.kontakt_list_item.view.*
 
 class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context) :
@@ -21,13 +25,20 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
     }
 
     override fun onBindViewHolder(holder: ViewHolderKontakt, position: Int) {
-        var name = kontaktList[position].kFirstName
+        var name = kontaktList[position].kLastName
+        val nameFirstname = kontaktList[position].kFirstName
         var task = kontaktList[position].kAbteilung
 
-        if (name.isNullOrEmpty()) {
-            name = kontaktList[position].kLastName
-        } else if (!kontaktList[position].kLastName.isNullOrEmpty()) {
-            name = name.plus(" ").plus(kontaktList[position].kLastName)
+        if (name != null) {
+            if (nameFirstname != null) {
+                name = name.plus(" ").plus(nameFirstname)
+            }
+        } else {
+            if (nameFirstname != null) {
+                name = nameFirstname
+            } else {
+                name = ""
+            }
         }
 
         if (task.isNullOrEmpty()) {
@@ -39,11 +50,9 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
         holder.tvKontaktName?.text = name
         holder.tvKontaktFunction?.text = task
 
-        /*
-        val intent = Intent(context, KontoDetailActivity::class.java)
-        intent.putExtra("id", kontaktList[position].kNumber)
+        val intent = Intent(context, KontakteDetailActivity::class.java)
+        intent.putExtra("id", kontaktList[position].kKontaktNumber)
         holder.tvHolder.setOnClickListener { v -> context.startActivity(intent) }
-         */
     }
 
     override fun getItemCount(): Int {
@@ -81,12 +90,23 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
                 var filterPattern = constraint.toString().toLowerCase().trim()
 
                 for (kontakt in kontaktListFull) {
-                    if (kontakt.kLastName?.toLowerCase()!!.contains(filterPattern)) {
-                        filteredList.add(kontakt)
+                    if (!kontakt.kFirstName.isNullOrEmpty()) {
+                        if (kontakt.kFirstName!!.toLowerCase().contains(filterPattern)) {
+                            filteredList.add(kontakt)
+                        }
+                    }
+                    if (!kontakt.kLastName.isNullOrEmpty()) {
+                        if (kontakt.kLastName!!.toLowerCase().contains(filterPattern)) {
+                            filteredList.add(kontakt)
+                        }
+                    }
+                    if (!kontakt.kNumber.isNullOrEmpty()) {
+                        if (kontakt.kNumber!!.toLowerCase().contains(filterPattern)) {
+                            filteredList.add(kontakt)
+                        }
                     }
                 }
             }
-
             var results = FilterResults()
             results.values = filteredList
             return results
@@ -103,4 +123,5 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
 class ViewHolderKontakt(view: View) : RecyclerView.ViewHolder(view) {
     val tvKontaktName = view.tv_kontakt_name
     val tvKontaktFunction = view.tv_kontakt_function
+    val tvHolder = view.holder
 }

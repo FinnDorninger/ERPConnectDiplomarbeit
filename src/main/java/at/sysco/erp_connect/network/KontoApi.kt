@@ -10,14 +10,17 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface KontoApi {
-    @GET("/ewlservice/export?User=meso&Company=300M&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
+    @GET("/ewlservice/export?Company=300M&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
     fun getKontoList(@Query("Password") pw: String, @Query("User") user: String): Call<KontoList>
 
-    @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=1&Vorlage=KontenWebservice")
+    @GET("/ewlservice/export?Company=300M&Type=1&Vorlage=KontenWebservice")
     fun getKonto(@Query("Password") pw: String, @Query("User") user: String, @Query("Key") kontoNummer: String): Call<KontoList>
 
-    @GET("/ewlservice/export?User=meso&Company=300M&Password=meso&Type=7&Vorlage=KontakteWebservice&Key=FILTERWSKontakte")
-    fun getKontakteList(): Call<KontakteList>
+    @GET("/ewlservice/export?Company=300M&Type=7&Vorlage=KontakteWebservice&Key=FILTERWSKontakte")
+    fun getKontakteList(@Query("Password") pw: String, @Query("User") user: String): Call<KontakteList>
+
+    @GET("/ewlservice/export?Company=300M&Type=7&Vorlage=KontakteWebservice&Key=FILTERWSKontakte")
+    fun getKontakt(@Query("Password") pw: String, @Query("User") user: String, @Query("Key") kontoNummer: String): Call<KontakteList>
 
     object Factory {
         fun create(baseURL: String): KontoApi {

@@ -74,13 +74,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     if (Patterns.WEB_URL.matcher(newURL).matches()) {
                         PreferenceManager.getDefaultSharedPreferences(requireContext().applicationContext)
                             .edit().putString("base_url", newURL).apply()
-                        Log.w(
-                            "Test",
-                            PreferenceManager.getDefaultSharedPreferences(requireContext().applicationContext).getString(
-                                "base_url",
-                                ""
-                            )
-                        )
                         return true
                     }
                     Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()

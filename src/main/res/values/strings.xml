@@ -25,4 +25,15 @@
     <string name="desc_openBrowser">Open in Browser</string>
     <string name="text_menu_connection">Verbindungs-Eigenschaften</string>
     <string name="menu_retry">Retry</string>
+    <string name="descPerson">Person</string>
+    <string name="descVorname">Vorname</string>
+    <string name="descNachname">Nachname</string>
+    <string name="descSex">Geschlecht</string>
+    <string name="descAbteilung">Abteilung</string>
+    <string name="descFunktion">Funktion</string>
+    <string name="descMobiltelefon">Mobiltelefon</string>
+    <string name="descMobilBetreiber">Mobil-Betreiber</string>
+    <string name="sexWeiblich">weiblich</string>
+    <string name="sexMännlich">Männlich</string>
+    <string name="desc_butMail">Button for mail</string>
 </resources>

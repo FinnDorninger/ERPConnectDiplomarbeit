@@ -28,10 +28,13 @@ class KontakteListActivity : AppCompatActivity(),
     private lateinit var kontakteListPresenter: KontakteListPresenter
     var snackbar: Snackbar? = null
     var adapterRV: KontakteListAdapter? = null
+    var search: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kontakte_list)
+        val intent = intent
+        search = intent.getStringExtra("searchdetail")
 
         initRecyclerView()
 
@@ -142,6 +145,11 @@ class KontakteListActivity : AppCompatActivity(),
                 return false
             }
         })
+
+        if (!search.isNullOrEmpty()) {
+            search_konto.setQuery(search, true)
+            search = ""
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -156,6 +164,7 @@ class KontakteListActivity : AppCompatActivity(),
         if (id == R.id.action_settings) {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
+            finish()
             return true
         }
         if (id == R.id.action_retry) {

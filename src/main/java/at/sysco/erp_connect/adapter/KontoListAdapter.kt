@@ -10,7 +10,6 @@ import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import at.sysco.erp_connect.R
-import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.konto_detail.KontoDetailActivity
 import at.sysco.erp_connect.pojo.Konto
 import kotlinx.android.synthetic.main.konto_list_item.view.*
@@ -49,7 +48,7 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     }
 
     override fun getFilter(): Filter {
-        return exampleFilter
+        return rvFilter
     }
 
     fun clearAll() {
@@ -59,7 +58,7 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         notifyItemRangeRemoved(0, sizeListFull)
     }
 
-    private var exampleFilter: Filter = object : Filter() {
+    private var rvFilter: Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             var filteredList = ArrayList<Konto>()
 
