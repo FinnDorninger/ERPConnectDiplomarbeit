@@ -126,14 +126,24 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     private fun openURL(konto: Konto) {
-        val url = konto.kUrl
-        if (url != null && android.util.Patterns.WEB_URL.matcher(url).matches()) {
-            val webpage: Uri = Uri.parse(url)
-            val intent = Intent(Intent.ACTION_VIEW, webpage)
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
+        var url = konto.kUrl
+        if (url != null) {
+            if (url.startsWith("http:") or url.startsWith("https:")) {
+                val webpage: Uri = Uri.parse(url)
+                val intent = Intent(Intent.ACTION_VIEW, webpage)
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
+            } else {
+                url = "https:$url"
+                val webpage: Uri = Uri.parse(url)
+                val intent = Intent(Intent.ACTION_VIEW, webpage)
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
             }
         }
+
     }
 
     private fun dialNumber(konto: Konto) {

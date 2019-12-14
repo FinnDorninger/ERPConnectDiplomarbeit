@@ -17,6 +17,8 @@ import android.util.Log
 import android.util.Patterns
 import android.util.Xml
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.pojo.Kontakt

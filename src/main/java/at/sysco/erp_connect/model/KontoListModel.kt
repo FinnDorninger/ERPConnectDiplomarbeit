@@ -16,8 +16,11 @@ import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
 import android.os.Handler
+import android.util.Log
 import android.util.Patterns
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.network.UnsafeHTTPClient
 import java.lang.IllegalArgumentException
@@ -26,10 +29,34 @@ const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 class KontoListModel(val context: Context) : KontoListContract.Model {
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
+        //test()
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
             KONTO_LIST_FILE_NAME.doesFileExist() -> loadKontoListFromFile(onFinishedListener)
             else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
+        }
+    }
+
+    fun test() {
+        // Although you can define your own key generation parameter specification, it's
+// recommended that you use the value specified here.
+        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+
+// Creates a file with this name, or replaces an existing file
+// that has the same name. Note that the file name cannot contain
+// path separators.
+        removeFile()
+        val fileToWrite = "my_sensitive.txt"
+        val encryptedFile = EncryptedFile.Builder(
+            File(context.filesDir, fileToWrite),
+            context,
+            masterKeyAlias,
+            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+        ).build()
+
+        encryptedFile.openFileOutput().bufferedWriter().use {
+            it.write("MY SUPER-SECRET INFORMATION")
         }
     }
 
@@ -102,6 +129,9 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
+                    Log.w("Test", t.cause)
+                    Log.w("Test", t.message)
+                    Log.w("Test", t.localizedMessage)
                     tryLoadingFromFile(onFinishedListener)
                 }
             })

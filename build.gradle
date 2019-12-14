@@ -17,7 +17,7 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "at.sysco.erp_connect"
-        minSdkVersion 22
+        minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -54,4 +54,5 @@ dependencies {
     //Anko
     implementation 'org.jetbrains.anko:anko-common:0.9'
 
+    implementation "androidx.security:security-crypto:1.0.0-alpha02"
 }
