@@ -122,7 +122,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
     ) {
-        val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
+        val encFile = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
         val encryptedFile = EncryptedFile.Builder(
             encFile,
             context,
