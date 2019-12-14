@@ -6,6 +6,8 @@ import android.os.Handler
 import android.util.Log
 import android.util.Patterns
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
@@ -28,6 +30,9 @@ import java.util.*
 const val KONTO_FILE_NAME = "KontoFile.xml"
 
 class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
+    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+
     override fun getKontoDetail(
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
@@ -120,11 +125,18 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
-        val path = context.filesDir.toString() + "/" + KONTO_FILE_NAME
-        var inputStream: FileInputStream? = null
+        val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
+        val encryptedFile = EncryptedFile.Builder(
+            encFile,
+            context,
+            masterKeyAlias,
+            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+        ).build()
+        lateinit var fileInputStream: FileInputStream
+
         try {
-            inputStream = File(path).inputStream()
-            val kontoList = Persister().read(KontoList::class.java, inputStream).kontenList
+            fileInputStream = encryptedFile.openFileInput()
+            val kontoList = Persister().read(KontoList::class.java, fileInputStream).kontenList
             if (kontoList != null) {
                 val konto = kontoList.find { it.kNumber == kontoNummer }
                 if (konto != null) {
@@ -138,22 +150,22 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         } catch (e: IOException) {
             //Exception: File does not exist or is corrupt
             if (KONTO_FILE_NAME.doesFileExist()) {
-                removeFile()
+                KONTO_LIST_FILE_NAME.removeFile()
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
                 onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
         } catch (e: PersistenceException) {
-            removeFile()
+            KONTO_LIST_FILE_NAME.removeFile()
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
-            inputStream?.close()
+            fileInputStream.close()
         }
     }
 
-    private fun removeFile() {
+    private fun String.removeFile() {
         when {
-            KONTO_LIST_FILE_NAME.doesFileExist() -> context.deleteFile(KONTO_LIST_FILE_NAME)
+            this.doesFileExist() -> context.deleteFile(this)
         }
     }
 }

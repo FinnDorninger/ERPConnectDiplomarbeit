@@ -3,6 +3,8 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailContract
@@ -21,6 +23,9 @@ import java.io.IOException
 const val KONTAKTE_FILE_NAME = "KontakteFile.xml"
 
 class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
+    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+    
     override fun getKontaktDetail(
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
@@ -117,11 +122,18 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
     ) {
-        val path = context.filesDir.toString() + "/" + KONTAKTE_FILE_NAME
-        var inputStream: FileInputStream? = null
+        val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
+        val encryptedFile = EncryptedFile.Builder(
+            encFile,
+            context,
+            masterKeyAlias,
+            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+        ).build()
+        lateinit var fileInputStream: FileInputStream
         try {
-            inputStream = File(path).inputStream()
-            val kontaktList = Persister().read(KontakteList::class.java, inputStream).kontakteList
+            fileInputStream = encryptedFile.openFileInput()
+            val kontaktList =
+                Persister().read(KontakteList::class.java, fileInputStream).kontakteList
             if (kontaktList != null) {
                 val kontakt = kontaktList.find { it.kKontaktNumber == kontaktNummer }
                 if (kontakt != null) {
@@ -135,22 +147,22 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         } catch (e: IOException) {
             //Exception: File does not exist or is corrupt
             if (KONTAKTE_FILE_NAME.doesFileExist()) {
-                removeFile()
+                KONTAKTE_LIST_FILE_NAME.removeFile()
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
                 onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
         } catch (e: PersistenceException) {
-            removeFile()
+            KONTAKTE_LIST_FILE_NAME.removeFile()
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
-            inputStream?.close()
+            fileInputStream.close()
         }
     }
 
-    private fun removeFile() {
+    private fun String.removeFile() {
         when {
-            KONTAKTE_LIST_FILE_NAME.doesFileExist() -> context.deleteFile(KONTAKTE_LIST_FILE_NAME)
+            this.doesFileExist() -> context.deleteFile(this)
         }
     }
 }

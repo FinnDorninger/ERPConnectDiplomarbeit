@@ -15,48 +15,23 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
-import android.os.Handler
 import android.util.Log
-import android.util.Patterns
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FinishCode
-import at.sysco.erp_connect.network.UnsafeHTTPClient
 import java.lang.IllegalArgumentException
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 class KontoListModel(val context: Context) : KontoListContract.Model {
+    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        //test()
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
             KONTO_LIST_FILE_NAME.doesFileExist() -> loadKontoListFromFile(onFinishedListener)
             else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
-        }
-    }
-
-    fun test() {
-        // Although you can define your own key generation parameter specification, it's
-// recommended that you use the value specified here.
-        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
-// Creates a file with this name, or replaces an existing file
-// that has the same name. Note that the file name cannot contain
-// path separators.
-        removeFile()
-        val fileToWrite = "my_sensitive.txt"
-        val encryptedFile = EncryptedFile.Builder(
-            File(context.filesDir, fileToWrite),
-            context,
-            masterKeyAlias,
-            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-        ).build()
-
-        encryptedFile.openFileOutput().bufferedWriter().use {
-            it.write("MY SUPER-SECRET INFORMATION")
         }
     }
 
@@ -80,30 +55,37 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     }
 
     private fun loadKontoListFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        val path = context.filesDir.toString() + "/" + KONTO_LIST_FILE_NAME
-        var inputStream: FileInputStream? = null
+        val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
+        val encryptedFile = EncryptedFile.Builder(
+            encFile,
+            context,
+            masterKeyAlias,
+            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+        ).build()
+        lateinit var fileInputStream: FileInputStream
+
         try {
-            inputStream = File(path).inputStream()
-            val kontoList = Persister().read(KontoList::class.java, inputStream).kontenList
+            fileInputStream = encryptedFile.openFileInput()
+
+            val kontoList = Persister().read(KontoList::class.java, fileInputStream).kontenList
             if (kontoList != null) {
                 onFinishedListener.onfinished(kontoList, FinishCode.finishedOnFile)
             } else {
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
         } catch (e: IOException) {
-            //Exception: File does not exist or is corrupt
             if (KONTO_LIST_FILE_NAME.doesFileExist()) {
-                removeFile()
+                KONTO_LIST_FILE_NAME.removeFile()
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
                 onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
         } catch (e: PersistenceException) {
             //Exception when Persister can not serialize object from file.
-            removeFile()
+            KONTO_LIST_FILE_NAME.removeFile()
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
-            inputStream?.close()
+            fileInputStream.close()
         }
     }
 
@@ -130,8 +112,6 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
                     Log.w("Test", t.cause)
-                    Log.w("Test", t.message)
-                    Log.w("Test", t.localizedMessage)
                     tryLoadingFromFile(onFinishedListener)
                 }
             })
@@ -153,14 +133,21 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     }
 
     fun saveKonto(listToSave: List<Konto>): String {
-        val writer = StringWriter()
-        lateinit var fileWriter: FileWriter
         val serializer = Xml.newSerializer()
+        lateinit var writer: OutputStreamWriter
 
-        serializer.setOutput(writer)
+        KONTO_LIST_FILE_NAME.removeFile()
+
         try {
-            val file = File(context.filesDir, KONTO_LIST_FILE_NAME)
-            fileWriter = FileWriter(file, false)
+            val encryptedFile = EncryptedFile.Builder(
+                File(context.filesDir, KONTO_LIST_FILE_NAME),
+                context,
+                masterKeyAlias,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
+            writer = encryptedFile.openFileOutput().writer(charset = Charsets.UTF_8)
+
+            serializer.setOutput(writer)
             serializer.startTag("", "MESOWebService")
             for (konto in listToSave) {
                 serializer.startTag("", "KontenWebservice")
@@ -244,30 +231,28 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             serializer.endTag("", "MESOWebService")
             serializer.endDocument()
 
-            val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
-            if (context.filesDir.freeSpace > bytesOfFile) {
-                fileWriter.write(writer.toString())
-                return (FinishCode.finishedSavingKonto)
+            if (context.filesDir.freeSpace > writer.toString().toByteArray(charset = Charsets.UTF_8).size) {
+                return FinishCode.finishedSavingKonto
             } else {
                 return FailureCode.NOT_ENOUGH_SPACE
             }
-        } catch (e: IOException) {
-            removeFile()
-            return (FailureCode.ERROR_SAVING_FILE)
+
         } catch (e: IllegalArgumentException) {
-            removeFile()
+            Log.w("Test", "Illega")
+            KONTO_LIST_FILE_NAME.removeFile()
             return (FailureCode.ERROR_SAVING_FILE)
         } catch (e: IllegalStateException) {
-            removeFile()
+            Log.w("Test", "IllegalStatw")
+            KONTO_LIST_FILE_NAME.removeFile()
             return (FailureCode.ERROR_SAVING_FILE)
         } finally {
-            fileWriter.close()
+            writer.close()
         }
     }
 
-    private fun removeFile() {
+    private fun String.removeFile() {
         when {
-            KONTO_LIST_FILE_NAME.doesFileExist() -> context.deleteFile(KONTO_LIST_FILE_NAME)
+            this.doesFileExist() -> context.deleteFile(this)
         }
     }
 }

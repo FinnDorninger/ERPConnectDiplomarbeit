@@ -27,6 +27,8 @@ import at.sysco.erp_connect.pojo.KontakteList
 const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
 class KontakteListModel(val context: Context) : KontakteListContract.Model {
+    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
     val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     var autoSync = sharedPref.getBoolean("auto_sync", true)
 
@@ -89,11 +91,19 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     }
 
     private fun loadKontakteListFromFile(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
-        val path = context.filesDir.toString() + "/" + KONTAKTE_LIST_FILE_NAME
-        var inputStream: FileInputStream? = null
+        val encFile = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
+        val encryptedFile = EncryptedFile.Builder(
+            encFile,
+            context,
+            masterKeyAlias,
+            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+        ).build()
+        lateinit var fileInputStream: FileInputStream
         try {
-            inputStream = File(path).inputStream()
-            val kontakteList = Persister().read(KontakteList::class.java, inputStream).kontakteList
+            fileInputStream = encryptedFile.openFileInput()
+
+            val kontakteList =
+                Persister().read(KontakteList::class.java, fileInputStream).kontakteList
             if (kontakteList != null) {
                 onFinishedListener.onfinished(kontakteList, FinishCode.finishedOnFile)
             } else {
@@ -102,18 +112,17 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         } catch (e: IOException) {
             //Exception: File does not exist or is corrupt
             if (KONTAKTE_LIST_FILE_NAME.doesFileExist()) {
-                removeFile()
+                KONTAKTE_LIST_FILE_NAME.removeFile()
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
                 onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
         } catch (e: PersistenceException) {
             //Exception when Persister can not serialize object from file.
-            Log.w("Test", "Persistence")
-            removeFile()
+            KONTAKTE_LIST_FILE_NAME.removeFile()
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
-            inputStream?.close()
+            fileInputStream.close()
         }
     }
 
@@ -130,13 +139,21 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     }
 
     fun saveKontakte(listToSave: List<Kontakt>): String {
-        val writer = StringWriter()
-        lateinit var fileWriter: FileWriter
         val serializer = Xml.newSerializer()
-        serializer.setOutput(writer)
+        lateinit var writer: OutputStreamWriter
+
+        KONTAKTE_LIST_FILE_NAME.removeFile()
+
         try {
-            val file = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
-            fileWriter = FileWriter(file, false)
+            val encryptedFile = EncryptedFile.Builder(
+                File(context.filesDir, KONTAKTE_LIST_FILE_NAME),
+                context,
+                masterKeyAlias,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
+            writer = encryptedFile.openFileOutput().writer(charset = Charsets.UTF_8)
+
+            serializer.setOutput(writer)
             serializer.startTag("", "MESOWebService")
             for (kontakt in listToSave) {
                 serializer.startTag("", "KontakteWebservice")
@@ -235,30 +252,28 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
             serializer.endTag("", "MESOWebService")
             serializer.endDocument()
 
-            val bytesOfFile = writer.toString().toByteArray(charset = Charsets.UTF_8).size
-            if (context.filesDir.freeSpace > bytesOfFile) {
-                fileWriter.write(writer.toString())
+            if (context.filesDir.freeSpace > writer.toString().toByteArray(charset = Charsets.UTF_8).size) {
                 return FinishCode.finishedSavingKontakte
             } else {
                 return FailureCode.NOT_ENOUGH_SPACE
             }
         } catch (e: IOException) {
-            removeFile()
+            KONTAKTE_LIST_FILE_NAME.removeFile()
             return FailureCode.ERROR_SAVING_FILE
         } catch (e: IllegalArgumentException) {
-            removeFile()
+            KONTAKTE_LIST_FILE_NAME.removeFile()
             return FailureCode.ERROR_SAVING_FILE
         } catch (e: IllegalStateException) {
-            removeFile()
+            KONTAKTE_LIST_FILE_NAME.removeFile()
             return FailureCode.ERROR_SAVING_FILE
         } finally {
-            fileWriter.close()
+            writer.close()
         }
     }
 
-    private fun removeFile() {
+    private fun String.removeFile() {
         when {
-            KONTAKTE_LIST_FILE_NAME.doesFileExist() -> context.deleteFile(KONTAKTE_LIST_FILE_NAME)
+            this.doesFileExist() -> context.deleteFile(this)
         }
     }
 
