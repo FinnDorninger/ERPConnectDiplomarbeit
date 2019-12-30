@@ -23,20 +23,23 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
                     val oldURL = newValue as String
                     var newURL = ""
+
+                    if (oldURL.isNullOrEmpty()) {
+                        removeFiles()
+                        return true
+                    }
+
                     when {
-                        oldURL.isEmpty() -> {
-                        }
                         oldURL.startsWith("https://") -> {
                         }
                         oldURL.startsWith("http://") -> newURL =
                             oldURL.replace("http://", "https://")
                         else -> newURL = "https://".plus(oldURL)
                     }
-                    if (!newURL.endsWith("/")) {
-                        newURL = oldURL
+                    if (!oldURL.endsWith("/")) {
                         newURL = newURL.plus("/")
-                        Log.w("Test", newURL)
                     }
+
                     if (Patterns.WEB_URL.matcher(newURL).matches()) {
                         if (!oldURL.equals(newURL)) {
                             removeFiles()
@@ -58,7 +61,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         val editConTimeoutPreference: EditTextPreference? = findPreference("timeoutCon")
         val editReadTimeoutPreference: EditTextPreference? = findPreference("timeoutRead")
-
         val editPwPreference: EditTextPreference? = findPreference("user_password")
         val editUserPreference: EditTextPreference? = findPreference("user_name")
 

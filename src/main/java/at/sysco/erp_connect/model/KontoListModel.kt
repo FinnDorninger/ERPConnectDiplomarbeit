@@ -97,10 +97,10 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val baseURL = sharedPref.getString("base_url", "")
         Log.w("Retrofit Start baseURL", baseURL)
 
-        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
             val retrofit = Retrofit.Builder()
-            val call = KontoApi.Factory.create(baseURL).getKontoList(userName, userPW)
 
+            val call = KontoApi.Factory.create(baseURL).getKontoList(userPW, userName)
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     var responseKontoList = response.body()?.kontenList
@@ -113,6 +113,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
+                    Log.w("Test", call.request().url().toString())
                     Log.w("Call failed ", t.cause)
                     tryLoadingFromFile(onFinishedListener)
                 }

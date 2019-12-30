@@ -80,7 +80,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         val userPW = sharedPref.getString("user_password", "")
         val baseURL = sharedPref.getString("base_url", "")
 
-        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
             val call = KontoApi.Factory.create(baseURL).getKonto(userPW, userName, kontoNummer)
 
             call.enqueue(object : Callback<KontoList> {

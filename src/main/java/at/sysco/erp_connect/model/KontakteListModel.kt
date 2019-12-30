@@ -57,7 +57,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         val userPW = sharedPref.getString("user_password", "")
         val baseURL = sharedPref.getString("base_url", "")
 
-        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
             val retrofit = Retrofit.Builder()
             val call = KontoApi.Factory.create(baseURL).getKontakteList(userPW, userName)
 

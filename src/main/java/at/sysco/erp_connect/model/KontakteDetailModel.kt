@@ -73,7 +73,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         val userPW = sharedPref.getString("user_password", "")
         val baseURL = sharedPref.getString("base_url", "")
 
-        if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
+        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
 
             val call = KontoApi.Factory.create(baseURL).getKontakt(userPW, userName, kontaktNummer)
 
