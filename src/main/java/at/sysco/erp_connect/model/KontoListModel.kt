@@ -27,6 +27,7 @@ const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 class KontoListModel(val context: Context) : KontoListContract.Model {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
@@ -90,10 +91,11 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     }
 
     private fun loadDataFromWebservice(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
         val baseURL = sharedPref.getString("base_url", "")
+        Log.w("Retrofit Start baseURL", baseURL)
 
         if (!baseURL.isNullOrEmpty() && !userName.isNullOrEmpty() && !userPW.isNullOrEmpty()) {
             val retrofit = Retrofit.Builder()
@@ -111,7 +113,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 }
 
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                    Log.w("Test", t.cause)
+                    Log.w("Call failed ", t.cause)
                     tryLoadingFromFile(onFinishedListener)
                 }
             })

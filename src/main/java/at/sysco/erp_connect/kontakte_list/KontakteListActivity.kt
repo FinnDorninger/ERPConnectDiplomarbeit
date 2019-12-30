@@ -24,7 +24,6 @@ import kotlinx.android.synthetic.main.activity_kontakte_list.*
 
 class KontakteListActivity : AppCompatActivity(),
     KontakteListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
-
     private lateinit var kontakteListPresenter: KontakteListPresenter
     var snackbar: Snackbar? = null
     var adapterRV: KontakteListAdapter? = null

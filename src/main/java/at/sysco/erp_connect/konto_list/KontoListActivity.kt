@@ -1,5 +1,6 @@
 package at.sysco.erp_connect.konto_list
 
+import android.content.Context
 import at.sysco.erp_connect.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,11 +24,12 @@ import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
 import at.sysco.erp_connect.network.UnsafeHTTPClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import org.jetbrains.anko.defaultSharedPreferences
 import java.util.concurrent.TimeUnit
 
 
 class KontoListActivity : AppCompatActivity(),
-    KontoListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
+    KontoListContract.View {
 
     private lateinit var kontoListPresenter: KontoListPresenter
     var snackbar: Snackbar? = null
@@ -60,23 +62,16 @@ class KontoListActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .registerOnSharedPreferenceChangeListener(this)
         bottomNavigation.menu.findItem(R.id.action_Konten).isChecked = true
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .unregisterOnSharedPreferenceChangeListener(this)
-        kontoListPresenter.onDestroy()
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (!this.fileList().contains("KontoFile.xml") or !this.fileList().contains("KontakteFile.xml")) {
             clearResults()
             kontoListPresenter.requestFromWS()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        kontoListPresenter.onDestroy()
     }
 
     fun clearResults() {
