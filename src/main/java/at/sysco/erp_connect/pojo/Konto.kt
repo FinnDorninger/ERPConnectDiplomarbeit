@@ -8,7 +8,7 @@ data class Konto(
     @field:Element(name = "Kontonummer")
     var kNumber: String? = null,
 
-    @field:Element(name = "Kontoname")
+    @field:Element(name = "Kontoname", required = false)
     var kName: String? = null,
 
     @field:Element(name = "Staat", required = false)

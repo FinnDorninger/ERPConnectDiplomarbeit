@@ -3,19 +3,15 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import android.content.SharedPreferences
 import at.sysco.erp_connect.constants.FailureCode
-import at.sysco.erp_connect.network.KontoApi
+import at.sysco.erp_connect.network.WebserviceApi
 import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
 import java.io.*
 import android.net.ConnectivityManager
-import android.os.Handler
 import android.util.Log
-import android.util.Patterns
-import android.util.Xml
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
@@ -23,6 +19,11 @@ import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.pojo.Kontakt
 import at.sysco.erp_connect.pojo.KontakteList
+import java.lang.Exception
+import java.security.GeneralSecurityException
+import javax.xml.stream.FactoryConfigurationError
+import javax.xml.stream.XMLOutputFactory
+import javax.xml.stream.XMLStreamException
 
 const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
@@ -58,8 +59,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         val baseURL = sharedPref.getString("base_url", "")
 
         if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
-            val retrofit = Retrofit.Builder()
-            val call = KontoApi.Factory.create(baseURL).getKontakteList(userPW, userName)
+            val call = WebserviceApi.Factory.getApi(baseURL).getKontakteList(userPW, userName)
 
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(
@@ -86,20 +86,20 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                 }
             })
         } else {
-            tryLoadingFromFile(onFinishedListener)
+            onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
     }
 
     private fun loadKontakteListFromFile(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
-        val encFile = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
-        val encryptedFile = EncryptedFile.Builder(
-            encFile,
-            context,
-            masterKeyAlias,
-            EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-        ).build()
         lateinit var fileInputStream: FileInputStream
         try {
+            val encFile = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
+            val encryptedFile = EncryptedFile.Builder(
+                encFile,
+                context,
+                masterKeyAlias,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
             fileInputStream = encryptedFile.openFileInput()
 
             val kontakteList =
@@ -110,19 +110,24 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
         } catch (e: IOException) {
-            //Exception: File does not exist or is corrupt
             if (KONTAKTE_LIST_FILE_NAME.doesFileExist()) {
                 KONTAKTE_LIST_FILE_NAME.removeFile()
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             } else {
                 onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
-        } catch (e: PersistenceException) {
-            //Exception when Persister can not serialize object from file.
+        } catch (e: Exception) {
+            KONTAKTE_LIST_FILE_NAME.removeFile()
+            onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
+        } catch (e: GeneralSecurityException) {
             KONTAKTE_LIST_FILE_NAME.removeFile()
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
-            fileInputStream.close()
+            try {
+                fileInputStream.close()
+            } catch (e: IOException) {
+                onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
+            }
         }
     }
 
@@ -139,10 +144,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     }
 
     fun saveKontakte(listToSave: List<Kontakt>): String {
-        val serializer = Xml.newSerializer()
-        lateinit var writer: OutputStreamWriter
-
         KONTAKTE_LIST_FILE_NAME.removeFile()
+        lateinit var writer: OutputStreamWriter
 
         try {
             val encryptedFile = EncryptedFile.Builder(
@@ -151,123 +154,125 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                 masterKeyAlias,
                 EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
             ).build()
-            writer = encryptedFile.openFileOutput().writer(charset = Charsets.UTF_8)
 
-            serializer.setOutput(writer)
-            serializer.startTag("", "MESOWebService")
+            writer = encryptedFile.openFileOutput().writer(charset = Charsets.UTF_8)
+            val outFactory: XMLOutputFactory = XMLOutputFactory.newInstance()
+            val xmlStreamWriter = outFactory.createXMLStreamWriter(writer)
+
+            xmlStreamWriter.writeStartDocument()
+            xmlStreamWriter.writeStartElement("MESOWebService")
             for (kontakt in listToSave) {
-                serializer.startTag("", "KontakteWebservice")
+                xmlStreamWriter.writeStartElement("KontakteWebservice")
                 if (kontakt.kKontaktNumber != null) {
-                    serializer.startTag("", "Kontaktnummer")
-                    serializer.text(kontakt.kKontaktNumber)
-                    serializer.endTag("", "Kontaktnummer")
+                    xmlStreamWriter.writeStartElement("Kontaktnummer")
+                    xmlStreamWriter.writeCharacters(kontakt.kKontaktNumber)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kLastName != null) {
-                    serializer.startTag("", "Name")
-                    serializer.text(kontakt.kLastName)
-                    serializer.endTag("", "Name")
+                    xmlStreamWriter.writeStartElement("Name")
+                    xmlStreamWriter.writeCharacters(kontakt.kLastName)
+                    xmlStreamWriter.writeEndElement()
+
                 }
                 if (kontakt.kNumber != null) {
-                    serializer.startTag("", "Kontonummer")
-                    serializer.text(kontakt.kNumber)
-                    serializer.endTag("", "Kontonummer")
+                    xmlStreamWriter.writeStartElement("Kontonummer")
+                    xmlStreamWriter.writeCharacters(kontakt.kNumber)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kFirstName != null) {
-                    serializer.startTag("", "Vorname")
-                    serializer.text(kontakt.kFirstName)
-                    serializer.endTag("", "Vorname")
+                    xmlStreamWriter.writeStartElement("Vorname")
+                    xmlStreamWriter.writeCharacters(kontakt.kFirstName)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kFunction != null) {
-                    serializer.startTag("", "Funktion")
-                    serializer.text(kontakt.kFunction)
-                    serializer.endTag("", "Funktion")
+                    xmlStreamWriter.writeStartElement("Funktion")
+                    xmlStreamWriter.writeCharacters(kontakt.kFunction)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kSex != null) {
-                    serializer.startTag("", "Geschlecht")
-                    serializer.text(kontakt.kSex)
-                    serializer.endTag("", "Geschlecht")
+                    xmlStreamWriter.writeStartElement("Geschlecht")
+                    xmlStreamWriter.writeCharacters(kontakt.kSex)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kAbteilung != null) {
-                    serializer.startTag("", "Abteilung")
-                    serializer.text(kontakt.kAbteilung)
-                    serializer.endTag("", "Abteilung")
+                    xmlStreamWriter.writeStartElement("Abteilung")
+                    xmlStreamWriter.writeCharacters(kontakt.kAbteilung)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kTelCountry != null) {
-                    serializer.startTag("", "Landesvorwahl")
-                    serializer.text(kontakt.kTelCountry)
-                    serializer.endTag("", "Landesvorwahl")
+                    xmlStreamWriter.writeStartElement("Landesvorwahl")
+                    xmlStreamWriter.writeCharacters(kontakt.kTelCountry)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kTelCity != null) {
-                    serializer.startTag("", "Ortsvorwahl")
-                    serializer.text(kontakt.kTelCity)
-                    serializer.endTag("", "Ortsvorwahl")
+                    xmlStreamWriter.writeStartElement("Ortsvorwahl")
+                    xmlStreamWriter.writeCharacters(kontakt.kTelCity)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kTelCountry != null) {
-                    serializer.startTag("", "Telefon1Land")
-                    serializer.text(kontakt.kTelCountry)
-                    serializer.endTag("", "Telefon1Land")
+                    xmlStreamWriter.writeStartElement("Telefon1Land")
+                    xmlStreamWriter.writeCharacters(kontakt.kTelCountry)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kMobilCountry != null) {
-                    serializer.startTag("", "LandesvorwahlMobiltelefonnummer")
-                    serializer.text(kontakt.kMobilCountry)
-                    serializer.endTag("", "LandesvorwahlMobiltelefonnummer")
+                    xmlStreamWriter.writeStartElement("LandesvorwahlMobiltelefonnummer")
+                    xmlStreamWriter.writeCharacters(kontakt.kMobilCountry)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kTelCity != null) {
-                    serializer.startTag("", "Telefon1Vorwahl")
-                    serializer.text(kontakt.kTelCity)
-                    serializer.endTag("", "Telefon1Vorwahl")
+                    xmlStreamWriter.writeStartElement("Telefon1Vorwahl")
+                    xmlStreamWriter.writeCharacters(kontakt.kTelCity)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kTelNumber != null) {
-                    serializer.startTag("", "Telefon1Durchwahl")
-                    serializer.text(kontakt.kTelNumber)
-                    serializer.endTag("", "Telefon1Durchwahl")
+                    xmlStreamWriter.writeStartElement("Telefon1Durchwahl")
+                    xmlStreamWriter.writeCharacters(kontakt.kTelNumber)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kMobilCountry != null) {
-                    serializer.startTag("", "MobiltelefonLand")
-                    serializer.text(kontakt.kMobilCountry)
-                    serializer.endTag("", "MobiltelefonLand")
+                    xmlStreamWriter.writeStartElement("MobiltelefonLand")
+                    xmlStreamWriter.writeCharacters(kontakt.kMobilCountry)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kMobilOperator != null) {
-                    serializer.startTag("", "MobiltelefonVorwahl")
-                    serializer.text(kontakt.kMobilOperator)
-                    serializer.endTag("", "MobiltelefonVorwahl")
+                    xmlStreamWriter.writeStartElement("MobiltelefonVorwahl")
+                    xmlStreamWriter.writeCharacters(kontakt.kMobilOperator)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kMobilNumber != null) {
-                    serializer.startTag("", "MobiltelefonNummer")
-                    serializer.text(kontakt.kMobilNumber)
-                    serializer.endTag("", "MobiltelefonNummer")
+                    xmlStreamWriter.writeStartElement("MobiltelefonNummer")
+                    xmlStreamWriter.writeCharacters(kontakt.kMobilNumber)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kMail != null) {
-                    serializer.startTag("", "eMailadresse")
-                    serializer.text(kontakt.kMail)
-                    serializer.endTag("", "eMailadresse")
+                    xmlStreamWriter.writeStartElement("eMailadresse")
+                    xmlStreamWriter.writeCharacters(kontakt.kMail)
+                    xmlStreamWriter.writeEndElement()
                 }
                 if (kontakt.kURL != null) {
-                    serializer.startTag("", "Homepage")
-                    serializer.text(kontakt.kURL)
-                    serializer.endTag("", "Homepage")
+                    xmlStreamWriter.writeStartElement("Homepage")
+                    xmlStreamWriter.writeCharacters(kontakt.kURL)
+                    xmlStreamWriter.writeEndElement()
                 }
-                serializer.endTag("", "KontakteWebservice")
+                xmlStreamWriter.writeEndElement()
             }
-            serializer.endTag("", "MESOWebService")
-            serializer.endDocument()
-
-            if (context.filesDir.freeSpace > writer.toString().toByteArray(charset = Charsets.UTF_8).size) {
-                return FinishCode.finishedSavingKontakte
-            } else {
-                return FailureCode.NOT_ENOUGH_SPACE
-            }
+            xmlStreamWriter.writeEndElement()
+            xmlStreamWriter.writeEndDocument()
         } catch (e: IOException) {
             KONTAKTE_LIST_FILE_NAME.removeFile()
-            return FailureCode.ERROR_SAVING_FILE
-        } catch (e: IllegalArgumentException) {
+        } catch (e: XMLStreamException) {
             KONTAKTE_LIST_FILE_NAME.removeFile()
-            return FailureCode.ERROR_SAVING_FILE
-        } catch (e: IllegalStateException) {
+        } catch (e: FactoryConfigurationError) {
             KONTAKTE_LIST_FILE_NAME.removeFile()
-            return FailureCode.ERROR_SAVING_FILE
+        } catch (e: GeneralSecurityException) {
+            KONTAKTE_LIST_FILE_NAME.removeFile()
         } finally {
-            writer.close()
+            try {
+                writer.close()
+            } catch (e: IOException) {
+                return FailureCode.ERROR_SAVING_FILE
+            }
+            return FinishCode.finishedSavingKontakte
         }
     }
 

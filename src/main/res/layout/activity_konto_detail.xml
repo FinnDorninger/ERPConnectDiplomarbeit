@@ -20,7 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textIsSelectable="true" />
 
         <TextView
             android:id="@+id/textInputKontoNumber"
@@ -29,7 +30,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textColor="@android:color/white"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:textIsSelectable="true" />
 
         <Button
             android:id="@+id/buttonAnsprechpartner"
@@ -149,7 +151,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -172,7 +175,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -195,7 +199,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -218,7 +223,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -270,7 +276,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -293,7 +300,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -345,7 +353,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -368,7 +377,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -391,7 +401,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
 
@@ -436,7 +447,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="2"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
         </TableLayout>
     </LinearLayout>

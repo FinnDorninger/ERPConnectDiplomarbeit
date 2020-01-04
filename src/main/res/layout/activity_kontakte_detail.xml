@@ -22,7 +22,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textIsSelectable="true" />
 
         <View
             android:layout_width="fill_parent"
@@ -40,7 +41,8 @@
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
             app:orientation="horizontal"
-            app:columnCount="4">
+            app:columnCount="4"
+            app:rowCount="1">
 
             <ImageView
                 android:id="@+id/buttonCall"
@@ -129,7 +131,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -144,7 +147,8 @@
                     android:text="@string/descNachname"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
 
                 <TextView
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
@@ -152,7 +156,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -175,7 +180,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -198,7 +204,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -221,7 +228,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -273,7 +281,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -296,7 +305,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -348,7 +358,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -371,7 +382,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -394,7 +406,8 @@
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textIsSelectable="true" />
 
             <TableRow
                 android:id="@+id/headlinePhone"
@@ -445,7 +458,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -468,7 +482,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
 
             <TableRow
@@ -491,7 +506,8 @@
                     android:textStyle="bold"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textIsSelectable="true" />
             </TableRow>
         </TableLayout>
     </LinearLayout>

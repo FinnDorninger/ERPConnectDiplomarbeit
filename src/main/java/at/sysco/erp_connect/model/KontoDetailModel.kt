@@ -2,30 +2,23 @@ package at.sysco.erp_connect.model
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.os.Handler
 import android.util.Log
-import android.util.Patterns
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
-import at.sysco.erp_connect.konto_list.KontoListContract
-import at.sysco.erp_connect.network.KontoApi
-import at.sysco.erp_connect.network.UnsafeHTTPClient
+import at.sysco.erp_connect.network.WebserviceApi
 import at.sysco.erp_connect.pojo.KontoList
-import okhttp3.OkHttpClient
 import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.util.*
 
 const val KONTO_FILE_NAME = "KontoFile.xml"
 
@@ -73,15 +66,13 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
-        val retrofit = Retrofit.Builder()
-
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
         val baseURL = sharedPref.getString("base_url", "")
 
         if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
-            val call = KontoApi.Factory.create(baseURL).getKonto(userPW, userName, kontoNummer)
+            val call = WebserviceApi.Factory.getApi(baseURL).getKonto(userPW, userName, kontoNummer)
 
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
@@ -92,6 +83,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                             responseKontoList[0],
                             FinishCode.finishedOnWeb
                         )
+                        Log.w("Test", call.request().url().toString())
                     } else {
                         tryLoadingFromFile(onFinishedListener, kontoNummer)
                     }
@@ -102,7 +94,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                 }
             })
         } else {
-            tryLoadingFromFile(onFinishedListener, kontoNummer)
+            onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
     }
 

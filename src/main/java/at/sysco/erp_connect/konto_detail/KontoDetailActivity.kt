@@ -23,7 +23,6 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_detail)
-
         val extra = intent.getStringExtra("id")
         if (extra != null) {
             kontoNummer = extra

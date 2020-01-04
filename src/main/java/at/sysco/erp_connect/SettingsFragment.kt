@@ -1,17 +1,14 @@
 package at.sysco.erp_connect
 
 import android.os.Bundle
-import android.text.Editable
 import android.text.InputType
-import android.text.TextWatcher
 import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import at.sysco.erp_connect.network.UnsafeHTTPClient
+import at.sysco.erp_connect.network.HTTPClient
 import java.lang.NumberFormatException
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -31,6 +28,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
                     when {
                         oldURL.startsWith("https://") -> {
+                            newURL = oldURL
                         }
                         oldURL.startsWith("http://") -> newURL =
                             oldURL.replace("http://", "https://")
@@ -39,9 +37,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     if (!oldURL.endsWith("/")) {
                         newURL = newURL.plus("/")
                     }
-
                     if (Patterns.WEB_URL.matcher(newURL).matches()) {
-                        if (!oldURL.equals(newURL)) {
+                        if (oldURL != newURL) {
                             removeFiles()
                             editURLPreference?.text = newURL
                             preferenceManager.sharedPreferences.edit().putString("base_url", newURL)
@@ -51,7 +48,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                         removeFiles()
                         return true
                     } else {
-                        Log.w("Testfail", newURL)
+                        Log.w("Testfail", "Test$newURL")
                         Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
                         return false
                     }
@@ -77,7 +74,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     try {
                         val value = Integer.parseInt(newValue.toString()).toLong()
                         if ((value > 0) && (value < 60)) {
-                            UnsafeHTTPClient.conTimeout = value
+                            HTTPClient.conTimeout = value
                             return true
                         } else {
                             Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
@@ -95,7 +92,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     try {
                         val value = Integer.parseInt(newValue.toString()).toLong()
                         if ((value > 0) && (value < 60)) {
-                            UnsafeHTTPClient.readTimeout = value
+                            HTTPClient.readTimeout = value
                             return true
                         } else {
                             Toast.makeText(context, "Ungültige Eingabe T", Toast.LENGTH_LONG).show()

@@ -6,11 +6,11 @@ import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
 
-class UnsafeHTTPClient {
+class HTTPClient {
     companion object {
         var conTimeout: Long = 5
         var readTimeout: Long = 5
-        fun getUnsafeOkHttpClient(): OkHttpClient {
+        fun getOkHttpClient(): OkHttpClient {
             try {
                 // Create a trust manager that does not validate certificate chains
                 /*

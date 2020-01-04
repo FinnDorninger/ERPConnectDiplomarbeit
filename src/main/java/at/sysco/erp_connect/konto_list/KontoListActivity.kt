@@ -1,6 +1,5 @@
 package at.sysco.erp_connect.konto_list
 
-import android.content.Context
 import at.sysco.erp_connect.R
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -14,18 +13,12 @@ import at.sysco.erp_connect.model.KontoListModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
-import android.content.SharedPreferences
-import android.util.Log
 import android.view.*
 import androidx.preference.PreferenceManager
-import androidx.transition.Slide
 import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
-import at.sysco.erp_connect.network.UnsafeHTTPClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.jetbrains.anko.defaultSharedPreferences
-import java.util.concurrent.TimeUnit
 
 
 class KontoListActivity : AppCompatActivity(),

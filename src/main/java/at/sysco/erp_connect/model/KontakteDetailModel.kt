@@ -8,14 +8,13 @@ import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailContract
-import at.sysco.erp_connect.network.KontoApi
+import at.sysco.erp_connect.network.WebserviceApi
 import at.sysco.erp_connect.pojo.KontakteList
 import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -66,8 +65,6 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
     ) {
-        val retrofit = Retrofit.Builder()
-
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         val userPW = sharedPref.getString("user_password", "")
@@ -75,7 +72,8 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
 
         if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
 
-            val call = KontoApi.Factory.create(baseURL).getKontakt(userPW, userName, kontaktNummer)
+            val call =
+                WebserviceApi.Factory.getApi(baseURL).getKontakt(userPW, userName, kontaktNummer)
 
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(
@@ -99,7 +97,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
                 }
             })
         } else {
-            tryLoadingFromFile(onFinishedListener, kontaktNummer)
+            onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
     }
 
