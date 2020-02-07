@@ -48,8 +48,5 @@ data class Konto(
     var kUrl: String? = null,
 
     @field:Element(name = "Notiz", required = false)
-    var kNote: String? = null,
-
-    var kTelComplete: String? = null,
-    var kMobilComplete: String? = null
+    var kNote: String? = null
 )

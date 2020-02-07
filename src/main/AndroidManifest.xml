@@ -12,17 +12,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".konto_detail.KontoDetailActivity"></activity>
-        <activity android:name=".kontakte_list.KontakteListActivity"></activity>
-        <activity android:name=".kontakte_detail.KontakteDetailActivity"></activity>
+        <activity
+            android:name=".konto_detail.KontoDetailActivity"
+            android:exported="false"></activity>
+        <activity
+            android:name=".kontakte_list.KontakteListActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            android:exported="false"></activity>
+        <activity
+            android:name=".kontakte_detail.KontakteDetailActivity"
+            android:exported="false"></activity>
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".konto_list.KontoListActivity"
-            android:persistent="true"
-            android:windowSoftInputMode="adjustPan|adjustResize">
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

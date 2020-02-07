@@ -1,27 +1,22 @@
 package at.sysco.erp_connect.model
 
 import android.content.Context
-//import android.util.Xml
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.konto_list.KontoListContract
 import at.sysco.erp_connect.network.WebserviceApi
 import at.sysco.erp_connect.pojo.Konto
 import at.sysco.erp_connect.pojo.KontoList
-import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
 import android.net.ConnectivityManager
-import android.util.Log
-import android.util.Xml
-import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
+import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FinishCode
 import java.lang.Exception
-import java.lang.IllegalArgumentException
 import java.security.GeneralSecurityException
 import javax.xml.stream.FactoryConfigurationError
 import javax.xml.stream.XMLOutputFactory
@@ -102,14 +97,12 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     }
 
     private fun loadDataFromWebservice(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
-        val userName = sharedPref.getString("user_name", "")
-        val userPW = sharedPref.getString("user_password", "")
-        val baseURL = sharedPref.getString("base_url", "")
-
-        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
+        val userPw = SharedPref.getUserPW(context)
+        val userName = SharedPref.getUserName(context)
+        val baseURL = SharedPref.getBaseURL(context)
+        if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
             val kontoService = WebserviceApi.Factory.getApi(baseURL)
-            val call = kontoService.getKontoList(userPW, userName)
+            val call = kontoService.getKontoList(userPw, userName)
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
                     var responseKontoList = response.body()?.kontenList
@@ -143,7 +136,6 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     fun saveKonto(listToSave: List<Konto>): String {
         KONTO_LIST_FILE_NAME.removeFile()
         lateinit var writer: OutputStreamWriter
-
         try {
             val encryptedFile = EncryptedFile.Builder(
                 File(context.filesDir, KONTO_LIST_FILE_NAME),
@@ -166,6 +158,66 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                 if (konto.kName != null) {
                     xmlStreamWriter.writeStartElement("Kontoname")
                     xmlStreamWriter.writeCharacters(konto.kName)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kCountry != null) {
+                    xmlStreamWriter.writeStartElement("Staat")
+                    xmlStreamWriter.writeCharacters(konto.kCountry)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kPlz != null) {
+                    xmlStreamWriter.writeStartElement("Postleitzahl")
+                    xmlStreamWriter.writeCharacters(konto.kPlz)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kCity != null) {
+                    xmlStreamWriter.writeStartElement("Ort")
+                    xmlStreamWriter.writeCharacters(konto.kCity)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kStreet != null) {
+                    xmlStreamWriter.writeStartElement("Strasse")
+                    xmlStreamWriter.writeCharacters(konto.kStreet)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kTelCountry != null) {
+                    xmlStreamWriter.writeStartElement("Landesvorwahl")
+                    xmlStreamWriter.writeCharacters(konto.kTelCountry)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kTelCity != null) {
+                    xmlStreamWriter.writeStartElement("Ortsvorwahl")
+                    xmlStreamWriter.writeCharacters(konto.kTelCity)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kTelMain != null) {
+                    xmlStreamWriter.writeStartElement("Telefon")
+                    xmlStreamWriter.writeCharacters(konto.kTelMain)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kMobilCountry != null) {
+                    xmlStreamWriter.writeStartElement("LandesvorwahlMobiltelefonnummer")
+                    xmlStreamWriter.writeCharacters(konto.kMobilCountry)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kMobilOperatorTel != null) {
+                    xmlStreamWriter.writeStartElement("BetreibervorwahlMobiltelefonnummer")
+                    xmlStreamWriter.writeCharacters(konto.kMobilOperatorTel)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kMobilTel != null) {
+                    xmlStreamWriter.writeStartElement("Mobiltelefonnummer")
+                    xmlStreamWriter.writeCharacters(konto.kMobilTel)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kMail != null) {
+                    xmlStreamWriter.writeStartElement("E-Mail-Adresse")
+                    xmlStreamWriter.writeCharacters(konto.kMail)
+                    xmlStreamWriter.writeEndElement()
+                }
+                if (konto.kUrl != null) {
+                    xmlStreamWriter.writeStartElement("WWW-Adresse")
+                    xmlStreamWriter.writeCharacters(konto.kUrl)
                     xmlStreamWriter.writeEndElement()
                 }
                 if (konto.kNote != null) {

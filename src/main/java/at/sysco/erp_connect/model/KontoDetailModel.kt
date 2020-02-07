@@ -3,9 +3,9 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import android.net.ConnectivityManager
 import android.util.Log
-import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
+import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
@@ -66,13 +66,11 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
-        val userName = sharedPref.getString("user_name", "")
-        val userPW = sharedPref.getString("user_password", "")
-        val baseURL = sharedPref.getString("base_url", "")
-
-        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
-            val call = WebserviceApi.Factory.getApi(baseURL).getKonto(userPW, userName, kontoNummer)
+        val userPw = SharedPref.getUserPW(context)
+        val userName = SharedPref.getUserName(context)
+        val baseURL = SharedPref.getBaseURL(context)
+        if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
+            val call = WebserviceApi.Factory.getApi(baseURL).getKonto(userPw, userName, kontoNummer)
 
             call.enqueue(object : Callback<KontoList> {
                 override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
@@ -102,6 +100,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
+        Log.w("Finn", "hier komme ich rein")
         if (KONTO_LIST_FILE_NAME.doesFileExist()) {
             loadKontoDetailFromFile(onFinishedListener, kontoNummer)
         } else {
@@ -117,6 +116,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
+        Log.w("Finn", "hier komme ich rein")
         val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
         val encryptedFile = EncryptedFile.Builder(
             encFile,
@@ -132,6 +132,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
             if (kontoList != null) {
                 val konto = kontoList.find { it.kNumber == kontoNummer }
                 if (konto != null) {
+                    Log.w("Finn", konto.kName)
                     onFinishedListener.onfinished(konto, FinishCode.finishedOnFile)
                 } else {
                     loadDataFromWebservice(onFinishedListener, kontoNummer)

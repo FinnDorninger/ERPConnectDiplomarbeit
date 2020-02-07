@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.network.WebserviceApi
-import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Callback
@@ -15,6 +14,7 @@ import android.util.Log
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
+import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.pojo.Kontakt
@@ -54,12 +54,11 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     }
 
     private fun loadDataFromWebservice(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
-        val userName = sharedPref.getString("user_name", "")
-        val userPW = sharedPref.getString("user_password", "")
-        val baseURL = sharedPref.getString("base_url", "")
-
-        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
-            val call = WebserviceApi.Factory.getApi(baseURL).getKontakteList(userPW, userName)
+        val userPw = SharedPref.getUserPW(context)
+        val userName = SharedPref.getUserName(context)
+        val baseURL = SharedPref.getBaseURL(context)
+        if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
+            val call = WebserviceApi.Factory.getApi(baseURL).getKontakteList(userPw, userName)
 
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(

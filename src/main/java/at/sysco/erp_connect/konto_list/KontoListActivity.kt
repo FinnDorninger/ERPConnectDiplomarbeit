@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
 import android.view.*
 import androidx.preference.PreferenceManager
+import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
@@ -25,6 +26,8 @@ class KontoListActivity : AppCompatActivity(),
     KontoListContract.View {
 
     private lateinit var kontoListPresenter: KontoListPresenter
+    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
     var snackbar: Snackbar? = null
     var adapterRV: KontoAdapter? = null
 

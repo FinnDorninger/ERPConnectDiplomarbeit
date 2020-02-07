@@ -2,9 +2,9 @@ package at.sysco.erp_connect.model
 
 import android.content.Context
 import android.net.ConnectivityManager
-import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
+import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailContract
@@ -65,23 +65,18 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
     ) {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
-        val userName = sharedPref.getString("user_name", "")
-        val userPW = sharedPref.getString("user_password", "")
-        val baseURL = sharedPref.getString("base_url", "")
-
-        if (!baseURL.isNullOrEmpty() && userName != null && userPW != null) {
-
+        val userPw = SharedPref.getUserPW(context)
+        val userName = SharedPref.getUserName(context)
+        val baseURL = SharedPref.getBaseURL(context)
+        if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
             val call =
-                WebserviceApi.Factory.getApi(baseURL).getKontakt(userPW, userName, kontaktNummer)
-
+                WebserviceApi.Factory.getApi(baseURL).getKontakt(userPw, userName, kontaktNummer)
             call.enqueue(object : Callback<KontakteList> {
                 override fun onResponse(
                     call: Call<KontakteList>,
                     response: Response<KontakteList>
                 ) {
                     val responseKontakteList = response.body()?.kontakteList
-
                     if (responseKontakteList != null) {
                         onFinishedListener.onfinished(
                             responseKontakteList[0],
