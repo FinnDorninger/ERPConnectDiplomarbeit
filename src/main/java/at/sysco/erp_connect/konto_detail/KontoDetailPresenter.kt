@@ -32,6 +32,7 @@ class KontoDetailPresenter(
         kontoDetailModel.getKontoDetail(this, kontoNummer)
     }
 
+    //Setzt View null, damit keine Referenz mehr zur Activity besteht
     override fun onDestroy() {
         this.kontoDetailView = null
     }

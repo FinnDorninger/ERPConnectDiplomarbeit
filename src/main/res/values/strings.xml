@@ -36,4 +36,8 @@
     <string name="sexWeiblich">Weiblich</string>
     <string name="sexMännlich">Männlich</string>
     <string name="desc_butMail">Button for mail</string>
+    <string name="anrufen">Anrufen</string>
+    <string name="sms">SMS</string>
+    <string name="navigiere">Navigiere</string>
+    <string name="browser">Browser</string>
 </resources>

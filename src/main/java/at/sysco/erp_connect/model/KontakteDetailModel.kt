@@ -40,7 +40,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
                 onFinishedListener,
                 kontaktNummer
             )
-            else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
+            else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
     }
 

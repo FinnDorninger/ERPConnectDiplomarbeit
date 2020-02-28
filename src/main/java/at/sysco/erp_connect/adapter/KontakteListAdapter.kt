@@ -75,12 +75,42 @@ class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context)
         return kontaktFilter
     }
 
-    //Methode zum löschen des Inhaltes des Recyclerviews
-    fun clearAll() {
-        val sizeListFull = kontaktListFull.size
-        kontaktList.clear()
-        kontaktListFull.clear()
-        notifyItemRangeRemoved(0, sizeListFull)
+    fun getSubFilter(): Filter {
+        return subFilter
+    }
+
+    private var subFilter: Filter = object : Filter() {
+        override fun performFiltering(constraint: CharSequence?): FilterResults {
+            var filteredList = ArrayList<Kontakt>()
+            var filterPattern = constraint.toString().toLowerCase().trim()
+            for (kontakt in kontaktListFull) {
+                if (!kontakt.kFirstName.isNullOrEmpty()) {
+                    if (kontakt.kFirstName!!.toLowerCase() == filterPattern) {
+                        filteredList.add(kontakt)
+                    }
+                }
+                if (!kontakt.kLastName.isNullOrEmpty()) {
+                    if (kontakt.kLastName!!.toLowerCase() == filterPattern) {
+                        filteredList.add(kontakt)
+                    }
+                }
+                if (!kontakt.kNumber.isNullOrEmpty()) {
+                    if (kontakt.kNumber!!.toLowerCase() == filterPattern) {
+                        filteredList.add(kontakt)
+                    }
+                }
+            }
+            var results = FilterResults()
+            results.values = filteredList
+            return results
+        }
+
+        //Methode welche die gefilterte Liste veröffentlicht und die alte Liste cleared.
+        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+            kontaktList.clear()
+            kontaktList.addAll(results?.values as ArrayList<Kontakt>)
+            notifyDataSetChanged()
+        }
     }
 
     //Filter, beschreibt wie gefiltert werden soll
@@ -88,7 +118,7 @@ class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context)
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             var filteredList = ArrayList<Kontakt>()
 
-            if (constraint == null || constraint.length == 0) {
+            if (constraint == null || constraint.isEmpty()) {
                 filteredList.addAll(kontaktListFull)
             } else {
                 var filterPattern = constraint.toString().toLowerCase().trim()

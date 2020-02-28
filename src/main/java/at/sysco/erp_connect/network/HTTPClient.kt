@@ -1,12 +1,9 @@
 package at.sysco.erp_connect.network
 
 import okhttp3.OkHttpClient
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
 
-//Eigener HTTP-Client inklusiver Methode zur Setzung des Timeouts
 class HTTPClient {
     companion object {
         var conTimeout: Long = 5
@@ -14,19 +11,21 @@ class HTTPClient {
         fun getOkHttpClient(): OkHttpClient {
             try {
                 val builder = OkHttpClient.Builder()
-                //builder.sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+                //Diese Methode wird nur aufgerufen, wenn ein Fehler bei der Verifizierung auftretet
+                //Return true: Verbindung dennoch erlauben
+                //Return false: Verbindung nicht erlauben
                 builder.hostnameVerifier(object : HostnameVerifier {
                     override fun verify(p0: String?, p1: SSLSession?): Boolean {
-                        if (p0 != null) {
-                            if (p0 == "83.164.140.68") {
-                                return true
-                            }
+                        //Zertifikat von Sysco ist nicht an die IP-Adresse gebunden, deswegen keine Verifizierung
+                        //Deswegen wird geprüft ob der Hostname dem Webservice entspricht und dann die Verbindung erlaubt
+                        if (p0 == "83.164.140.68") {
+                            return true
                         }
-                        return false
+                        //Falls eine andere Eingabe vorherrscht wird die Verbindung nur erlaubt, wenn der Hostname
+                        //aus dem Zertifikat der gleiche ist wie der Verbindungs-Hostname.
+                        return p0 == p1?.peerHost
                     }
                 })
-
-                //Setzt Timeout
                 return builder
                     .connectTimeout(conTimeout, TimeUnit.SECONDS)
                     .readTimeout(readTimeout, TimeUnit.SECONDS)

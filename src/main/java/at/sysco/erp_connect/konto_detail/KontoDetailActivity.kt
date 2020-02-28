@@ -4,8 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.Toast
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
@@ -56,8 +56,8 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
-            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
-            FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
+            FailureCode.NO_CONNECTION -> showSnackbar(failureCode, true)
+            else -> showSnackbar(failureCode, false)
         }
     }
 
@@ -132,6 +132,8 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         intent.setPackage("com.google.android.apps.maps")
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
+        } else {
+            Toast.makeText(this, "Kein Google Maps installiert!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -151,8 +153,12 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
                 val intent = Intent(Intent.ACTION_VIEW, webpage)
                 if (intent.resolveActivity(packageManager) != null) {
                     startActivity(intent)
+                } else {
+                    Toast.makeText(this, "Google Maps benötigt!", Toast.LENGTH_SHORT).show()
                 }
             }
+        } else {
+            Toast.makeText(this, "Keine URL vorhanden!", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -167,14 +173,16 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
             telNumber = "$telNumberCity$telNumber"
             if (telNumberCountry != null) {
                 telNumber = "$telNumberCountry$telNumber"
-                Log.w("Finn", "Du Depp")
             }
             val intent = Intent(Intent.ACTION_DIAL).apply {
                 data = Uri.parse("tel:$telNumber")
             }
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
+                Toast.makeText(this, "Keine Telefon-App installiert!", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Zu wenige Informationen vorhanden!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -194,7 +202,11 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
             }
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
+            } else {
+                Toast.makeText(this, "Keine SMS-App vorhanden!", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Zu wenige Informationen vorhanden!", Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -3,7 +3,6 @@ package at.sysco.erp_connect
 import android.os.Bundle
 import android.text.InputType
 import android.util.Base64
-import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.preference.EditTextPreference
@@ -30,19 +29,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 //Prüft Benutzereingaben ob diese mit / endet und ob https://-Schema verwendet wurde
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
                     val oldURL = newValue as String
-                    var newURL = ""
+                    var newURL: String
 
-                    if (oldURL.isNullOrEmpty()) {
+                    if (oldURL.isEmpty()) {
                         removeFiles()
                         return true
                     }
-                    when {
+                    newURL = when {
                         oldURL.startsWith("https://") -> {
-                            newURL = oldURL
+                            oldURL
                         }
-                        oldURL.startsWith("http://") -> newURL =
-                            oldURL.replace("http://", "https://")
-                        else -> newURL = "https://".plus(oldURL)
+                        oldURL.startsWith("http://") -> oldURL.replace("http://", "https://")
+                        else -> "https://".plus(oldURL)
                     }
                     if (!oldURL.endsWith("/")) {
                         newURL = newURL.plus("/")
@@ -105,7 +103,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     val key = Encrypt().generateSymmetricKey()
                     val pair = Encrypt().encrypt(
                         pwPlain.toByteArray(Charsets.UTF_8),
-                        key = key
+                        key
                     )
                     val cipherText = pair?.first!!
                     val cipherTextString = Base64.encodeToString(cipherText, Base64.DEFAULT)

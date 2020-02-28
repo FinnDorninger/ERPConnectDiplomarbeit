@@ -17,6 +17,7 @@ import android.view.*
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.SettingsActivity
+import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -28,6 +29,7 @@ class KontoListActivity : AppCompatActivity(),
     private lateinit var kontoListPresenter: KontoListPresenter
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+    var firstCall: Boolean = true
     var snackbar: Snackbar? = null
     var adapterRV: KontoAdapter? = null
 
@@ -38,8 +40,8 @@ class KontoListActivity : AppCompatActivity(),
         initRecyclerView()
         PreferenceManager.setDefaultValues(this, R.xml.settings_pref, false)
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
-        kontoListPresenter.requestFromWS()
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        kontoListPresenter.requestFromWS()
     }
 
     //Listener auf die Auswahl in dem Bottom-Navigation-Menu
@@ -62,9 +64,11 @@ class KontoListActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
         bottomNavigation.menu.findItem(R.id.action_Konten).isChecked = true
-        if (!this.fileList().contains("KontoFile.xml") or !this.fileList().contains("KontakteFile.xml")) {
+        if (!firstCall && !this.fileList().contains("KontoFile.xml")) {
             clearResults()
             kontoListPresenter.requestFromWS()
+        } else {
+            firstCall = false
         }
     }
 
@@ -91,8 +95,11 @@ class KontoListActivity : AppCompatActivity(),
                 )
             snackbar?.setAction("Retry!") { kontoListPresenter.requestFromWS() }
         } else {
-            snackbar =
-                Snackbar.make(this.layoutKonto_List, title, Snackbar.LENGTH_LONG)
+            var text = when (title) {
+                FinishCode.finishedSavingKontakte -> "Alles gespeichert!"
+                else -> title
+            }
+            snackbar = Snackbar.make(this.layoutKonto_List, text, Snackbar.LENGTH_LONG)
         }
         snackbar?.show()
     }
@@ -107,8 +114,8 @@ class KontoListActivity : AppCompatActivity(),
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
-            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
-            FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
+            FailureCode.NO_CONNECTION -> showSnackbar(failureCode, true)
+            else -> showSnackbar(failureCode, false)
         }
     }
 

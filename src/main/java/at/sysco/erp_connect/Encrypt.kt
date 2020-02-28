@@ -4,18 +4,14 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyGenParameterSpec
-import android.util.Log
-import androidx.security.crypto.MasterKeys
 import java.security.*
 import javax.crypto.spec.IvParameterSpec
 
-
-//Klasse zur Verschlüsselung von Daten
+//Klasse welche die Daten verschlüsselt
 class Encrypt {
     private val cipherAlgorithm = "AES/CBC/PKCS7Padding"
     private val keyAlias = "aes_encryption"
 
-    //Methode welche die Schlüsseleigenschaften liefert/setzt
     fun getKeyGenParameter(): KeyGenParameterSpec {
         val keyGenParameterSpec =
             KeyGenParameterSpec.Builder(
@@ -24,12 +20,11 @@ class Encrypt {
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                .setUserAuthenticationRequired(true)
                 .build()
         return keyGenParameterSpec
     }
 
-    //Ladet falls vorhanden AES-Schlüssel aus KeyStore. Ansonsten wird ein neuer generiert, und in KeyStore gespeichert.
+    //Generiert einen AES-Schlüssel
     fun generateSymmetricKey(): Key {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
@@ -42,16 +37,16 @@ class Encrypt {
         return keyStore.getKey(keyAlias, null)
     }
 
-    //Methode welche einen Text (ByteArray) mit einem Schlüssel verschlüsselt
-    //Rückgabe ist der verschlüsselte Text und der Initialisierungsvektor
+    //Verschlüsselt ein Byte-Array und liefert zurück die verschlüsselten Daten + Initialisierungsvektor
     fun encrypt(plainText: ByteArray, key: Key): Pair<ByteArray, ByteArray>? {
         val cipher = Cipher.getInstance(cipherAlgorithm)
         cipher.init(Cipher.ENCRYPT_MODE, key)
         val cipherText = cipher.doFinal(plainText)
-        return Pair(cipherText, cipher.iv)
+        val iv = cipher.iv
+        return Pair(cipherText, iv)
     }
 
-    //Methode mit Parametern (Ciphertext, Schlüssel und Initialisierungsvektor) für die Entschlüsselung eines Textes
+    //Entschlüsselt einen Text. Eingabe Ciphertext, Schlüsssel und der Initialisierungsvektor
     fun decrypt(cipherText: ByteArray, key: Key, iv: IvParameterSpec): ByteArray? {
         val cipher = Cipher.getInstance(cipherAlgorithm)
         try {

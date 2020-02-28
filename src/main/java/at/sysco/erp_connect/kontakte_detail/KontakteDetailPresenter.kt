@@ -32,6 +32,7 @@ class KontakteDetailPresenter(
         kontakteDetailModel.getKontaktDetail(this, kontaktNummer)
     }
 
+    //Setzt View null, damit keine Referenz mehr zur Activity besteht
     override fun onDestroy() {
         this.kontaktDetailView = null
     }

@@ -1,7 +1,4 @@
 package at.sysco.erp_connect.konto_list
-
-import android.util.Log
-import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.model.KontakteListModel
@@ -53,6 +50,9 @@ class KontoListPresenter(
                         kontoListView?.onError(message)
                     }
                 })
+            } else if (message == FinishCode.finishedSavingKonto) {
+                kontoListView?.onSucess(message)
+                kontoListView?.hideProgress()
             } else {
                 kontoListView?.hideProgress()
                 kontoListView?.onError(message)
@@ -82,7 +82,7 @@ class KontoListPresenter(
         kontoListModel.getKontoList(this)
     }
 
-    //Setzt View null.
+    //Setzt View null, damit keine Referenz mehr zur Activity besteht
     override fun onDestroy() {
         this.kontoListView = null
     }

@@ -9,13 +9,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import at.sysco.erp_connect.constants.FailureCode
 import com.google.android.material.snackbar.Snackbar
 import android.content.Intent
-import android.content.SharedPreferences
-import android.util.Log
 import android.view.*
-import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.SettingsActivity
 import at.sysco.erp_connect.adapter.KontakteListAdapter
-import at.sysco.erp_connect.konto_list.KontoListActivity
 import at.sysco.erp_connect.model.KontakteListModel
 import at.sysco.erp_connect.pojo.Kontakt
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -23,7 +19,7 @@ import kotlinx.android.synthetic.main.activity_kontakte_list.*
 
 //Activity für die Listen-Darstellung aller Kontakt/Ansprechpartner
 class KontakteListActivity : AppCompatActivity(),
-    KontakteListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
+    KontakteListContract.View {
     private lateinit var kontakteListPresenter: KontakteListPresenter
     var snackbar: Snackbar? = null
     var adapterRV: KontakteListAdapter? = null
@@ -63,32 +59,13 @@ class KontakteListActivity : AppCompatActivity(),
     //Hier werden Listener registriert und die Bottom-Navigation-Auswahl richtig eingestellt.
     override fun onResume() {
         super.onResume()
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .registerOnSharedPreferenceChangeListener(this)
         bottomNavigation.menu.findItem(R.id.action_Kontakte).isChecked = true
     }
 
     //Wenn die Activity geschlossen wird, kann der nicht benötigte Listener geschlossen werden.
     override fun onDestroy() {
         super.onDestroy()
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .unregisterOnSharedPreferenceChangeListener(this)
         kontakteListPresenter.onDestroy()
-    }
-
-    //Wenn Daten aus den Einstellungen gelöscht wurden müssen Daten aus dem Recyclerview gelöscht werden
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (this.fileList().contains("KontakteFile.xml")) {
-            this.deleteFile("KontakteFile.xml")
-        }
-        clearResults()
-        kontakteListPresenter.requestFromWS()
-    }
-
-    //Löscht Daten aus Recyclerview
-    fun clearResults() {
-        snackbar?.dismiss()
-        adapterRV?.clearAll()
     }
 
     //Stellt Snackbar dar.
@@ -120,8 +97,8 @@ class KontakteListActivity : AppCompatActivity(),
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
-            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
-            FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
+            FailureCode.NO_CONNECTION -> showSnackbar(failureCode, true)
+            else -> showSnackbar(failureCode, false)
         }
     }
 
@@ -150,6 +127,9 @@ class KontakteListActivity : AppCompatActivity(),
 
         search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
+                if (search == query) {
+                    adapterRV?.getSubFilter()?.filter(search)
+                }
                 return false
             }
 
@@ -158,7 +138,6 @@ class KontakteListActivity : AppCompatActivity(),
                 return false
             }
         })
-
         if (!search.isNullOrEmpty()) {
             search_konto.setQuery(search, true)
             search = ""
@@ -175,12 +154,14 @@ class KontakteListActivity : AppCompatActivity(),
     //Wird aufgerufen bei dem Abruf einer Option aus dem Optionsmenü
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
+        //"Verbindungseigenschaften-Eintrag" - Finished diese Activity, damit nach den Einstellungsänderungen wieder die Startseite startet.
         if (id == R.id.action_settings) {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
             finish()
             return true
         }
+        //Retry: Neuer Webservice-Call
         if (id == R.id.action_retry) {
             kontakteListPresenter.requestFromWS()
         }

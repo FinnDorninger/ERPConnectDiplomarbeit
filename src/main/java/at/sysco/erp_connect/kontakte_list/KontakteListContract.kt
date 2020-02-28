@@ -17,7 +17,6 @@ interface KontakteListContract {
     interface View {
         fun showProgress()
         fun hideProgress()
-
         fun onSucess(finishCode: String)
         fun onError(failureCode: String)
         fun displayKontakteListInRecyclerView(kontakteList: List<Kontakt>)

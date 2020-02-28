@@ -2,7 +2,6 @@ package at.sysco.erp_connect.model
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.SharedPref
@@ -39,7 +38,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                 onFinishedListener,
                 kontoNummer
             )
-            else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
+            else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
     }
 
@@ -81,7 +80,6 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
                             responseKontoList[0],
                             FinishCode.finishedOnWeb
                         )
-                        Log.w("Test", call.request().url().toString())
                     } else {
                         tryLoadingFromFile(onFinishedListener, kontoNummer)
                     }
@@ -100,7 +98,6 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
-        Log.w("Finn", "hier komme ich rein")
         if (KONTO_LIST_FILE_NAME.doesFileExist()) {
             loadKontoDetailFromFile(onFinishedListener, kontoNummer)
         } else {
@@ -116,7 +113,6 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
     ) {
-        Log.w("Finn", "hier komme ich rein")
         val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
         val encryptedFile = EncryptedFile.Builder(
             encFile,
@@ -132,7 +128,6 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
             if (kontoList != null) {
                 val konto = kontoList.find { it.kNumber == kontoNummer }
                 if (konto != null) {
-                    Log.w("Finn", konto.kName)
                     onFinishedListener.onfinished(konto, FinishCode.finishedOnFile)
                 } else {
                     loadDataFromWebservice(onFinishedListener, kontoNummer)

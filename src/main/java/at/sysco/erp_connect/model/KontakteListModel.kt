@@ -10,7 +10,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
 import android.net.ConnectivityManager
-import android.util.Log
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
@@ -39,7 +38,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
             KONTAKTE_LIST_FILE_NAME.doesFileExist() -> loadKontakteListFromFile(onFinishedListener)
-            else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
+            else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
     }
 
@@ -69,7 +68,6 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                     call: Call<KontakteList>,
                     response: Response<KontakteList>
                 ) {
-                    Log.w("Stop", "onResponse")
                     var responseKontakteList = response.body()?.kontakteList
                     responseKontakteList =
                         responseKontakteList?.sortedWith(compareBy { it.kLastName })
@@ -84,7 +82,6 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                 }
 
                 override fun onFailure(call: Call<KontakteList>, t: Throwable) {
-                    Log.w("Stop", "onFailure")
                     tryLoadingFromFile(onFinishedListener)
                 }
             })

@@ -34,7 +34,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
             KONTO_LIST_FILE_NAME.doesFileExist() -> loadKontoListFromFile(onFinishedListener)
-            else -> onFinishedListener.onFailure(FailureCode.NO_DATA)
+            else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
     }
 
@@ -106,7 +106,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val userPw = SharedPref.getUserPW(context)
         val userName = SharedPref.getUserName(context)
         val baseURL = SharedPref.getBaseURL(context)
-        if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
+        if (!baseURL.isNullOrBlank() && !userPw.isNullOrBlank() && !userName.isNullOrBlank()) {
             val kontoService = WebserviceApi.Factory.getApi(baseURL)
             val call = kontoService.getKontoList(userPw, userName)
             call.enqueue(object : Callback<KontoList> {

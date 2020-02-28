@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.model.KontakteDetailModel
@@ -51,8 +52,8 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
-            FailureCode.ERROR_SAVING_FILE -> showSnackbar(failureCode, false)
-            FailureCode.NOT_ENOUGH_SPACE -> showSnackbar(failureCode, false)
+            FailureCode.NO_CONNECTION -> showSnackbar(failureCode, true)
+            else -> showSnackbar(failureCode, false)
         }
     }
 
@@ -139,8 +140,13 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
                 val intent = Intent(Intent.ACTION_VIEW, webpage)
                 if (intent.resolveActivity(packageManager) != null) {
                     startActivity(intent)
+                } else {
+                    Toast.makeText(this, "Kein passender Browser vorhanden!", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
+        } else {
+            Toast.makeText(this, "Keine URL vorhanden!", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -161,7 +167,12 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
             }
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
+            } else {
+                Toast.makeText(this, "Keine Telefon-App vorhanden!", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Keine vollständige Telefonnummer vorhanden!", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -174,7 +185,11 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
             }
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
+            } else {
+                Toast.makeText(this, "Keine Mail-App vorhanden!", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Keine E-Mail-Adresse vorhanden!", Toast.LENGTH_SHORT).show()
         }
     }
 }

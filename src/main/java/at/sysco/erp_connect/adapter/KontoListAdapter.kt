@@ -2,7 +2,6 @@ package at.sysco.erp_connect.adapter
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,13 +14,13 @@ import at.sysco.erp_connect.pojo.Konto
 import kotlinx.android.synthetic.main.konto_list_item.view.*
 
 //Adapter welcher beschreibt wie Daten an Recyclerview gebunden werden sollen
-class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
+class KontoAdapter(kontoList: ArrayList<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>(), Filterable {
-    var kontoList: ArrayList<Konto> = exampleList
+    var kontoList: ArrayList<Konto> = kontoList
     var kontoListFull: ArrayList<Konto>
 
     init {
-        this.kontoListFull = ArrayList(exampleList)
+        this.kontoListFull = ArrayList(kontoList)
     }
 
     //Liefert die aktuelle Größe der Recyclerview-Liste
@@ -66,12 +65,10 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             var filteredList = ArrayList<Konto>()
 
-            if (constraint == null || constraint.length == 0) {
+            if (constraint == null || constraint.isEmpty()) {
                 filteredList.addAll(kontoListFull)
             } else {
                 var filterPattern = constraint.toString().toLowerCase().trim()
-                Log.w("Finn", filterPattern)
-
                 for (konto in kontoListFull) {
                     if (konto.kName?.toLowerCase()!!.contains(filterPattern)) {
                         filteredList.add(konto)
@@ -85,8 +82,8 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-            exampleList.clear()
-            exampleList.addAll(results?.values as ArrayList<Konto>)
+            kontoList.clear()
+            kontoList.addAll(results?.values as ArrayList<Konto>)
             notifyDataSetChanged()
         }
     }

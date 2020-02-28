@@ -17,6 +17,9 @@ class KontakteListPresenter(
         kontakteListView?.hideProgress()
         if (finishCode != FinishCode.finishedOnWeb) {
             kontakteListView?.onSucess(finishCode)
+        } else {
+            val string = kontakteListModel.saveKontakte(kontaktArrayList)
+            kontakteListView?.onSucess(string)
         }
     }
 
@@ -32,7 +35,7 @@ class KontakteListPresenter(
         kontakteListModel.getKontakteList(this)
     }
 
-    //Setzt View null.
+    //Setzt View null damit keine Referenz mehr zur Activity besteht.
     override fun onDestroy() {
         this.kontakteListView = null
     }
