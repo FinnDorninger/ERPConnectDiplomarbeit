@@ -3,6 +3,7 @@ package at.sysco.erp_connect.kontakte_detail
 import at.sysco.erp_connect.pojo.Kontakt
 
 interface KontakteDetailContract {
+    //Datenbeschaffung
     interface Model {
         interface OnFinishedListener {
             fun onfinished(kontakt: Kontakt, finishCode: String)
@@ -12,6 +13,7 @@ interface KontakteDetailContract {
         fun getKontaktDetail(onFinishedListener: OnFinishedListener, kontaktNummer: String)
     }
 
+    //Darstellung
     interface View {
         fun setTextData(kontakt: Kontakt)
         fun onSucess(finishCode: String)
@@ -20,6 +22,7 @@ interface KontakteDetailContract {
         fun showProgress()
     }
 
+    //Presentierlogik
     interface Presenter {
         fun requestFromWS(kontaktNummer: String)
         fun onDestroy()

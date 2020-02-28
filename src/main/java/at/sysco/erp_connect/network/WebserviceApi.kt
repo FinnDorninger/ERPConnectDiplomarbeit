@@ -8,7 +8,9 @@ import retrofit2.SimpleXmlConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+//Interface für die Erstellung der Retrofit-API
 interface WebserviceApi {
+    //Mit @Get Annotationen werden
     @GET("/ewlservice/export?Company=300M&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
     fun getKontoList(@Query("Password") pw: String, @Query("User") user: String): Call<KontoList>
 

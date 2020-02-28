@@ -3,6 +3,7 @@ package at.sysco.erp_connect.konto_detail
 import at.sysco.erp_connect.pojo.Konto
 
 interface KontoDetailContract {
+    //Datenbeschaffung
     interface Model {
         interface OnFinishedListener {
             fun onfinished(konto: Konto, finishCode: String)
@@ -12,6 +13,7 @@ interface KontoDetailContract {
         fun getKontoDetail(onFinishedListener: OnFinishedListener, kontoNummer: String)
     }
 
+    //Darstellung
     interface View {
         fun setTextData(konto: Konto)
         fun onSucess(finishCode: String)
@@ -20,6 +22,7 @@ interface KontoDetailContract {
         fun showProgress()
     }
 
+    //Presentierlogik
     interface Presenter {
         fun requestFromWS(kontoNummer: String)
         fun onDestroy()

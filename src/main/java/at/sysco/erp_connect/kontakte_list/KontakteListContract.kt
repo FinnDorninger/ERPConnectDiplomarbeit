@@ -3,6 +3,7 @@ package at.sysco.erp_connect.kontakte_list
 import at.sysco.erp_connect.pojo.Kontakt
 
 interface KontakteListContract {
+    //Datenbeschaffung
     interface Model {
         interface OnFinishedListener {
             fun onfinished(kontaktArrayList: List<Kontakt>, finishCode: String)
@@ -12,6 +13,7 @@ interface KontakteListContract {
         fun getKontakteList(onFinishedListener: OnFinishedListener)
     }
 
+    //Darstellung
     interface View {
         fun showProgress()
         fun hideProgress()
@@ -21,6 +23,7 @@ interface KontakteListContract {
         fun displayKontakteListInRecyclerView(kontakteList: List<Kontakt>)
     }
 
+    //Presentierlogik
     interface Presenter {
         fun requestFromWS()
         fun onDestroy()

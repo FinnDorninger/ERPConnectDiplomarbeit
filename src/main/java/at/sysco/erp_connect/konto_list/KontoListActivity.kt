@@ -21,7 +21,7 @@ import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-
+//Activity für die Listen-Darstellung von allen Konten/Ansprechpartnerdetails
 class KontoListActivity : AppCompatActivity(),
     KontoListContract.View {
 
@@ -31,6 +31,7 @@ class KontoListActivity : AppCompatActivity(),
     var snackbar: Snackbar? = null
     var adapterRV: KontoAdapter? = null
 
+    //Setzt Layout und beauftragt Presenter für Beschaffung der Daten.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_list)
@@ -41,6 +42,7 @@ class KontoListActivity : AppCompatActivity(),
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
+    //Listener auf die Auswahl in dem Bottom-Navigation-Menu
     private val mOnNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -56,6 +58,7 @@ class KontoListActivity : AppCompatActivity(),
             false
         }
 
+    //Hier werden Listener registriert und die Bottom-Navigation-Auswahl richtig eingestellt.
     override fun onResume() {
         super.onResume()
         bottomNavigation.menu.findItem(R.id.action_Konten).isChecked = true
@@ -65,16 +68,19 @@ class KontoListActivity : AppCompatActivity(),
         }
     }
 
+    //Wenn die Activity geschlossen wird, kann der nicht benötigte Listener geschlossen werden.
     override fun onDestroy() {
         super.onDestroy()
         kontoListPresenter.onDestroy()
     }
 
+    //Löscht Daten aus Recyclerview
     fun clearResults() {
         snackbar?.dismiss()
         adapterRV?.clearAll()
     }
 
+    //Stellt Snackbar dar.
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             snackbar =
@@ -91,10 +97,12 @@ class KontoListActivity : AppCompatActivity(),
         snackbar?.show()
     }
 
+    //Bei Erfolg wird eine kurze Snackbar dargestellt.
     override fun onSucess(finishCode: String) {
         showSnackbar(finishCode, false)
     }
 
+    //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
@@ -104,19 +112,23 @@ class KontoListActivity : AppCompatActivity(),
         }
     }
 
+    //Zeigt den Ladebalken
     override fun showProgress() {
         progressBar.visibility = View.VISIBLE
     }
 
+    //Schließt ("Versteckt")  Ladebalken
     override fun hideProgress() {
         progressBar.visibility = View.GONE
     }
 
+    //Set Layoutmanager und Trennung der einzelnen Einträge des Recyclerviews.
     private fun initRecyclerView() {
         rv_konto_list.layoutManager = LinearLayoutManager(this)
         rv_konto_list.addItemDecoration(DividerItemDecoration(rv_konto_list.context, 1))
     }
 
+    //Bindet Daten aus dem Model mit Recylcerview. Implementiert auch Such-Listener (SearchView)
     override fun displayKontoListInRecyclerView(kontoList: List<Konto>) {
         rv_konto_list.visibility = View.VISIBLE
         adapterRV = KontoAdapter(ArrayList(kontoList), this)
@@ -135,12 +147,14 @@ class KontoListActivity : AppCompatActivity(),
         })
     }
 
+    //Zeichnet das Optionsmenü
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.settings_menu, menu)
         return true
     }
 
+    //Wird aufgerufen bei dem Abruf einer Option aus dem Optionsmenü
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.action_settings) {

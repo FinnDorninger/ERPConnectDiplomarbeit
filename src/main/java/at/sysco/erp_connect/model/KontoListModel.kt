@@ -24,10 +24,12 @@ import javax.xml.stream.XMLStreamException
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
+//Geschäftslogik der Kontenlisten
 class KontoListModel(val context: Context) : KontoListContract.Model {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
 
+    //Methode welche entscheidet welches Verfahren für die Beschaffung der Daten ausgeführt werden soll
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
@@ -36,6 +38,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         }
     }
 
+    //Methode welche die Prüfung der Existenz einer Date erleichtert
     private fun String.doesFileExist(): Boolean {
         if (context.fileList().contains(this)) {
             return true
@@ -43,6 +46,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         return false
     }
 
+    //Prüft ob Internetverbindung besteht
     private fun checkInternetConnection(context: Context): Boolean {
         val connectivity =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -55,6 +59,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         return false
     }
 
+    //Ladet Kontenliste aus dem Filesystem (XML-Datei)
     private fun loadKontoListFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         lateinit var fileInputStream: FileInputStream
         try {
@@ -96,6 +101,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         }
     }
 
+    //Ladet Daten aus dem Webservice
     private fun loadDataFromWebservice(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         val userPw = SharedPref.getUserPW(context)
         val userName = SharedPref.getUserName(context)
@@ -113,6 +119,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                         tryLoadingFromFile(onFinishedListener)
                     }
                 }
+
                 override fun onFailure(call: Call<KontoList>, t: Throwable) {
                     tryLoadingFromFile(onFinishedListener)
                 }
@@ -121,6 +128,8 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
     }
+
+    //Prüft ob Laden aus dem File möglich ist
     private fun tryLoadingFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         if (KONTO_LIST_FILE_NAME.doesFileExist()) {
             loadKontoListFromFile(onFinishedListener)
@@ -133,6 +142,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         }
     }
 
+    //Funktion welches die Kontenliste in ein XML-File speichert
     fun saveKonto(listToSave: List<Konto>): String {
         KONTO_LIST_FILE_NAME.removeFile()
         lateinit var writer: OutputStreamWriter
@@ -247,6 +257,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         }
     }
 
+    //Methode welches das Löschen einer Datei erleichtert
     private fun String.removeFile() {
         when {
             this.doesFileExist() -> context.deleteFile(this)

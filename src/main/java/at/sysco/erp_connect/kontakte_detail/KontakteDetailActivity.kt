@@ -12,15 +12,17 @@ import at.sysco.erp_connect.pojo.Kontakt
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_kontakte_detail.*
 
-//TO-DO: Error anzeigen, wenn Daten nicht genug Daten für Funktionen vorhanden!
+//Activity welche Kontakt-Details anzeigt
 class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View {
     lateinit var kontaktDetailPresenter: KontakteDetailPresenter
     lateinit var kontaktNummer: String
 
+    //Methode des Lifecycles. Setzt Layout und beauftragt Presenter für Beschaffung der Daten.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kontakte_detail)
 
+        //Ruft Extras auf welche angehängt wurden. Extra ist die ID des zu ladenden Kontakt/Ansprechpartner
         val extra = intent.getStringExtra("id")
         if (extra != null) {
             kontaktNummer = extra
@@ -29,18 +31,22 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         kontaktDetailPresenter.requestFromWS(kontaktNummer)
     }
 
+    //Darstellung der Daten
     override fun showProgress() {
-        tableDetails.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
     }
 
+    //Versteckt den Ladebalken
     override fun hideProgress() {
         progressBar.visibility = View.GONE
     }
 
+    //Bei Erfolg wird eine Snackbar aufgerufen
     override fun onSucess(finishCode: String) {
         showSnackbar(finishCode, false)
     }
 
+    //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
@@ -50,6 +56,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         }
     }
 
+    //Darstellung von Fehlermeldungen oder Erfolsmeldungen in Snackbar
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             val snackbar: Snackbar =
@@ -65,7 +72,9 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         }
     }
 
+    //Methode welche die Daten aus dem Presenter bzw. Model darstellt. Setzt auch Listener für die Aktions-Buttons
     override fun setTextData(kontakt: Kontakt) {
+        tableDetails.visibility = View.VISIBLE
         textInputName.text = if (kontakt.kLastName != null) {
             if (kontakt.kFirstName != null) {
                 kontakt.kLastName.plus(" ").plus(kontakt.kFirstName)
@@ -114,6 +123,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         }
     }
 
+    //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
     private fun openURL(kontakt: Kontakt) {
         var url = kontakt.kURL
         if (url != null) {
@@ -135,6 +145,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
 
     }
 
+    //Startet Intent welches eine Telefonnummer anruft.
     private fun dialNumber(kontakt: Kontakt) {
         var telNumber = kontakt.kTelNumber
         val telNumberCity = kontakt.kTelCity
@@ -154,6 +165,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         }
     }
 
+    //Startet Intent welcher eine E-Mail-Konversation an hinterlegte Adresse startet.
     private fun mailNumber(kontakt: Kontakt) {
         val mail = kontakt.kMail
         if (mail != null && android.util.Patterns.EMAIL_ADDRESS.matcher(mail).matches()) {

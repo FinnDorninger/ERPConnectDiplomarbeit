@@ -15,11 +15,12 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_detail.*
 import java.net.URLEncoder
 
-//TO-DO: Error anzeigen, wenn Daten nicht genug Daten für Funktionen vorhanden!
+//Activity welche Konto/Kunden-Details anzeigt
 class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     lateinit var kontoDetailPresenter: KontoDetailPresenter
     lateinit var kontoNummer: String
 
+    //Methode des Lifecycles. Setzt Layout und beauftragt Presenter für Beschaffung der Daten.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_konto_detail)
@@ -35,18 +36,22 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Versteckt Ladebalken
     override fun hideProgress() {
         progressBar.visibility = View.GONE
     }
 
+    //Darstellung des Ladebalkens
     override fun showProgress() {
-        tableDetails.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
     }
 
+    //Stellt erfolgreiches Laden dar ("Daten geladen aber vlt nicht aktuell etc")
     override fun onSucess(finishCode: String) {
         showSnackbar(finishCode, false)
     }
 
+    //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
@@ -56,6 +61,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Darstellung von Fehlermeldungen oder Erfolsmeldungen in Snackbar
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             val snackbar: Snackbar =
@@ -71,7 +77,9 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Methode welche die Daten aus dem Presenter bzw. Model darstellt. Setzt auch Listener für die Aktions-Buttons
     override fun setTextData(konto: Konto) {
+        tableDetails.visibility = View.VISIBLE
         textInputName.text = konto.kName
         textInputKontoNumber.text = "(".plus(konto.kNumber).plus(")")
         textInputStaat.text = konto.kCountry
@@ -99,12 +107,15 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Wird ausgeführt nach ausführen des Buttons "Ihre Ansprechpartner". Intent auf Kontakte/Ansprechpartner-Activity
+    //mit passende Suchdetails.
     private fun startKontakte(kontoNumber: String) {
         val intent = Intent(this, KontakteListActivity::class.java)
         intent.putExtra("searchdetail", kontoNumber)
         startActivity(intent)
     }
 
+    //Startet Intent welche hinterlegte Adresse mit Google Maps öffnet
     private fun openAddress(konto: Konto) {
         val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
         val adressIterator = adressList.iterator()
@@ -124,6 +135,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
     private fun openURL(konto: Konto) {
         var url = konto.kUrl
         if (url != null) {
@@ -145,6 +157,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
 
     }
 
+    //Startet Intent welches eine Telefonnummer anruft.
     private fun dialNumber(konto: Konto) {
         var telNumber = konto.kTelMain
         val telNumberCity = konto.kTelCity
@@ -165,6 +178,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Intent welcher eine hinterlegte Nummer in einem Telefonfenster öffnet
     private fun messageNumber(konto: Konto) {
         var telMobilNumber = konto.kMobilTel
         val telMobilProvider = konto.kMobilOperatorTel

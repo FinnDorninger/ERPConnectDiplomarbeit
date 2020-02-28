@@ -2,7 +2,6 @@ package at.sysco.erp_connect.adapter
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,18 +11,19 @@ import androidx.recyclerview.widget.RecyclerView
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailActivity
 import at.sysco.erp_connect.pojo.Kontakt
-import kotlinx.android.synthetic.main.activity_kontakte_detail.*
 import kotlinx.android.synthetic.main.kontakt_list_item.view.*
 
-class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context) :
+//Adapter welcher beschreibt wie Daten an Recyclerview gebunden werden sollen
+class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context) :
     RecyclerView.Adapter<ViewHolderKontakt>(), Filterable {
-    var kontaktList: ArrayList<Kontakt> = exampleList
+    var kontaktList: ArrayList<Kontakt> = kontaktList
     var kontaktListFull: ArrayList<Kontakt>
 
     init {
-        this.kontaktListFull = ArrayList(exampleList)
+        this.kontaktListFull = ArrayList(kontaktList)
     }
 
+    //Füllt die einzelnen Einträge eines Recyclerviews mit Daten
     override fun onBindViewHolder(holder: ViewHolderKontakt, position: Int) {
         var name = kontaktList[position].kLastName
         val nameFirstname = kontaktList[position].kFirstName
@@ -50,16 +50,18 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
         holder.tvKontaktName?.text = name
         holder.tvKontaktFunction?.text = task
 
+        //Auswahl eines Recyclerview-Eintrages startet die zugehörige Kontakt-Detailseite
         val intent = Intent(context, KontakteDetailActivity::class.java)
         intent.putExtra("id", kontaktList[position].kKontaktNumber)
         holder.tvHolder.setOnClickListener { v -> context.startActivity(intent) }
     }
 
+    //Liefert die aktuelle Größe der Recyclerview-Liste
     override fun getItemCount(): Int {
         return kontaktList.size
     }
 
-    //Inflates the item views: ViewGroup?
+    //Legt Layout eines Recyclerview-Eintrages fest
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderKontakt {
         return ViewHolderKontakt(
             LayoutInflater.from(context).inflate(
@@ -70,9 +72,10 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
     }
 
     override fun getFilter(): Filter {
-        return exampleFilter
+        return kontaktFilter
     }
 
+    //Methode zum löschen des Inhaltes des Recyclerviews
     fun clearAll() {
         val sizeListFull = kontaktListFull.size
         kontaktList.clear()
@@ -80,7 +83,8 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
         notifyItemRangeRemoved(0, sizeListFull)
     }
 
-    private var exampleFilter: Filter = object : Filter() {
+    //Filter, beschreibt wie gefiltert werden soll
+    private var kontaktFilter: Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             var filteredList = ArrayList<Kontakt>()
 
@@ -112,14 +116,16 @@ class KontakteListAdapter(exampleList: ArrayList<Kontakt>, val context: Context)
             return results
         }
 
+        //Methode welche die gefilterte Liste veröffentlicht und die alte Liste cleared.
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-            exampleList.clear()
-            exampleList.addAll(results?.values as ArrayList<Kontakt>)
+            kontaktList.clear()
+            kontaktList.addAll(results?.values as ArrayList<Kontakt>)
             notifyDataSetChanged()
         }
     }
 }
 
+//ViewHolder beschreibt das Layout der einzelnen Einträge
 class ViewHolderKontakt(view: View) : RecyclerView.ViewHolder(view) {
     val tvKontaktName = view.tv_kontakt_name
     val tvKontaktFunction = view.tv_kontakt_function

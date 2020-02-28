@@ -12,17 +12,22 @@ import androidx.preference.PreferenceFragmentCompat
 import at.sysco.erp_connect.network.HTTPClient
 import java.lang.NumberFormatException
 
+//Settingsfragment stellt die Einstellung dar. Setzt Listener auf die Einstellungsdaten. Prüft Benutzereingaben.
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        //Ladet Einstellungshierarchie
         setPreferencesFromResource(R.xml.settings_pref, rootKey)
+        //Ladet die Einstellungen aus dem Preferences. Dient dafür die Eigenschaften zu verändern
         val editURLPreference: EditTextPreference? = findPreference("base_url")
         val editConTimeoutPreference: EditTextPreference? = findPreference("timeoutCon")
         val editReadTimeoutPreference: EditTextPreference? = findPreference("timeoutRead")
         val editPwPreference: EditTextPreference? = findPreference("user_password")
         val editUserPreference: EditTextPreference? = findPreference("user_name")
 
+        //Listener welcher bei Eingaben in den URL-EditText aufgerufen wird.
         val listenerUrl: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
+                //Prüft Benutzereingaben ob diese mit / endet und ob https://-Schema verwendet wurde
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
                     val oldURL = newValue as String
                     var newURL = ""
@@ -58,11 +63,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     }
                 }
             }
+        //Listener auf Benutzereingaben in die Benutzername-Einstellung, löscht dann Daten da durch andere Benutzereingaben neue Daten geladen werden sollen.
         val listenerUsername: Preference.OnPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { preference, newValue ->
                 removeFiles()
                 true
             }
+        //Listener auf Benutzereingaben zur Auswahl des Connection Timeouts
         val listenerConnection: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
@@ -75,6 +82,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     }
                 }
             }
+        //Listener auf Benutzereingaben zur Auswahl des Reading Timeouts.
         val listenerReading: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
@@ -87,6 +95,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     }
                 }
             }
+        //Listener bei Eingaben in das Passwort-Fenster, speichert verschlüsselte Daten.
+        //Löscht dann Daten da durch andere Benutzereingaben neue Daten geladen werden sollen.
         val listenerPassword: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
@@ -108,11 +118,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     return false
                 }
             }
+        //Versteckt Passwort bei Eingabe mit "Sternen"
         editPwPreference?.setOnBindEditTextListener { editText ->
             editText.inputType =
                 InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
         }
 
+        //Setzt die Listener
         editConTimeoutPreference?.onPreferenceChangeListener = listenerConnection
         editReadTimeoutPreference?.onPreferenceChangeListener = listenerReading
         editPwPreference?.onPreferenceChangeListener = listenerPassword
@@ -120,6 +132,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         editURLPreference?.onPreferenceChangeListener = listenerUrl
     }
 
+    //Prüft Input ob dieser über 0 und unter 60 ist. (Für Timeout)
     private fun checkInput(newValue: Any?): Pair<Boolean, Long> {
         var returnPair: Pair<Boolean, Long> = Pair(false, 0)
         try {
@@ -135,6 +148,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         return returnPair
     }
 
+    //Methode welche die Daten löscht
     private fun removeFiles() {
         requireContext().deleteFile("KontoFile.xml")
         requireContext().deleteFile("KontakteFile.xml")

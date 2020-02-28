@@ -21,10 +21,12 @@ import java.io.IOException
 
 const val KONTAKTE_FILE_NAME = "KontakteFile.xml"
 
+//Geschäftslogik der Ansprechpartnerdetails
 class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-    
+
+    //Methode welche entscheidet welches Verfahren für die Beschaffung der Daten ausgeführt werden soll
     override fun getKontaktDetail(
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
@@ -42,6 +44,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         }
     }
 
+    //Erleichtert die Prüfung ob ein File existiert
     private fun String.doesFileExist(): Boolean {
         if (context.fileList().contains(this)) {
             return true
@@ -49,6 +52,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         return false
     }
 
+    //Prüft ob eine Internetverbindung besteht
     private fun checkInternetConnection(context: Context): Boolean {
         val connectivity =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -61,6 +65,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         return false
     }
 
+    //Ladet Daten aus dem Webservice
     private fun loadDataFromWebservice(
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
@@ -96,6 +101,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         }
     }
 
+    //Prüft ob Laden aus dem Filesystem möglich ist
     private fun tryLoadingFromFile(
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
@@ -111,6 +117,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         }
     }
 
+    //Ladet Ansprechpartner aus dem Filesystem
     private fun loadKontaktDetailFromFile(
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
@@ -153,6 +160,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         }
     }
 
+    //Methode welche das Löschen der Datei vereinfacht
     private fun String.removeFile() {
         when {
             this.doesFileExist() -> context.deleteFile(this)

@@ -21,7 +21,7 @@ import at.sysco.erp_connect.pojo.Kontakt
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_kontakte_list.*
 
-
+//Activity für die Listen-Darstellung aller Kontakt/Ansprechpartner
 class KontakteListActivity : AppCompatActivity(),
     KontakteListContract.View, SharedPreferences.OnSharedPreferenceChangeListener {
     private lateinit var kontakteListPresenter: KontakteListPresenter
@@ -29,10 +29,12 @@ class KontakteListActivity : AppCompatActivity(),
     var adapterRV: KontakteListAdapter? = null
     var search: String? = ""
 
+    //Setzt Layout und beauftragt Presenter für Beschaffung der Daten.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_kontakte_list)
         val intent = intent
+        //Ruft Extras auf welche angehängt wurden. Extra ist die ID des zu ladenden Kontakt/Ansprechpartner
         search = intent.getStringExtra("searchdetail")
 
         initRecyclerView()
@@ -43,6 +45,7 @@ class KontakteListActivity : AppCompatActivity(),
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
+    //Listener auf die Auswahl in dem Bottom-Navigation-Menu
     private val mOnNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -57,6 +60,7 @@ class KontakteListActivity : AppCompatActivity(),
             false
         }
 
+    //Hier werden Listener registriert und die Bottom-Navigation-Auswahl richtig eingestellt.
     override fun onResume() {
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(this)
@@ -64,6 +68,7 @@ class KontakteListActivity : AppCompatActivity(),
         bottomNavigation.menu.findItem(R.id.action_Kontakte).isChecked = true
     }
 
+    //Wenn die Activity geschlossen wird, kann der nicht benötigte Listener geschlossen werden.
     override fun onDestroy() {
         super.onDestroy()
         PreferenceManager.getDefaultSharedPreferences(this)
@@ -71,6 +76,7 @@ class KontakteListActivity : AppCompatActivity(),
         kontakteListPresenter.onDestroy()
     }
 
+    //Wenn Daten aus den Einstellungen gelöscht wurden müssen Daten aus dem Recyclerview gelöscht werden
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (this.fileList().contains("KontakteFile.xml")) {
             this.deleteFile("KontakteFile.xml")
@@ -79,11 +85,13 @@ class KontakteListActivity : AppCompatActivity(),
         kontakteListPresenter.requestFromWS()
     }
 
+    //Löscht Daten aus Recyclerview
     fun clearResults() {
         snackbar?.dismiss()
         adapterRV?.clearAll()
     }
 
+    //Stellt Snackbar dar.
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             snackbar =
@@ -102,10 +110,12 @@ class KontakteListActivity : AppCompatActivity(),
         snackbar?.show()
     }
 
+    //Bei Erfolg wird eine kurze Snackbar dargestellt.
     override fun onSucess(finishCode: String) {
         showSnackbar(finishCode, false)
     }
 
+    //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
@@ -115,19 +125,23 @@ class KontakteListActivity : AppCompatActivity(),
         }
     }
 
+    //Zeigt den Ladebalken
     override fun showProgress() {
         progressBar.visibility = View.VISIBLE
     }
 
+    //Versteckt den Ladebalken
     override fun hideProgress() {
         progressBar.visibility = View.GONE
     }
 
+    //Set Layoutmanager und Trennung der einzelnen Einträge des Recyclerviews.
     private fun initRecyclerView() {
         rv_kontakte_list.layoutManager = LinearLayoutManager(this)
         rv_kontakte_list.addItemDecoration(DividerItemDecoration(rv_kontakte_list.context, 1))
     }
 
+    //Bindet Daten aus dem Model mit Recylcerview. Implementiert auch Such-Listener (SearchView)
     override fun displayKontakteListInRecyclerView(kontakteList: List<Kontakt>) {
         rv_kontakte_list.visibility = View.VISIBLE
         adapterRV = KontakteListAdapter(ArrayList(kontakteList), this)
@@ -151,13 +165,14 @@ class KontakteListActivity : AppCompatActivity(),
         }
     }
 
+    //Zeichnet das Optionsmenü
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu to use in the action bar
         val inflater = menuInflater
         inflater.inflate(R.menu.settings_menu, menu)
         return true
     }
 
+    //Wird aufgerufen bei dem Abruf einer Option aus dem Optionsmenü
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         if (id == R.id.action_settings) {

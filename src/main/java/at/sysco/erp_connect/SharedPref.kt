@@ -5,19 +5,23 @@ import android.util.Base64
 import androidx.preference.PreferenceManager
 import javax.crypto.spec.IvParameterSpec
 
+//Klasse mit Methoden zum Laden von Daten aus den SharedPreferences
 object SharedPref {
+    //Liefert Username
     fun getUserName(context: Context): String? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val userName = sharedPref.getString("user_name", "")
         return userName
     }
 
+    //Liefert URL aus SharedPref.
     fun getBaseURL(context: Context): String? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val baseURL = sharedPref.getString("base_url", "")
         return baseURL
     }
 
+    //Ladet (entschlüsselt) das Passwort des Benutzers aus SharedPref.
     fun getUserPW(context: Context): String? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         var userPW = sharedPref.getString("user_password", "")

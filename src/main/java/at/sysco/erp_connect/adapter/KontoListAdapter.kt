@@ -14,6 +14,7 @@ import at.sysco.erp_connect.konto_detail.KontoDetailActivity
 import at.sysco.erp_connect.pojo.Konto
 import kotlinx.android.synthetic.main.konto_list_item.view.*
 
+//Adapter welcher beschreibt wie Daten an Recyclerview gebunden werden sollen
 class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>(), Filterable {
     var kontoList: ArrayList<Konto> = exampleList
@@ -23,11 +24,12 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         this.kontoListFull = ArrayList(exampleList)
     }
 
+    //Liefert die aktuelle Größe der Recyclerview-Liste
     override fun getItemCount(): Int {
         return kontoList.size
     }
 
-    //Inflates the item views: ViewGroup?
+    //Legt Layout eines Recyclerview-Eintrages fest
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(context).inflate(
@@ -37,7 +39,7 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         )
     }
 
-    // Binds each Konto in the ArrayList to a view
+    //Füllt die einzelnen Einträge eines Recyclerviews mit Daten
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.tvKontoName?.text = kontoList[position].kName
         holder.tvKontoNumber?.text = kontoList[position].kNumber
@@ -51,6 +53,7 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         return rvFilter
     }
 
+    //Methode zum löschen des Inhaltes des Recyclerviews
     fun clearAll() {
         val sizeListFull = kontoListFull.size
         kontoList.clear()
@@ -58,6 +61,7 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
         notifyItemRangeRemoved(0, sizeListFull)
     }
 
+    //Filter, beschreibt wie gefiltert werden soll
     private var rvFilter: Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             var filteredList = ArrayList<Konto>()
@@ -88,6 +92,7 @@ class KontoAdapter(exampleList: ArrayList<Konto>, val context: Context) :
     }
 }
 
+//ViewHolder beschreibt das Layout der einzelnen Einträge
 class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     // Holds the TextView that will add each konto to
     val tvKontoName = view.tv_konto_name

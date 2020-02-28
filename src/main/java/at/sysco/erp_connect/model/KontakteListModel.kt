@@ -27,12 +27,14 @@ import javax.xml.stream.XMLStreamException
 
 const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
+//Geschäftslogik der Ansprechpartnerlisten
 class KontakteListModel(val context: Context) : KontakteListContract.Model {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
     val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     var autoSync = sharedPref.getBoolean("auto_sync", true)
 
+    //Methode welche entscheidet welches Verfahren für die Beschaffung der Daten ausgeführt werden soll
     override fun getKontakteList(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
@@ -41,6 +43,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         }
     }
 
+    //Prüft ob Internetverbindung besteht
     private fun checkInternetConnection(context: Context): Boolean {
         val connectivity =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -53,6 +56,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         return false
     }
 
+    //Ladet Daten aus dem Webservice
     private fun loadDataFromWebservice(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         val userPw = SharedPref.getUserPW(context)
         val userName = SharedPref.getUserName(context)
@@ -89,6 +93,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         }
     }
 
+    //Ladet Ansrechpartnerliste aus dem Filesystem (XML-Datei)
     private fun loadKontakteListFromFile(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         lateinit var fileInputStream: FileInputStream
         try {
@@ -130,6 +135,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         }
     }
 
+    //Prüft ob Laden aus dem File möglich ist
     private fun tryLoadingFromFile(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         if (KONTAKTE_LIST_FILE_NAME.doesFileExist()) {
             loadKontakteListFromFile(onFinishedListener)
@@ -142,6 +148,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         }
     }
 
+    //Funktion welches die Daten in ein XML-File speichert
     fun saveKontakte(listToSave: List<Kontakt>): String {
         KONTAKTE_LIST_FILE_NAME.removeFile()
         lateinit var writer: OutputStreamWriter
@@ -275,12 +282,14 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         }
     }
 
+    //Funktion welches das Löschen einer Datei erleichtert
     private fun String.removeFile() {
         when {
             this.doesFileExist() -> context.deleteFile(this)
         }
     }
 
+    //Funktion welche das Prüfen der Existenz einer Datei erleichtert
     private fun String.doesFileExist(): Boolean {
         if (context.fileList().contains(this)) {
             return true

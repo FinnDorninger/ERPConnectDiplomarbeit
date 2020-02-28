@@ -3,8 +3,12 @@ package at.sysco.erp_connect.pojo
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
 
+//Für Speicherung und Laden aus dem Webservice benötigt
+//Beschreibt Aufbau eines Kontaktes/Ansprechpartners
+//@Root beschreibt das Root-Element dieses Objektes.
 @Root(name = "KontenWebservice", strict = false)
 data class Konto(
+    //Beeinhaltet Element mit dem Namen "Kontonummer"
     @field:Element(name = "Kontonummer")
     var kNumber: String? = null,
 

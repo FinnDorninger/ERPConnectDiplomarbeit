@@ -1,5 +1,6 @@
 package at.sysco.erp_connect.constants
 
+//Beinhaltet Strings welche beschreiben welche Fehler im Model geschehen sind, für die Darstellung im View.
 class FailureCode {
     companion object {
         const val NO_CONNECTION = "Keine Daten vorhanden! Bitte starten Sie das Internet."
