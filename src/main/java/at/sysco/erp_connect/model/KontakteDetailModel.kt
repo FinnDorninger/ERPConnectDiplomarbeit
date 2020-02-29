@@ -46,23 +46,25 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
 
     //Erleichtert die Prüfung ob ein File existiert
     private fun String.doesFileExist(): Boolean {
+        var doesExist = false
         if (context.fileList().contains(this)) {
-            return true
+            doesExist = true
         }
-        return false
+        return doesExist
     }
 
     //Prüft ob eine Internetverbindung besteht
     private fun checkInternetConnection(context: Context): Boolean {
+        var isConnected = false
         val connectivity =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val info = connectivity.allNetworks
         for (i in info.indices) {
             if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
-                return true
+                isConnected = true
             }
         }
-        return false
+        return isConnected
     }
 
     //Ladet Daten aus dem Webservice

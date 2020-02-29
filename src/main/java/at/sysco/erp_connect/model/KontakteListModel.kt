@@ -44,15 +44,16 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
     //Prüft ob Internetverbindung besteht
     private fun checkInternetConnection(context: Context): Boolean {
+        var isConnected = false
         val connectivity =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val info = connectivity.allNetworks
         for (i in info.indices) {
             if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
-                return true
+                isConnected = true
             }
         }
-        return false
+        return isConnected
     }
 
     //Ladet Daten aus dem Webservice
@@ -148,8 +149,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     //Funktion welches die Daten in ein XML-File speichert
     fun saveKontakte(listToSave: List<Kontakt>): String {
         KONTAKTE_LIST_FILE_NAME.removeFile()
+        var finishOrErrorCode: String = FinishCode.finishedSavingKonto
         lateinit var writer: OutputStreamWriter
-
         try {
             val encryptedFile = EncryptedFile.Builder(
                 File(context.filesDir, KONTAKTE_LIST_FILE_NAME),
@@ -263,19 +264,23 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
             xmlStreamWriter.writeEndDocument()
         } catch (e: IOException) {
             KONTAKTE_LIST_FILE_NAME.removeFile()
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
         } catch (e: XMLStreamException) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTAKTE_LIST_FILE_NAME.removeFile()
         } catch (e: FactoryConfigurationError) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTAKTE_LIST_FILE_NAME.removeFile()
         } catch (e: GeneralSecurityException) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTAKTE_LIST_FILE_NAME.removeFile()
         } finally {
             try {
                 writer.close()
             } catch (e: IOException) {
-                return FailureCode.ERROR_SAVING_FILE
+                finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             }
-            return FinishCode.finishedSavingKontakte
+            return finishOrErrorCode
         }
     }
 
@@ -288,9 +293,10 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
     //Funktion welche das Prüfen der Existenz einer Datei erleichtert
     private fun String.doesFileExist(): Boolean {
+        var doesExist = false
         if (context.fileList().contains(this)) {
-            return true
+            doesExist = true
         }
-        return false
+        return doesExist
     }
 }

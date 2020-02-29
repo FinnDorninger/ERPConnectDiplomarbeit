@@ -30,10 +30,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
                     val oldURL = newValue as String
                     var newURL: String
+                    var shouldSafe: Boolean
 
                     if (oldURL.isEmpty()) {
                         removeFiles()
-                        return true
                     }
                     newURL = when {
                         oldURL.startsWith("https://") -> {
@@ -51,14 +51,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
                             editURLPreference?.text = newURL
                             preferenceManager.sharedPreferences.edit().putString("base_url", newURL)
                                 .apply()
-                            return false
+                            shouldSafe = false
+                        } else {
+                            removeFiles()
+                            shouldSafe = true
                         }
-                        removeFiles()
-                        return true
                     } else {
                         Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
-                        return false
+                        shouldSafe = false
                     }
+                    return shouldSafe
                 }
             }
         //Listener auf Benutzereingaben in die Benutzername-Einstellung, löscht dann Daten da durch andere Benutzereingaben neue Daten geladen werden sollen.
@@ -71,26 +73,30 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val listenerConnection: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
+                    val shouldSafe: Boolean
                     val checked = checkInput(newValue)
                     if (checked.first) {
                         HTTPClient.conTimeout = checked.second
-                        return true
+                        shouldSafe = true
                     } else {
-                        return false
+                        shouldSafe = false
                     }
+                    return shouldSafe
                 }
             }
         //Listener auf Benutzereingaben zur Auswahl des Reading Timeouts.
         val listenerReading: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
+                    val shouldSafe: Boolean
                     val checked = checkInput(newValue)
                     if (checked.first) {
                         HTTPClient.readTimeout = checked.second
-                        return true
+                        shouldSafe = true
                     } else {
-                        return false
+                        shouldSafe = false
                     }
+                    return shouldSafe
                 }
             }
         //Listener bei Eingaben in das Passwort-Fenster, speichert verschlüsselte Daten.

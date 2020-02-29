@@ -40,23 +40,25 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
     //Methode welche die Prüfung der Existenz einer Date erleichtert
     private fun String.doesFileExist(): Boolean {
+        var doesExist = false
         if (context.fileList().contains(this)) {
-            return true
+            doesExist = true
         }
-        return false
+        return doesExist
     }
 
     //Prüft ob Internetverbindung besteht
     private fun checkInternetConnection(context: Context): Boolean {
+        var isConnected = false
         val connectivity =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val info = connectivity.allNetworks
         for (i in info.indices) {
             if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
-                return true
+                isConnected = true
             }
         }
-        return false
+        return isConnected
     }
 
     //Ladet Kontenliste aus dem Filesystem (XML-Datei)
@@ -145,6 +147,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     //Funktion welches die Kontenliste in ein XML-File speichert
     fun saveKonto(listToSave: List<Konto>): String {
         KONTO_LIST_FILE_NAME.removeFile()
+        var finishOrErrorCode: String = FinishCode.finishedSavingKonto
         lateinit var writer: OutputStreamWriter
         try {
             val encryptedFile = EncryptedFile.Builder(
@@ -240,21 +243,25 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             xmlStreamWriter.writeEndElement()
             xmlStreamWriter.writeEndDocument()
         } catch (e: IOException) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTO_LIST_FILE_NAME.removeFile()
         } catch (e: XMLStreamException) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTO_LIST_FILE_NAME.removeFile()
         } catch (e: FactoryConfigurationError) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTO_LIST_FILE_NAME.removeFile()
         } catch (e: GeneralSecurityException) {
+            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             KONTO_LIST_FILE_NAME.removeFile()
         } finally {
             try {
                 writer.close()
             } catch (e: IOException) {
-                return FailureCode.ERROR_SAVING_FILE
+                finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             }
-            return FinishCode.finishedSavingKonto
         }
+        return finishOrErrorCode
     }
 
     //Methode welches das Löschen einer Datei erleichtert

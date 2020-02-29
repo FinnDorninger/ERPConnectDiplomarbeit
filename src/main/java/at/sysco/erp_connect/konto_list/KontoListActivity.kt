@@ -95,7 +95,7 @@ class KontoListActivity : AppCompatActivity(),
                 )
             snackbar?.setAction("Retry!") { kontoListPresenter.requestFromWS() }
         } else {
-            var text = when (title) {
+            val text = when (title) {
                 FinishCode.finishedSavingKontakte -> "Alles gespeichert!"
                 else -> title
             }

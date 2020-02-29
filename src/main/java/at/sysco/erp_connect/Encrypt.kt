@@ -27,14 +27,17 @@ class Encrypt {
     //Generiert einen AES-Schlüssel
     fun generateSymmetricKey(): Key {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        val key: Key
         keyStore.load(null)
-        if (!keyStore.containsAlias(keyAlias)) {
+        key = if (!keyStore.containsAlias(keyAlias)) {
             val keyGenerator =
                 KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
             keyGenerator.init(getKeyGenParameter())
-            return keyGenerator.generateKey()
+            keyGenerator.generateKey()
+        } else {
+            keyStore.getKey(keyAlias, null)
         }
-        return keyStore.getKey(keyAlias, null)
+        return key
     }
 
     //Verschlüsselt ein Byte-Array und liefert zurück die verschlüsselten Daten + Initialisierungsvektor
@@ -48,14 +51,16 @@ class Encrypt {
 
     //Entschlüsselt einen Text. Eingabe Ciphertext, Schlüsssel und der Initialisierungsvektor
     fun decrypt(cipherText: ByteArray, key: Key, iv: IvParameterSpec): ByteArray? {
+        var clearText: ByteArray?
         val cipher = Cipher.getInstance(cipherAlgorithm)
         try {
             cipher.init(Cipher.DECRYPT_MODE, key, iv)
+            clearText = cipher.doFinal(cipherText)
         } catch (e: InvalidKeyException) {
-            return null
+            clearText = null
         } catch (e: InvalidAlgorithmParameterException) {
-            return null
+            clearText = null
         }
-        return cipher.doFinal(cipherText)
+        return clearText
     }
 }
