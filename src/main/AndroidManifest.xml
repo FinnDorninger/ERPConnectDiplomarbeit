@@ -25,8 +25,7 @@
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".konto_list.KontoListActivity"
-            android:windowSoftInputMode="adjustPan|adjustResize"
-            android:exported="false">
+            android:windowSoftInputMode="adjustPan|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

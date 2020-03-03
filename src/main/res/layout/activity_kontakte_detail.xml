@@ -390,7 +390,7 @@
                 android:id="@+id/rowMobilePhoneNumber"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:weightSum="2" />
+                android:weightSum="2">
 
             <TextView
                 android:id="@+id/textMobilePhoneNumber"
@@ -408,6 +408,7 @@
                 android:layout_weight="1"
                 android:textColor="@android:color/white"
                 android:textIsSelectable="true" />
+            </TableRow>
 
             <TableRow
                 android:id="@+id/headlinePhone"

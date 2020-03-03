@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.SimpleXmlConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.lang.Exception
 
 //Interface für die Erstellung der Retrofit-API
 interface WebserviceApi {
@@ -24,13 +25,23 @@ interface WebserviceApi {
     fun getKontakt(@Query("Password") pw: String, @Query("User") user: String, @Query("Key") kontoNummer: String): Call<KontakteList>
 
     object Factory {
-        fun getApi(baseURL: String): WebserviceApi {
-            val retrofit = Retrofit.Builder()
-                .baseUrl(baseURL)
-                .client(HTTPClient.getOkHttpClient())
-                .addConverterFactory(SimpleXmlConverterFactory.create())
-                .build()
-            return retrofit.create(WebserviceApi::class.java)
+        fun getApi(baseURL: String): WebserviceApi? {
+            val api: WebserviceApi?
+            api = if (baseURL.startsWith("https://")) {
+                try {
+                    val retrofit = Retrofit.Builder()
+                        .baseUrl(baseURL)
+                        .client(HTTPClient.getOkHttpClient())
+                        .addConverterFactory(SimpleXmlConverterFactory.create())
+                        .build()
+                    retrofit.create(WebserviceApi::class.java)
+                } catch (e: Exception) {
+                    null
+                }
+            } else {
+                null
+            }
+            return api
         }
     }
 }

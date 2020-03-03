@@ -9,20 +9,19 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
-import android.net.ConnectivityManager
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
+import at.sysco.erp_connect.model.ModelUtitlity.checkInternetConnection
+import at.sysco.erp_connect.model.ModelUtitlity.doesFileExist
+import at.sysco.erp_connect.model.ModelUtitlity.removeFile
 import at.sysco.erp_connect.pojo.Kontakt
 import at.sysco.erp_connect.pojo.KontakteList
 import java.lang.Exception
-import java.security.GeneralSecurityException
-import javax.xml.stream.FactoryConfigurationError
 import javax.xml.stream.XMLOutputFactory
-import javax.xml.stream.XMLStreamException
 
 const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
@@ -37,23 +36,11 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     override fun getKontakteList(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
-            KONTAKTE_LIST_FILE_NAME.doesFileExist() -> loadKontakteListFromFile(onFinishedListener)
+            doesFileExist(context, KONTAKTE_LIST_FILE_NAME) -> loadKontakteListFromFile(
+                onFinishedListener
+            )
             else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
-    }
-
-    //Prüft ob Internetverbindung besteht
-    private fun checkInternetConnection(context: Context): Boolean {
-        var isConnected = false
-        val connectivity =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val info = connectivity.allNetworks
-        for (i in info.indices) {
-            if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
-                isConnected = true
-            }
-        }
-        return isConnected
     }
 
     //Ladet Daten aus dem Webservice
@@ -62,33 +49,38 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         val userName = SharedPref.getUserName(context)
         val baseURL = SharedPref.getBaseURL(context)
         if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
-            val call = WebserviceApi.Factory.getApi(baseURL).getKontakteList(userPw, userName)
+            val api = WebserviceApi.Factory.getApi(baseURL)
+            if (api != null) {
+                val call = api.getKontakteList(userPw, userName)
+                call.enqueue(object : Callback<KontakteList> {
+                    override fun onResponse(
+                        call: Call<KontakteList>,
+                        response: Response<KontakteList>
+                    ) {
+                        var responseKontakteList = response.body()?.kontakteList
+                        responseKontakteList =
+                            responseKontakteList?.sortedWith(compareBy { it.kLastName })
+                        if (responseKontakteList != null) {
+                            onFinishedListener.onfinished(
+                                responseKontakteList,
+                                FinishCode.finishedOnWeb
+                            )
+                        } else {
+                            tryLoadingFromFile(onFinishedListener)
+                        }
+                    }
 
-            call.enqueue(object : Callback<KontakteList> {
-                override fun onResponse(
-                    call: Call<KontakteList>,
-                    response: Response<KontakteList>
-                ) {
-                    var responseKontakteList = response.body()?.kontakteList
-                    responseKontakteList =
-                        responseKontakteList?.sortedWith(compareBy { it.kLastName })
-                    if (responseKontakteList != null) {
-                        onFinishedListener.onfinished(
-                            responseKontakteList,
-                            FinishCode.finishedOnWeb
-                        )
-                    } else {
+                    override fun onFailure(call: Call<KontakteList>, t: Throwable) {
                         tryLoadingFromFile(onFinishedListener)
                     }
-                }
-
-                override fun onFailure(call: Call<KontakteList>, t: Throwable) {
-                    tryLoadingFromFile(onFinishedListener)
-                }
-            })
+                })
+            } else {
+                onFinishedListener.onFailure(FailureCode.NO_DATA)
+            }
         } else {
             onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
+
     }
 
     //Ladet Ansrechpartnerliste aus dem Filesystem (XML-Datei)
@@ -111,18 +103,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
             } else {
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
-        } catch (e: IOException) {
-            if (KONTAKTE_LIST_FILE_NAME.doesFileExist()) {
-                KONTAKTE_LIST_FILE_NAME.removeFile()
-                onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
-            } else {
-                onFinishedListener.onFailure(FailureCode.NO_DATA)
-            }
         } catch (e: Exception) {
-            KONTAKTE_LIST_FILE_NAME.removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
-        } catch (e: GeneralSecurityException) {
-            KONTAKTE_LIST_FILE_NAME.removeFile()
+            removeFile(context, KONTAKTE_LIST_FILE_NAME)
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
             try {
@@ -135,7 +117,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
     //Prüft ob Laden aus dem File möglich ist
     private fun tryLoadingFromFile(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
-        if (KONTAKTE_LIST_FILE_NAME.doesFileExist()) {
+        if (doesFileExist(context, KONTAKTE_LIST_FILE_NAME)) {
             loadKontakteListFromFile(onFinishedListener)
         } else {
             if (checkInternetConnection(context)) {
@@ -148,8 +130,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
 
     //Funktion welches die Daten in ein XML-File speichert
     fun saveKontakte(listToSave: List<Kontakt>): String {
-        KONTAKTE_LIST_FILE_NAME.removeFile()
-        var finishOrErrorCode: String = FinishCode.finishedSavingKonto
+        removeFile(context, KONTAKTE_LIST_FILE_NAME)
+        var finishOrErrorCode: String = FinishCode.finishedSavingKontakte
         lateinit var writer: OutputStreamWriter
         try {
             val encryptedFile = EncryptedFile.Builder(
@@ -171,6 +153,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
                     xmlStreamWriter.writeStartElement("Kontaktnummer")
                     xmlStreamWriter.writeCharacters(kontakt.kKontaktNumber)
                     xmlStreamWriter.writeEndElement()
+                } else {
+                    continue
                 }
                 if (kontakt.kLastName != null) {
                     xmlStreamWriter.writeStartElement("Name")
@@ -262,41 +246,16 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
             }
             xmlStreamWriter.writeEndElement()
             xmlStreamWriter.writeEndDocument()
-        } catch (e: IOException) {
-            KONTAKTE_LIST_FILE_NAME.removeFile()
+        } catch (e: Exception) {
+            removeFile(context, KONTAKTE_LIST_FILE_NAME)
             finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-        } catch (e: XMLStreamException) {
-            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTAKTE_LIST_FILE_NAME.removeFile()
-        } catch (e: FactoryConfigurationError) {
-            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTAKTE_LIST_FILE_NAME.removeFile()
-        } catch (e: GeneralSecurityException) {
-            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTAKTE_LIST_FILE_NAME.removeFile()
         } finally {
             try {
                 writer.close()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             }
             return finishOrErrorCode
         }
-    }
-
-    //Funktion welches das Löschen einer Datei erleichtert
-    private fun String.removeFile() {
-        when {
-            this.doesFileExist() -> context.deleteFile(this)
-        }
-    }
-
-    //Funktion welche das Prüfen der Existenz einer Datei erleichtert
-    private fun String.doesFileExist(): Boolean {
-        var doesExist = false
-        if (context.fileList().contains(this)) {
-            doesExist = true
-        }
-        return doesExist
     }
 }

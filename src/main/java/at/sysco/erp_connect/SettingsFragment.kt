@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import at.sysco.erp_connect.network.HTTPClient
 import java.lang.NumberFormatException
 
@@ -104,22 +105,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val listenerPassword: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
+                    var sucess = false
                     removeFiles()
                     val pwPlain = newValue as String
-                    val key = Encrypt().generateSymmetricKey()
-                    val pair = Encrypt().encrypt(
-                        pwPlain.toByteArray(Charsets.UTF_8),
-                        key
-                    )
-                    val cipherText = pair?.first!!
-                    val cipherTextString = Base64.encodeToString(cipherText, Base64.DEFAULT)
-                    val iv = pair.second
-                    val ivString = Base64.encodeToString(iv, Base64.DEFAULT)
-
-                    preferenceManager.sharedPreferences.edit()
-                        .putString("user_password", cipherTextString).apply()
-                    preferenceManager.sharedPreferences.edit().putString("usedIV", ivString).apply()
-                    return false
+                    if (!SharedPref.storePw(pwPlain, requireContext())) {
+                        Toast.makeText(
+                            context,
+                            "Verschlüsselung hat nicht funktioniert!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        sucess = true
+                    }
+                    return sucess
                 }
             }
         //Versteckt Passwort bei Eingabe mit "Sternen"

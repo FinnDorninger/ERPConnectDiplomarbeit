@@ -6,8 +6,7 @@ import at.sysco.erp_connect.model.KontoDetailModel
 
 //Presenter für die Kommunikation zwischen Model und View.
 class KontoDetailPresenter(
-    kontoListView: KontoDetailContract.View,
-    val kontoDetailModel: KontoDetailModel
+    kontoListView: KontoDetailContract.View, val kontoDetailModel: KontoDetailModel
 ) : KontoDetailContract.Presenter, KontoDetailContract.Model.OnFinishedListener {
     var kontoDetailView: KontoDetailContract.View? = kontoListView
 

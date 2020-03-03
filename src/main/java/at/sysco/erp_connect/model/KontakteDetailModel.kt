@@ -1,13 +1,15 @@
 package at.sysco.erp_connect.model
 
 import android.content.Context
-import android.net.ConnectivityManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailContract
+import at.sysco.erp_connect.model.ModelUtitlity.checkInternetConnection
+import at.sysco.erp_connect.model.ModelUtitlity.doesFileExist
+import at.sysco.erp_connect.model.ModelUtitlity.removeFile
 import at.sysco.erp_connect.network.WebserviceApi
 import at.sysco.erp_connect.pojo.KontakteList
 import org.simpleframework.xml.core.PersistenceException
@@ -18,6 +20,7 @@ import retrofit2.Response
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.lang.Exception
 
 const val KONTAKTE_FILE_NAME = "KontakteFile.xml"
 
@@ -36,35 +39,12 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
                 onFinishedListener,
                 kontaktNummer
             )
-            KONTAKTE_FILE_NAME.doesFileExist() -> loadKontaktDetailFromFile(
+            doesFileExist(context, KONTAKTE_FILE_NAME) -> loadKontaktDetailFromFile(
                 onFinishedListener,
                 kontaktNummer
             )
             else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
-    }
-
-    //Erleichtert die Prüfung ob ein File existiert
-    private fun String.doesFileExist(): Boolean {
-        var doesExist = false
-        if (context.fileList().contains(this)) {
-            doesExist = true
-        }
-        return doesExist
-    }
-
-    //Prüft ob eine Internetverbindung besteht
-    private fun checkInternetConnection(context: Context): Boolean {
-        var isConnected = false
-        val connectivity =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val info = connectivity.allNetworks
-        for (i in info.indices) {
-            if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
-                isConnected = true
-            }
-        }
-        return isConnected
     }
 
     //Ladet Daten aus dem Webservice
@@ -76,31 +56,32 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         val userName = SharedPref.getUserName(context)
         val baseURL = SharedPref.getBaseURL(context)
         if (!baseURL.isNullOrBlank() && userName != null && userPw != null) {
-            val call =
-                WebserviceApi.Factory.getApi(baseURL).getKontakt(userPw, userName, kontaktNummer)
-            call.enqueue(object : Callback<KontakteList> {
-                override fun onResponse(
-                    call: Call<KontakteList>,
-                    response: Response<KontakteList>
-                ) {
-                    val responseKontakteList = response.body()?.kontakteList
-                    if (responseKontakteList != null) {
-                        onFinishedListener.onfinished(
-                            responseKontakteList[0],
-                            FinishCode.finishedOnWeb
-                        )
-                    } else {
+            val api = WebserviceApi.Factory.getApi(baseURL)
+            if (api != null) {
+                val call = api.getKontakt(userPw, userName, kontaktNummer)
+                call.enqueue(object : Callback<KontakteList> {
+                    override fun onResponse(
+                        call: Call<KontakteList>,
+                        response: Response<KontakteList>
+                    ) {
+                        val responseKontakteList = response.body()?.kontakteList
+                        if (responseKontakteList != null) {
+                            onFinishedListener.onfinished(
+                                responseKontakteList[0],
+                                FinishCode.finishedOnWeb
+                            )
+                        } else {
+                            tryLoadingFromFile(onFinishedListener, kontaktNummer)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<KontakteList>, t: Throwable) {
                         tryLoadingFromFile(onFinishedListener, kontaktNummer)
                     }
-                }
-
-                override fun onFailure(call: Call<KontakteList>, t: Throwable) {
-                    tryLoadingFromFile(onFinishedListener, kontaktNummer)
-                }
-            })
-        } else {
-            onFinishedListener.onFailure(FailureCode.NO_DATA)
+                })
+            }
         }
+        onFinishedListener.onFailure(FailureCode.NO_DATA)
     }
 
     //Prüft ob Laden aus dem Filesystem möglich ist
@@ -108,7 +89,7 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
         onFinishedListener: KontakteDetailContract.Model.OnFinishedListener,
         kontaktNummer: String
     ) {
-        if (KONTAKTE_FILE_NAME.doesFileExist()) {
+        if (doesFileExist(context, KONTAKTE_FILE_NAME)) {
             loadKontaktDetailFromFile(onFinishedListener, kontaktNummer)
         } else {
             if (checkInternetConnection(context)) {
@@ -146,26 +127,11 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
             } else {
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
-        } catch (e: IOException) {
-            //Exception: File does not exist or is corrupt
-            if (KONTAKTE_FILE_NAME.doesFileExist()) {
-                KONTAKTE_LIST_FILE_NAME.removeFile()
-                onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
-            } else {
-                onFinishedListener.onFailure(FailureCode.NO_DATA)
-            }
-        } catch (e: PersistenceException) {
-            KONTAKTE_LIST_FILE_NAME.removeFile()
+        } catch (e: Exception) {
+            removeFile(context, KONTAKTE_LIST_FILE_NAME)
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
             fileInputStream.close()
-        }
-    }
-
-    //Methode welche das Löschen der Datei vereinfacht
-    private fun String.removeFile() {
-        when {
-            this.doesFileExist() -> context.deleteFile(this)
         }
     }
 }

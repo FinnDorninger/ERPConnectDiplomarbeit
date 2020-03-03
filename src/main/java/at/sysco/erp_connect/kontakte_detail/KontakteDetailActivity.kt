@@ -89,6 +89,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
                 ""
             }
         }
+
         textInputVorname.text = kontakt.kFirstName
         textInputNachname.text = kontakt.kLastName
         textInputSex.text = kontakt.kSex

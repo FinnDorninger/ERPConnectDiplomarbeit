@@ -1,6 +1,7 @@
 package at.sysco.erp_connect.model
 
 import android.content.Context
+import android.util.Log
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.konto_list.KontoListContract
 import at.sysco.erp_connect.network.WebserviceApi
@@ -11,16 +12,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.*
-import android.net.ConnectivityManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.SharedPref
 import at.sysco.erp_connect.constants.FinishCode
+import at.sysco.erp_connect.model.ModelUtitlity.checkInternetConnection
+import at.sysco.erp_connect.model.ModelUtitlity.doesFileExist
+import at.sysco.erp_connect.model.ModelUtitlity.removeFile
 import java.lang.Exception
-import java.security.GeneralSecurityException
-import javax.xml.stream.FactoryConfigurationError
 import javax.xml.stream.XMLOutputFactory
-import javax.xml.stream.XMLStreamException
 
 const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
@@ -33,32 +33,12 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         when {
             checkInternetConnection(context) -> loadDataFromWebservice(onFinishedListener)
-            KONTO_LIST_FILE_NAME.doesFileExist() -> loadKontoListFromFile(onFinishedListener)
+            doesFileExist(
+                context,
+                KONTO_LIST_FILE_NAME
+            ) -> loadKontoListFromFile(onFinishedListener)
             else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
-    }
-
-    //Methode welche die Prüfung der Existenz einer Date erleichtert
-    private fun String.doesFileExist(): Boolean {
-        var doesExist = false
-        if (context.fileList().contains(this)) {
-            doesExist = true
-        }
-        return doesExist
-    }
-
-    //Prüft ob Internetverbindung besteht
-    private fun checkInternetConnection(context: Context): Boolean {
-        var isConnected = false
-        val connectivity =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val info = connectivity.allNetworks
-        for (i in info.indices) {
-            if (info[i] != null && connectivity.getNetworkInfo(info[i])!!.isConnected) {
-                isConnected = true
-            }
-        }
-        return isConnected
     }
 
     //Ladet Kontenliste aus dem Filesystem (XML-Datei)
@@ -81,23 +61,13 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             } else {
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
-        } catch (e: IOException) {
-            if (KONTAKTE_LIST_FILE_NAME.doesFileExist()) {
-                KONTAKTE_LIST_FILE_NAME.removeFile()
-                onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
-            } else {
-                onFinishedListener.onFailure(FailureCode.NO_DATA)
-            }
         } catch (e: Exception) {
-            KONTAKTE_LIST_FILE_NAME.removeFile()
-            onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
-        } catch (e: GeneralSecurityException) {
-            KONTAKTE_LIST_FILE_NAME.removeFile()
+            removeFile(context, KONTO_LIST_FILE_NAME)
             onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
         } finally {
             try {
                 fileInputStream.close()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 onFinishedListener.onFailure(FailureCode.ERROR_LOADING_FILE)
             }
         }
@@ -110,30 +80,38 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         val baseURL = SharedPref.getBaseURL(context)
         if (!baseURL.isNullOrBlank() && !userPw.isNullOrBlank() && !userName.isNullOrBlank()) {
             val kontoService = WebserviceApi.Factory.getApi(baseURL)
-            val call = kontoService.getKontoList(userPw, userName)
-            call.enqueue(object : Callback<KontoList> {
-                override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
-                    var responseKontoList = response.body()?.kontenList
-                    responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
-                    if (responseKontoList != null && response.isSuccessful) {
-                        onFinishedListener.onfinished(responseKontoList, FinishCode.finishedOnWeb)
-                    } else {
+            if (kontoService != null) {
+                val call = kontoService.getKontoList(userPw, userName)
+                call.enqueue(object : Callback<KontoList> {
+                    override fun onResponse(call: Call<KontoList>, response: Response<KontoList>) {
+                        var responseKontoList = response.body()?.kontenList
+                        responseKontoList = responseKontoList?.sortedWith(compareBy({ it.kName }))
+                        if (responseKontoList != null && response.isSuccessful) {
+                            onFinishedListener.onfinished(
+                                responseKontoList,
+                                FinishCode.finishedOnWeb
+                            )
+                        } else {
+                            tryLoadingFromFile(onFinishedListener)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<KontoList>, t: Throwable) {
                         tryLoadingFromFile(onFinishedListener)
                     }
-                }
-
-                override fun onFailure(call: Call<KontoList>, t: Throwable) {
-                    tryLoadingFromFile(onFinishedListener)
-                }
-            })
+                })
+            } else {
+                onFinishedListener.onFailure(FailureCode.NO_DATA)
+            }
         } else {
             onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
+
     }
 
     //Prüft ob Laden aus dem File möglich ist
     private fun tryLoadingFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
-        if (KONTO_LIST_FILE_NAME.doesFileExist()) {
+        if (doesFileExist(context, KONTO_LIST_FILE_NAME)) {
             loadKontoListFromFile(onFinishedListener)
         } else {
             if (checkInternetConnection(context)) {
@@ -146,7 +124,7 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
 
     //Funktion welches die Kontenliste in ein XML-File speichert
     fun saveKonto(listToSave: List<Konto>): String {
-        KONTO_LIST_FILE_NAME.removeFile()
+        removeFile(context, KONTO_LIST_FILE_NAME)
         var finishOrErrorCode: String = FinishCode.finishedSavingKonto
         lateinit var writer: OutputStreamWriter
         try {
@@ -167,6 +145,8 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
                     xmlStreamWriter.writeStartElement("Kontonummer")
                     xmlStreamWriter.writeCharacters(konto.kNumber)
                     xmlStreamWriter.writeEndElement()
+                } else {
+                    continue
                 }
                 if (konto.kName != null) {
                     xmlStreamWriter.writeStartElement("Kontoname")
@@ -242,32 +222,16 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
             }
             xmlStreamWriter.writeEndElement()
             xmlStreamWriter.writeEndDocument()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTO_LIST_FILE_NAME.removeFile()
-        } catch (e: XMLStreamException) {
-            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTO_LIST_FILE_NAME.removeFile()
-        } catch (e: FactoryConfigurationError) {
-            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTO_LIST_FILE_NAME.removeFile()
-        } catch (e: GeneralSecurityException) {
-            finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
-            KONTO_LIST_FILE_NAME.removeFile()
+            removeFile(context, KONTO_LIST_FILE_NAME)
         } finally {
             try {
                 writer.close()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 finishOrErrorCode = FailureCode.ERROR_SAVING_FILE
             }
         }
         return finishOrErrorCode
-    }
-
-    //Methode welches das Löschen einer Datei erleichtert
-    private fun String.removeFile() {
-        when {
-            this.doesFileExist() -> context.deleteFile(this)
-        }
     }
 }
