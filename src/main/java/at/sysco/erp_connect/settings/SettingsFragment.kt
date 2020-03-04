@@ -1,16 +1,14 @@
-package at.sysco.erp_connect
+package at.sysco.erp_connect.settings
 
 import android.os.Bundle
 import android.text.InputType
-import android.util.Base64
 import android.util.Patterns
 import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
+import at.sysco.erp_connect.R
 import at.sysco.erp_connect.network.HTTPClient
-import java.lang.NumberFormatException
 
 //Settingsfragment stellt die Einstellung dar. Setzt Listener auf die Einstellungsdaten. Prüft Benutzereingaben.
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -30,36 +28,25 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 //Prüft Benutzereingaben ob diese mit / endet und ob https://-Schema verwendet wurde
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
                     val oldURL = newValue as String
-                    var newURL: String
-                    var shouldSafe: Boolean
+                    val newURL: String
+                    var shouldSafe = false
 
                     if (oldURL.isEmpty()) {
                         removeFiles()
                     }
-                    newURL = when {
-                        oldURL.startsWith("https://") -> {
-                            oldURL
-                        }
-                        oldURL.startsWith("http://") -> oldURL.replace("http://", "https://")
-                        else -> "https://".plus(oldURL)
-                    }
-                    if (!oldURL.endsWith("/")) {
-                        newURL = newURL.plus("/")
-                    }
+                    newURL = SettingsUtility.improveURL(oldURL)
                     if (Patterns.WEB_URL.matcher(newURL).matches()) {
                         if (oldURL != newURL) {
                             removeFiles()
                             editURLPreference?.text = newURL
                             preferenceManager.sharedPreferences.edit().putString("base_url", newURL)
                                 .apply()
-                            shouldSafe = false
                         } else {
                             removeFiles()
                             shouldSafe = true
                         }
                     } else {
                         Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
-                        shouldSafe = false
                     }
                     return shouldSafe
                 }
@@ -74,13 +61,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val listenerConnection: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
-                    val shouldSafe: Boolean
-                    val checked = checkInput(newValue)
+                    var shouldSafe = false
+                    val checked = SettingsUtility.checkInput(newValue)
                     if (checked.first) {
                         HTTPClient.conTimeout = checked.second
                         shouldSafe = true
                     } else {
-                        shouldSafe = false
+                        Toast.makeText(
+                            context,
+                            "Eingabe muss zwischen 0-60 sein!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     return shouldSafe
                 }
@@ -89,13 +80,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val listenerReading: Preference.OnPreferenceChangeListener =
             object : Preference.OnPreferenceChangeListener {
                 override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
-                    val shouldSafe: Boolean
-                    val checked = checkInput(newValue)
+                    var shouldSafe = false
+                    val checked = SettingsUtility.checkInput(newValue)
                     if (checked.first) {
                         HTTPClient.readTimeout = checked.second
                         shouldSafe = true
                     } else {
-                        shouldSafe = false
+                        Toast.makeText(
+                            context,
+                            "Eingabe muss zwischen 0-60 sein!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     return shouldSafe
                 }
@@ -108,7 +103,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     var sucess = false
                     removeFiles()
                     val pwPlain = newValue as String
-                    if (!SharedPref.storePw(pwPlain, requireContext())) {
+                    if (!SharedPref.storePw(
+                            pwPlain,
+                            requireContext()
+                        )
+                    ) {
                         Toast.makeText(
                             context,
                             "Verschlüsselung hat nicht funktioniert!",
@@ -131,22 +130,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         editPwPreference?.onPreferenceChangeListener = listenerPassword
         editUserPreference?.onPreferenceChangeListener = listenerUsername
         editURLPreference?.onPreferenceChangeListener = listenerUrl
-    }
-
-    //Prüft Input ob dieser über 0 und unter 60 ist. (Für Timeout)
-    private fun checkInput(newValue: Any?): Pair<Boolean, Long> {
-        var returnPair: Pair<Boolean, Long> = Pair(false, 0)
-        try {
-            val value = Integer.parseInt(newValue.toString()).toLong()
-            if ((value > 0) && (value < 60)) {
-                returnPair = Pair(true, value)
-            } else {
-                Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
-            }
-        } catch (e: NumberFormatException) {
-            Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
-        }
-        return returnPair
     }
 
     //Methode welche die Daten löscht

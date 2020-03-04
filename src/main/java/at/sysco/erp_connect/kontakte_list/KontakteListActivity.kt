@@ -10,7 +10,7 @@ import at.sysco.erp_connect.constants.FailureCode
 import com.google.android.material.snackbar.Snackbar
 import android.content.Intent
 import android.view.*
-import at.sysco.erp_connect.SettingsActivity
+import at.sysco.erp_connect.settings.SettingsActivity
 import at.sysco.erp_connect.adapter.KontakteListAdapter
 import at.sysco.erp_connect.model.KontakteListModel
 import at.sysco.erp_connect.pojo.Kontakt

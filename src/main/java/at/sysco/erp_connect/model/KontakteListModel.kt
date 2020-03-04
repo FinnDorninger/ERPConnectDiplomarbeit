@@ -12,7 +12,7 @@ import java.io.*
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.model.ModelUtitlity.checkInternetConnection

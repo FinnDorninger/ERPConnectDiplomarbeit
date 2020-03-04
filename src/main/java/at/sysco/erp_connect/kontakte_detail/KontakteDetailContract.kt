@@ -20,6 +20,7 @@ interface KontakteDetailContract {
         fun onError(failureCode: String)
         fun hideProgress()
         fun showProgress()
+        fun initListener(kontakt: Kontakt)
     }
 
     //Presentierlogik

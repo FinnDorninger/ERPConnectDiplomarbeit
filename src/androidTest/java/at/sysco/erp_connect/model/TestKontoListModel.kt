@@ -4,7 +4,7 @@ import android.content.Context.MODE_PRIVATE
 import androidx.preference.PreferenceManager
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_list.KontoListContract

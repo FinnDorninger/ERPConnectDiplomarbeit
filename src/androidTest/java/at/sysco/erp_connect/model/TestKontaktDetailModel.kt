@@ -13,7 +13,7 @@ import org.junit.Assert.*
 import android.content.Context.MODE_PRIVATE
 import java.io.OutputStreamWriter
 import androidx.preference.PreferenceManager
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailContract
 import at.sysco.erp_connect.pojo.Kontakt
 import java.util.concurrent.CountDownLatch

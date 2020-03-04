@@ -1,17 +1,30 @@
 package at.sysco.erp_connect.kontakte_detail
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import at.sysco.erp_connect.pojo.KontaktUtility
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.model.KontakteDetailModel
 import at.sysco.erp_connect.pojo.Kontakt
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_kontakte_detail.*
+import kotlinx.android.synthetic.main.activity_kontakte_detail.buttonCall
+import kotlinx.android.synthetic.main.activity_kontakte_detail.buttonURL
+import kotlinx.android.synthetic.main.activity_kontakte_detail.layout_kontoDetail
+import kotlinx.android.synthetic.main.activity_kontakte_detail.progressBar
+import kotlinx.android.synthetic.main.activity_kontakte_detail.tableDetails
+import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputMail
+import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputName
+import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputPhoneNumber
+import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputPrefixCity
+import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputPrefixCountry
+import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputWWW
 
 //Activity welche Kontakt-Details anzeigt
 class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View {
@@ -76,23 +89,9 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
     //Methode welche die Daten aus dem Presenter bzw. Model darstellt. Setzt auch Listener für die Aktions-Buttons
     override fun setTextData(kontakt: Kontakt) {
         tableDetails.visibility = View.VISIBLE
-        textInputName.text = if (kontakt.kLastName != null) {
-            if (kontakt.kFirstName != null) {
-                kontakt.kLastName.plus(" ").plus(kontakt.kFirstName)
-            } else {
-                kontakt.kLastName
-            }
-        } else {
-            if (kontakt.kFirstName != null) {
-                kontakt.kFirstName
-            } else {
-                ""
-            }
-        }
-
+        textInputName.text = KontaktUtility.calculateName(kontakt)
         textInputVorname.text = kontakt.kFirstName
         textInputNachname.text = kontakt.kLastName
-        textInputSex.text = kontakt.kSex
         textInputAbteilung.text = kontakt.kAbteilung
         textInputFunktion.text = kontakt.kFunction
         textInputMail.text = kontakt.kMail
@@ -103,84 +102,83 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         textInputPrefixCountry.text = kontakt.kTelCountry
         textInputPrefixCity.text = kontakt.kTelCity
         textInputPhoneNumber.text = kontakt.kTelNumber
+        textInputSex.text = KontaktUtility.calculateSex(kontakt.kSex)
+    }
 
-        if (kontakt.kSex == "1") {
-            textInputSex.text = getString(R.string.sexWeiblich)
-        } else if (kontakt.kSex == "0") {
-            textInputSex.text = getString(R.string.sexMännlich)
+    override fun initListener(kontakt: Kontakt) {
+        val mail = kontakt.kMail
+        val number = KontaktUtility.calculateNumber(kontakt)
+        val url = kontakt.kURL
+        val color = Color.rgb(216, 27, 96)
+
+        if (!number.isBlank()) {
+            buttonCall.setOnClickListener {
+                dialNumber(number)
+            }
+            buttonCall.setColorFilter(color)
         } else {
-            textInputSex.text = "/"
+            notEnoughData()
         }
 
-        buttonCall.setOnClickListener {
-            dialNumber(kontakt)
+        if (!mail.isNullOrBlank()) {
+            buttonMail.setOnClickListener {
+                startMail(mail)
+            }
+        } else {
+            buttonMail.setColorFilter(color)
         }
 
-        buttonMail.setOnClickListener {
-            mailNumber(kontakt)
-        }
-
-        buttonURL.setOnClickListener {
-            openURL(kontakt)
+        if (!url.isNullOrBlank()) {
+            buttonURL.setOnClickListener {
+                openURL(url)
+            }
+        } else {
+            buttonURL.setColorFilter(color)
         }
     }
 
+    private fun notEnoughData() {
+        Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT).show()
+    }
+
     //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
-    private fun openURL(kontakt: Kontakt) {
-        var url = kontakt.kURL
-        if (url != null) {
-            if (url.startsWith("http:") or url.startsWith("https:")) {
-                val webpage: Uri = Uri.parse(url)
-                val intent = Intent(Intent.ACTION_VIEW, webpage)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
-            } else {
-                url = "https:$url"
-                val webpage: Uri = Uri.parse(url)
-                val intent = Intent(Intent.ACTION_VIEW, webpage)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(this, "Kein passender Browser vorhanden!", Toast.LENGTH_SHORT)
-                        .show()
-                }
+    private fun openURL(urlInput: String) {
+        var url = urlInput
+        if (url.startsWith("http:") or url.startsWith("https:")) {
+            val webpage: Uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
             }
         } else {
-            Toast.makeText(this, "Keine URL vorhanden!", Toast.LENGTH_SHORT).show()
+            url = "https:$url"
+            val webpage: Uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Kein passender Browser vorhanden!", Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
 
     }
 
     //Startet Intent welches eine Telefonnummer anruft.
-    private fun dialNumber(kontakt: Kontakt) {
-        var telNumber = kontakt.kTelNumber
-        val telNumberCity = kontakt.kTelCity
-        val telNumberCountry = kontakt.kTelCountry
-
-        if (telNumber != null && telNumberCity != null) {
-            telNumber = "$telNumberCity$telNumber"
-            if (telNumberCountry != null) {
-                telNumber = "$telNumberCountry$telNumber"
-            }
-            val intent = Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:$telNumber")
-            }
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            } else {
-                Toast.makeText(this, "Keine Telefon-App vorhanden!", Toast.LENGTH_SHORT).show()
-            }
+    private fun dialNumber(telNumber: String) {
+        val intent = Intent(Intent.ACTION_DIAL).apply {
+            data = Uri.parse("tel:$telNumber")
+        }
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
         } else {
-            Toast.makeText(this, "Keine vollständige Telefonnummer vorhanden!", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(this, "Keine Telefon-App vorhanden!", Toast.LENGTH_SHORT).show()
         }
     }
 
     //Startet Intent welcher eine E-Mail-Konversation an hinterlegte Adresse startet.
-    private fun mailNumber(kontakt: Kontakt) {
-        val mail = kontakt.kMail
-        if (mail != null && android.util.Patterns.EMAIL_ADDRESS.matcher(mail).matches()) {
+    private fun startMail(mail: String) {
+        if (android.util.Patterns.EMAIL_ADDRESS.matcher(mail).matches()) {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:$mail")
             }

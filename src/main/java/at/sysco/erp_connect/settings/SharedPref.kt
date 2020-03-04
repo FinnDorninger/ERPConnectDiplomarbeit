@@ -1,10 +1,7 @@
-package at.sysco.erp_connect
+package at.sysco.erp_connect.settings
 
 import android.content.Context
-import android.util.Base64
-import android.widget.Toast
 import androidx.preference.PreferenceManager
-import javax.crypto.spec.IvParameterSpec
 
 object SharedPref {
     //Liefert den Benutzernamen aus den SharedPreferences (gespeichertes!)

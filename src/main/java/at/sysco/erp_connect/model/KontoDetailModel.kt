@@ -3,7 +3,7 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.konto_detail.KontoDetailContract

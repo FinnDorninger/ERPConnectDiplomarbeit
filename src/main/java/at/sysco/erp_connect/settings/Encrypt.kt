@@ -1,11 +1,10 @@
-package at.sysco.erp_connect
+package at.sysco.erp_connect.settings
 
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import android.security.keystore.KeyProperties
 import android.security.keystore.KeyGenParameterSpec
 import android.util.Base64
-import android.widget.Toast
 import java.lang.Exception
 import java.security.*
 import javax.crypto.spec.IvParameterSpec

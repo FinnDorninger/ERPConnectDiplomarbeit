@@ -13,19 +13,8 @@ class KontoListPresenter(
     kontoListView: KontoListContract.View,
     private val kontoListModel: KontoListModel,
     private val kontaktListModel: KontakteListModel
-) : KontoListContract.Presenter, KontoListContract.Model.OnFinishedListener {
+) : KontoListContract.Presenter {
     var kontoListView: KontoListContract.View? = kontoListView
-
-    //Wird nach erfolgreicher Datenbeschaffung des Models geladen.
-    override fun onfinished(kontoArrayList: List<Konto>, finishCode: String) {
-        kontoListView?.displayKontoListInRecyclerView(kontoArrayList)
-        if (finishCode != FinishCode.finishedOnWeb) {
-            kontoListView?.onSucess(finishCode)
-            kontoListView?.hideProgress()
-        } else {
-            trySaving(kontoArrayList)
-        }
-    }
 
     //Versucht die Daten zu laden. Und gegebenenfalls auch noch, wenn im Einstellungsmneü "Synchronisieren von Kontakte"
     //ausgewählt wurde, werden diese ebenfalls noch geladen.
@@ -72,16 +61,27 @@ class KontoListPresenter(
         }
     }
 
-    //Methode welche bei Fehlern in der Datenbeschaffung aufgerufen wird.
-    override fun onFailure(failureCode: String) {
-        kontoListView?.hideProgress()
-        kontoListView?.onError(failureCode)
-    }
-
     //Beauftragt Model mit der Datenbeschaffung
     override fun requestFromWS() {
         kontoListView?.showProgress()
-        kontoListModel.getKontoList(this)
+        kontoListModel.getKontoList(object : KontoListContract.Model.OnFinishedListener {
+            //Wird nach erfolgreicher Datenbeschaffung des Models geladen.
+            override fun onfinished(kontoArrayList: List<Konto>, finishCode: String) {
+                kontoListView?.displayKontoListInRecyclerView(kontoArrayList)
+                if (finishCode != FinishCode.finishedOnWeb) {
+                    kontoListView?.onSucess(finishCode)
+                    kontoListView?.hideProgress()
+                } else {
+                    trySaving(kontoArrayList)
+                }
+            }
+
+            //Methode welche bei Fehlern in der Datenbeschaffung aufgerufen wird.
+            override fun onFailure(failureCode: String) {
+                kontoListView?.hideProgress()
+                kontoListView?.onError(failureCode)
+            }
+        })
     }
 
     //Setzt View null, damit keine Referenz mehr zur Activity besteht

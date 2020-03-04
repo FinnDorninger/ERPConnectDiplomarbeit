@@ -20,6 +20,7 @@ interface KontoDetailContract {
         fun onError(failureCode: String)
         fun hideProgress()
         fun showProgress()
+        fun initListener(konto: Konto)
     }
 
     //Presentierlogik

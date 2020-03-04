@@ -1,19 +1,14 @@
 package at.sysco.erp_connect
 
-import android.content.SharedPreferences
-import android.util.Base64
 import androidx.preference.PreferenceManager
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import at.sysco.erp_connect.settings.SharedPref
 
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import org.junit.Assert.*
-import java.nio.charset.Charset
-import java.security.SecureRandom
-import javax.crypto.KeyGenerator
-import javax.crypto.spec.IvParameterSpec
 
 /**
  * Instrumented test, which will execute on an Android device.

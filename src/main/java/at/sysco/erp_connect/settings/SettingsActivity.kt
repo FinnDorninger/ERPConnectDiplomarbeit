@@ -1,7 +1,8 @@
-package at.sysco.erp_connect
+package at.sysco.erp_connect.settings
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import at.sysco.erp_connect.R
 
 //Activity welche die Einstellungen anzeigt
 class SettingsActivity : AppCompatActivity() {
@@ -12,7 +13,10 @@ class SettingsActivity : AppCompatActivity() {
         //Stellt Settings Fragment dar.
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.fragmentContainer, SettingsFragment())
+            .replace(
+                R.id.fragmentContainer,
+                SettingsFragment()
+            )
             .commit()
     }
 }

@@ -8,31 +8,31 @@ import at.sysco.erp_connect.pojo.Kontakt
 class KontakteListPresenter(
     kontakteListView: KontakteListContract.View,
     private val kontakteListModel: KontakteListModel
-) : KontakteListContract.Presenter, KontakteListContract.Model.OnFinishedListener {
+) : KontakteListContract.Presenter {
     var kontakteListView: KontakteListContract.View? = kontakteListView
-
-    //Methode welche aufgerufen wird nach Erfolg des Models. Ruft Methoden zum Darstellen von Daten in der View auf.
-    override fun onfinished(kontaktArrayList: List<Kontakt>, finishCode: String) {
-        kontakteListView?.displayKontakteListInRecyclerView(kontaktArrayList)
-        kontakteListView?.hideProgress()
-        if (finishCode != FinishCode.finishedOnWeb) {
-            kontakteListView?.onSucess(finishCode)
-        } else {
-            val string = kontakteListModel.saveKontakte(kontaktArrayList)
-            kontakteListView?.onSucess(string)
-        }
-    }
-
-    //Methode welche bei Fehlern in der Datenbeschaffung aufgerufen wird.
-    override fun onFailure(failureCode: String) {
-        kontakteListView?.hideProgress()
-        kontakteListView?.onError(failureCode)
-    }
 
     //Beauftragt Model mit der Datenbeschaffung
     override fun requestFromWS() {
         kontakteListView?.showProgress()
-        kontakteListModel.getKontakteList(this)
+        kontakteListModel.getKontakteList(object : KontakteListContract.Model.OnFinishedListener {
+            //Methode welche aufgerufen wird nach Erfolg des Models. Ruft Methoden zum Darstellen von Daten in der View auf.
+            override fun onfinished(kontaktArrayList: List<Kontakt>, finishCode: String) {
+                kontakteListView?.displayKontakteListInRecyclerView(kontaktArrayList)
+                kontakteListView?.hideProgress()
+                if (finishCode != FinishCode.finishedOnWeb) {
+                    kontakteListView?.onSucess(finishCode)
+                } else {
+                    val string = kontakteListModel.saveKontakte(kontaktArrayList)
+                    kontakteListView?.onSucess(string)
+                }
+            }
+
+            //Methode welche bei Fehlern in der Datenbeschaffung aufgerufen wird.
+            override fun onFailure(failureCode: String) {
+                kontakteListView?.hideProgress()
+                kontakteListView?.onError(failureCode)
+            }
+        })
     }
 
     //Setzt View null damit keine Referenz mehr zur Activity besteht.

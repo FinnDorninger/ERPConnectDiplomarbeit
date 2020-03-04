@@ -13,11 +13,10 @@ import at.sysco.erp_connect.model.KontoListModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
-import android.util.Log
 import android.view.*
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.MasterKeys
-import at.sysco.erp_connect.SettingsActivity
+import at.sysco.erp_connect.settings.SettingsActivity
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
 import at.sysco.erp_connect.model.KontakteListModel
@@ -43,7 +42,6 @@ class KontoListActivity : AppCompatActivity(),
         kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         kontoListPresenter.requestFromWS()
-        Log.w("Test", "halloo")
     }
 
     //Listener auf die Auswahl in dem Bottom-Navigation-Menu

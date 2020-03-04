@@ -1,11 +1,13 @@
 package at.sysco.erp_connect.konto_detail
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import at.sysco.erp_connect.pojo.KontoUtility
 import at.sysco.erp_connect.R
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
@@ -14,6 +16,8 @@ import at.sysco.erp_connect.model.KontoDetailModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_konto_detail.*
 import java.net.URLEncoder
+
+//todoo
 
 //Activity welche Konto/Kunden-Details anzeigt
 class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
@@ -33,6 +37,55 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
 
         buttonAnsprechpartner.setOnClickListener {
             startKontakte(kontoNummer)
+        }
+    }
+
+    override fun initListener(konto: Konto) {
+        val mobileNumber = KontoUtility.createMobilNumber(konto)
+        val phoneNumber = KontoUtility.createFullNumber(konto)
+        val url = konto.kUrl
+        val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
+        val color = Color.rgb(216, 27, 96)
+
+        if (!phoneNumber.isBlank()) {
+            buttonCall.setOnClickListener {
+                dialNumber(phoneNumber)
+            }
+            buttonCall.setColorFilter(color)
+        } else {
+            buttonCall.setOnClickListener {
+                notEnoughData()
+            }
+        }
+        if (!url.isNullOrBlank()) {
+            buttonURL.setOnClickListener {
+                openURL(url)
+            }
+            buttonURL.setColorFilter(color)
+        } else {
+            buttonURL.setOnClickListener {
+                notEnoughData()
+            }
+        }
+        if (adressList.isNotEmpty()) {
+            buttonMap.setOnClickListener {
+                openAddress(adressList)
+            }
+            buttonMap.setColorFilter(color)
+        } else {
+            buttonMap.setOnClickListener {
+                notEnoughData()
+            }
+        }
+        if (!mobileNumber.isNotBlank()) {
+            buttonSMS.setOnClickListener {
+                messageNumber(mobileNumber)
+            }
+            buttonSMS.setColorFilter(color)
+        } else {
+            buttonSMS.setOnClickListener {
+                notEnoughData()
+            }
         }
     }
 
@@ -92,19 +145,6 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         textInputPrefixCity.text = konto.kTelCity
         textInputPhoneNumber.text = konto.kTelMain
         textInputNote.text = konto.kNote
-
-        buttonCall.setOnClickListener {
-            dialNumber(konto)
-        }
-        buttonURL.setOnClickListener {
-            openURL(konto)
-        }
-        buttonMap.setOnClickListener {
-            openAddress(konto)
-        }
-        buttonSMS.setOnClickListener {
-            messageNumber(konto)
-        }
     }
 
     //Wird ausgeführt nach ausführen des Buttons "Ihre Ansprechpartner". Intent auf Kontakte/Ansprechpartner-Activity
@@ -116,8 +156,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     }
 
     //Startet Intent welche hinterlegte Adresse mit Google Maps öffnet
-    private fun openAddress(konto: Konto) {
-        val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
+    private fun openAddress(adressList: List<String?>) {
         val adressIterator = adressList.iterator()
         var url = "https://www.google.com/maps/search/?api=1&query="
         var adress = ""
@@ -136,77 +175,50 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
             Toast.makeText(this, "Kein Google Maps installiert!", Toast.LENGTH_SHORT).show()
         }
     }
-
-    //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
-    private fun openURL(konto: Konto) {
-        var url = konto.kUrl
-        if (url != null) {
-            if (url.startsWith("http:") or url.startsWith("https:")) {
-                val webpage: Uri = Uri.parse(url)
-                val intent = Intent(Intent.ACTION_VIEW, webpage)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
-            } else {
-                url = "https:$url"
-                val webpage: Uri = Uri.parse(url)
-                val intent = Intent(Intent.ACTION_VIEW, webpage)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(this, "Google Maps benötigt!", Toast.LENGTH_SHORT).show()
-                }
-            }
-        } else {
-            Toast.makeText(this, "Keine URL vorhanden!", Toast.LENGTH_SHORT).show()
-        }
-
-    }
-
     //Startet Intent welches eine Telefonnummer anruft.
-    private fun dialNumber(konto: Konto) {
-        var telNumber = konto.kTelMain
-        val telNumberCity = konto.kTelCity
-        val telNumberCountry = konto.kTelCountry
-
-        if (telNumber != null && telNumberCity != null) {
-            telNumber = "$telNumberCity$telNumber"
-            if (telNumberCountry != null) {
-                telNumber = "$telNumberCountry$telNumber"
-            }
-            val intent = Intent(Intent.ACTION_DIAL).apply {
-                data = Uri.parse("tel:$telNumber")
-            }
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-                Toast.makeText(this, "Keine Telefon-App installiert!", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(this, "Zu wenige Informationen vorhanden!", Toast.LENGTH_SHORT).show()
+    private fun dialNumber(telNumber: String) {
+        val intent = Intent(Intent.ACTION_DIAL).apply {
+            data = Uri.parse("tel:$telNumber")
+        }
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+            Toast.makeText(this, "Keine Telefon-App installiert!", Toast.LENGTH_SHORT).show()
         }
     }
 
     //Intent welcher eine hinterlegte Nummer in einem Telefonfenster öffnet
-    private fun messageNumber(konto: Konto) {
-        var telMobilNumber = konto.kMobilTel
-        val telMobilProvider = konto.kMobilOperatorTel
-        val telMobilCountry = konto.kMobilCountry
+    private fun messageNumber(mobilNumber: String) {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("smsto:$mobilNumber")
+        }
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Keine SMS-App vorhanden!", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-        if (telMobilNumber != null && telMobilProvider != null) {
-            telMobilNumber = "$telMobilProvider$telMobilNumber"
-            if (telMobilCountry != null) {
-                telMobilNumber = "$telMobilCountry$telMobilNumber"
+    //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
+    private fun openURL(url: String) {
+        if (url.startsWith("http:") or url.startsWith("https:")) {
+            val webpage: Uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
             }
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("smsto:$telMobilNumber")
-            }
+        } else {
+            val newUrl = "https:$url"
+            val webpage: Uri = Uri.parse(newUrl)
+            val intent = Intent(Intent.ACTION_VIEW, webpage)
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Keine SMS-App vorhanden!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Kein Browser vorhanden!", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(this, "Zu wenige Informationen vorhanden!", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun notEnoughData() {
+        Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT).show()
     }
 }

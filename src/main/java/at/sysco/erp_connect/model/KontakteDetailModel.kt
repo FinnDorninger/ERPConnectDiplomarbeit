@@ -3,7 +3,7 @@ package at.sysco.erp_connect.model
 import android.content.Context
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_detail.KontakteDetailContract
@@ -12,14 +12,12 @@ import at.sysco.erp_connect.model.ModelUtitlity.doesFileExist
 import at.sysco.erp_connect.model.ModelUtitlity.removeFile
 import at.sysco.erp_connect.network.WebserviceApi
 import at.sysco.erp_connect.pojo.KontakteList
-import org.simpleframework.xml.core.PersistenceException
 import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
 import java.lang.Exception
 
 const val KONTAKTE_FILE_NAME = "KontakteFile.xml"
@@ -79,9 +77,12 @@ class KontakteDetailModel(val context: Context) : KontakteDetailContract.Model {
                         tryLoadingFromFile(onFinishedListener, kontaktNummer)
                     }
                 })
+            } else {
+                onFinishedListener.onFailure(FailureCode.NO_DATA)
             }
+        } else {
+            onFinishedListener.onFailure(FailureCode.NO_DATA)
         }
-        onFinishedListener.onFailure(FailureCode.NO_DATA)
     }
 
     //Prüft ob Laden aus dem Filesystem möglich ist

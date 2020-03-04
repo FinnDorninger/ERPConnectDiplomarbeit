@@ -4,16 +4,14 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
-import at.sysco.erp_connect.model.ModelUtitlity
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.*
 import android.content.Context.MODE_PRIVATE
 import java.io.OutputStreamWriter
 import androidx.preference.PreferenceManager
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
-import at.sysco.erp_connect.model.KontakteListModel
 import at.sysco.erp_connect.pojo.Kontakt
 import java.util.concurrent.CountDownLatch
 

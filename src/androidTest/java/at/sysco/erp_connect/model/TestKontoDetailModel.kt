@@ -4,8 +4,6 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
-import at.sysco.erp_connect.model.KontoListModel
-import at.sysco.erp_connect.model.ModelUtitlity
 import at.sysco.erp_connect.pojo.Konto
 
 import org.junit.Test
@@ -15,9 +13,8 @@ import org.junit.Assert.*
 import android.content.Context.MODE_PRIVATE
 import java.io.OutputStreamWriter
 import androidx.preference.PreferenceManager
-import at.sysco.erp_connect.SharedPref
+import at.sysco.erp_connect.settings.SharedPref
 import at.sysco.erp_connect.konto_detail.KontoDetailContract
-import at.sysco.erp_connect.model.KontoDetailModel
 import java.util.concurrent.CountDownLatch
 
 
