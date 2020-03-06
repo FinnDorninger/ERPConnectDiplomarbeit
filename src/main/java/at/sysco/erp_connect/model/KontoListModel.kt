@@ -25,9 +25,6 @@ const val KONTO_LIST_FILE_NAME = "KontoFile.xml"
 
 //Geschäftslogik der Kontenlisten
 class KontoListModel(val context: Context) : KontoListContract.Model {
-    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-
     //Methode welche entscheidet welches Verfahren für die Beschaffung der Daten ausgeführt werden soll
     override fun getKontoList(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         when {
@@ -43,6 +40,8 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
     //Ladet Kontenliste aus dem Filesystem (XML-Datei)
     private fun loadKontoListFromFile(onFinishedListener: KontoListContract.Model.OnFinishedListener) {
         lateinit var fileInputStream: FileInputStream
+        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
         try {
             val encFile = File(context.filesDir, KONTO_LIST_FILE_NAME)
             val encryptedFile = EncryptedFile.Builder(
@@ -126,6 +125,10 @@ class KontoListModel(val context: Context) : KontoListContract.Model {
         removeFile(context, KONTO_LIST_FILE_NAME)
         var finishOrErrorCode: String = FinishCode.finishedSavingKonto
         lateinit var writer: OutputStreamWriter
+
+        val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+        val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+
         try {
             val encryptedFile = EncryptedFile.Builder(
                 File(context.filesDir, KONTO_LIST_FILE_NAME),

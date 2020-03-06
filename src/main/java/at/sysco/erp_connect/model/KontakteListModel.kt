@@ -27,10 +27,6 @@ const val KONTAKTE_LIST_FILE_NAME = "KontakteFile.xml"
 
 //Geschäftslogik der Ansprechpartnerlisten
 class KontakteListModel(val context: Context) : KontakteListContract.Model {
-    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
-    val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
     //Methode welche entscheidet welches Verfahren für die Beschaffung der Daten ausgeführt werden soll
     override fun getKontakteList(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         when {
@@ -43,6 +39,7 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     }
 
     override fun isAutoSyncActivated(): Boolean {
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         return sharedPref.getBoolean("auto_sync", true)
     }
 
@@ -90,6 +87,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     private fun loadKontakteListFromFile(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
         lateinit var fileInputStream: FileInputStream
         try {
+            val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+            val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
             val encFile = File(context.filesDir, KONTAKTE_LIST_FILE_NAME)
             val encryptedFile = EncryptedFile.Builder(
                 encFile,
@@ -137,6 +136,8 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
         var finishOrErrorCode: String = FinishCode.finishedSavingKontakte
         lateinit var writer: OutputStreamWriter
         try {
+            val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
+            val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
             val encryptedFile = EncryptedFile.Builder(
                 File(context.filesDir, KONTAKTE_LIST_FILE_NAME),
                 context,

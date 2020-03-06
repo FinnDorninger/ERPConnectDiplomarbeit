@@ -1,4 +1,4 @@
-package at.sysco.erp_connect.instrumented.settingsUtilitity
+package at.sysco.erp_connect.test.settingsUtilitity
 
 import at.sysco.erp_connect.settings.SettingsUtility
 import org.junit.Test

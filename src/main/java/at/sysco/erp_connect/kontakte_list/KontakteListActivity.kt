@@ -95,6 +95,7 @@ class KontakteListActivity : AppCompatActivity(),
 
     //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
+        search_konto.visibility = View.GONE
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)

@@ -21,7 +21,6 @@ import java.util.concurrent.CountDownLatch
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-//to: emulate fullstorage.
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class TestKontoListModel {

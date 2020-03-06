@@ -23,12 +23,10 @@ import at.sysco.erp_connect.model.KontakteListModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 //Activity für die Listen-Darstellung von allen Konten/Ansprechpartnerdetails
-class KontoListActivity : AppCompatActivity(),
-    KontoListContract.View {
+class KontoListActivity : AppCompatActivity(), KontoListContract.View {
 
-    private lateinit var kontoListPresenter: KontoListPresenter
-    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-    private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+    var kontoListPresenter: KontoListPresenter =
+        KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
     var firstCall: Boolean = true
     var snackbar: Snackbar? = null
     var adapterRV: KontoAdapter? = null
@@ -44,7 +42,6 @@ class KontoListActivity : AppCompatActivity(),
     }
 
     override fun startPresenterRequest() {
-        kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         kontoListPresenter.requestFromWS()
     }
 
@@ -84,12 +81,13 @@ class KontoListActivity : AppCompatActivity(),
 
     //Löscht Daten aus Recyclerview
     fun clearResults() {
+        search_konto.visibility = View.GONE
         snackbar?.dismiss()
         adapterRV?.clearAll()
     }
 
     //Stellt Snackbar dar.
-    private fun showSnackbar(title: String, withAction: Boolean) {
+    fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             snackbar =
                 Snackbar.make(
@@ -115,6 +113,7 @@ class KontoListActivity : AppCompatActivity(),
 
     //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
+        search_konto.visibility = View.GONE
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)

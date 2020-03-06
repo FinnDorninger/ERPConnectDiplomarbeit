@@ -1,4 +1,4 @@
-package at.sysco.erp_connect.instrumented.pojoUtilitity
+package at.sysco.erp_connect.test.pojoUtilitity
 
 import at.sysco.erp_connect.pojo.KontaktUtility
 import at.sysco.erp_connect.pojo.Kontakt

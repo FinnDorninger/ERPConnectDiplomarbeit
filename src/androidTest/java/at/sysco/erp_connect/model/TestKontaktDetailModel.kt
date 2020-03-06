@@ -24,7 +24,6 @@ import java.util.concurrent.CountDownLatch
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-//TO: emulate fullstorage.
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class TestKontaktDetailModel {

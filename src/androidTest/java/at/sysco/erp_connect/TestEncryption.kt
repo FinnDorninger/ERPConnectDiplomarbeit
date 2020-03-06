@@ -3,6 +3,8 @@ package at.sysco.erp_connect
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
+import androidx.test.rule.ActivityTestRule
+import at.sysco.erp_connect.konto_list.KontoListActivity
 import at.sysco.erp_connect.settings.Encrypt
 
 import org.junit.Test

@@ -1,8 +1,7 @@
-package at.sysco.erp_connect.instrumented.presenter
+package at.sysco.erp_connect.test.presenter
 
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
-import at.sysco.erp_connect.kontakte_detail.KontakteDetailPresenter
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.konto_list.KontoListContract
 import at.sysco.erp_connect.konto_list.KontoListPresenter
@@ -11,11 +10,7 @@ import at.sysco.erp_connect.model.KontoListModel
 import at.sysco.erp_connect.pojo.Kontakt
 import at.sysco.erp_connect.pojo.Konto
 import com.nhaarman.mockito_kotlin.*
-import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
-import org.junit.internal.runners.statements.Fail
-import org.junit.runner.notification.Failure
 
 /**
  * Example local unit test, which will execute on the development machine (host).
