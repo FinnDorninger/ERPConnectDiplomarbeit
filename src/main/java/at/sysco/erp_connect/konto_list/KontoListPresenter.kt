@@ -23,12 +23,12 @@ class KontoListPresenter(
         if (kontoArrayList != null) {
             //Ruft Model zur Kontenspeicherung auf.
             message = kontoListModel.saveKonto(kontoArrayList)
-            if (message == FinishCode.finishedSavingKonto && kontaktListModel.autoSync) {
+            if (message == FinishCode.finishedSavingKonto && kontaktListModel.isAutoSyncActivated()) {
                 //Startet bei bestehender Einstellung "Synchronisieren von Kontakte" auch das Kontakte-Model zum diese zu laden.
                 kontaktListModel.getKontakteList(object : KontakteListContract.Model.OnFinishedListener {
                     override fun onfinished(kontaktArrayList: List<Kontakt>, finishCode: String) {
                         if (finishCode != FinishCode.finishedOnWeb) {
-                            kontoListView?.onSucess(finishCode)
+                            kontoListView?.onSucess(FinishCode.finishedOnFileAutosyncKontakt)
                             kontoListView?.hideProgress()
                         } else {
                             //Ruft die gleiche Methode wieder auf
@@ -38,7 +38,7 @@ class KontoListPresenter(
 
                     override fun onFailure(failureCode: String) {
                         kontoListView?.hideProgress()
-                        kontoListView?.onError(message)
+                        kontoListView?.onSucess(FinishCode.finishedOnFileAutosyncKontakt)
                     }
                 })
             } else if (message == FinishCode.finishedSavingKonto) {
@@ -56,7 +56,7 @@ class KontoListPresenter(
                 kontoListView?.onSucess(message)
             } else {
                 kontoListView?.hideProgress()
-                kontoListView?.onError(message)
+                kontoListView?.onSucess(FinishCode.finishedOnFileAutosyncKontakt)
             }
         }
     }

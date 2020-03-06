@@ -2,6 +2,7 @@ package at.sysco.erp_connect.instrumented.presenter
 
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
+import at.sysco.erp_connect.kontakte_detail.KontakteDetailPresenter
 import at.sysco.erp_connect.kontakte_list.KontakteListContract
 import at.sysco.erp_connect.konto_list.KontoListContract
 import at.sysco.erp_connect.konto_list.KontoListPresenter
@@ -13,6 +14,8 @@ import com.nhaarman.mockito_kotlin.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.internal.runners.statements.Fail
+import org.junit.runner.notification.Failure
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -20,10 +23,10 @@ import org.junit.Test
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class TestKontoListPresenter {
-    lateinit var mView: KontoListContract.View
-    lateinit var mModelKonto: KontoListModel
-    lateinit var mModelKontakt: KontakteListModel
-    lateinit var presenter: KontoListPresenter
+    var mView: KontoListContract.View = mock()
+    var mModelKonto: KontoListModel = mock()
+    var mModelKontakt: KontakteListModel = mock()
+    var presenter: KontoListPresenter = KontoListPresenter(mView, mModelKonto, mModelKontakt)
 
     val konto = Konto("1", "Test")
     val listKonto = listOf(konto)
@@ -31,32 +34,27 @@ class TestKontoListPresenter {
     val kontakt = Kontakt("1", "Test")
     val listKontakt = listOf(kontakt)
 
-    @Before
-    fun setUpPresenter() {
-        mModelKonto = mock()
-        mView = mock()
-        presenter = KontoListPresenter(mView, mModelKonto, mModelKontakt)
-    }
-
     @Test
-    fun displayLoading() {
+    fun showDisplayLoading() {
         presenter.requestFromWS()
         verify(mView).showProgress()
     }
 
     @Test
-    fun loadDataSucessAndSaveKontoAndKontakt() {
-        val finishedCode = FinishCode.finishedSavingKontakte
-
+    fun loadAndSaveKonten() {
+        val finishedCode = FinishCode.finishedSavingKonto
         doAnswer {
             val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onfinished(listKonto, finishedCode)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
         }.whenever(mModelKonto).getKontoList(any())
 
         doAnswer {
-            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onfinished(listKontakt, finishedCode)
-        }.whenever(mModelKontakt).getKontakteList(any())
+            false
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
 
         presenter.requestFromWS()
         verify(mView, never()).onError(any())
@@ -66,67 +64,81 @@ class TestKontoListPresenter {
     }
 
     @Test
-    fun loadDataSaveKontakteAndKonto() {
-        val finishedCode = FinishCode.finishedSavingKontakte
-
-        doAnswer {
-            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onfinished(listKonto, finishedCode)
-        }.whenever(mModelKonto).getKontoList(any())
-
-        doAnswer {
-            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onfinished(listKontakt, finishedCode)
-        }.whenever(mModelKontakt).getKontakteList(any())
-
-        presenter.requestFromWS()
-        verify(mView, never()).onError(any())
-        verify(mView).onSucess(finishedCode)
-        verify(mView, never()).onSucess(any())
-        verify(mView).hideProgress()
-        verify(mView).displayKontoListInRecyclerView(listKonto)
-    }
-
-    @Test
-    fun loadDataSucessFromFile() {
+    fun loadOnlyOffline() {
         val finishedCode = FinishCode.finishedOnFile
-
         doAnswer {
             val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onfinished(listKonto, finishedCode)
+            callback.onfinished(listKonto, FinishCode.finishedOnFile)
         }.whenever(mModelKonto).getKontoList(any())
 
+        doAnswer {
+            false
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
         presenter.requestFromWS()
-        verify(mView, never()).onError(finishedCode)
-        verify(mView).onSucess(any())
+        verify(mView, never()).onError(any())
+        verify(mView).onSucess(finishedCode)
         verify(mView).hideProgress()
         verify(mView).displayKontoListInRecyclerView(listKonto)
     }
 
     @Test
-    fun loadDataFailedFromWeb() {
-        val failureCode = FailureCode.NO_DATA
-
+    fun failedSaving() {
+        val failureCode = FailureCode.ERROR_SAVING_FILE
         doAnswer {
             val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onFailure(failureCode)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
         }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            false
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            FailureCode.ERROR_SAVING_FILE
+        }.whenever(mModelKonto).saveKonto(any())
 
         presenter.requestFromWS()
         verify(mView).onError(failureCode)
         verify(mView, never()).onSucess(any())
         verify(mView).hideProgress()
-        verify(mView, never()).displayKontoListInRecyclerView(listKonto)
+        verify(mView).displayKontoListInRecyclerView(listKonto)
     }
 
     @Test
-    fun loadDataFailedNoConnection() {
+    fun failedLoading() {
+        val failureCode = FailureCode.NOT_SAVED
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onFailure(FailureCode.NOT_SAVED)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            false
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        presenter.requestFromWS()
+        verify(mView).onError(failureCode)
+        verify(mView, never()).onSucess(any())
+        verify(mView).hideProgress()
+        verify(mView, never()).displayKontoListInRecyclerView(any())
+    }
+
+    @Test
+    fun failedNoConnectionNoFiles() {
         val failureCode = FailureCode.NO_CONNECTION
-
         doAnswer {
             val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onFailure(failureCode)
+            callback.onFailure(FailureCode.NO_CONNECTION)
         }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            false
+        }.whenever(mModelKontakt).isAutoSyncActivated()
 
         presenter.requestFromWS()
         verify(mView).onError(failureCode)
@@ -135,26 +147,254 @@ class TestKontoListPresenter {
         verify(mView, never()).displayKontoListInRecyclerView(listKonto)
     }
 
+
     @Test
-    fun loadDataFailedCorruptFile() {
-        val failureCode = FailureCode.ERROR_LOADING_FILE
+    fun autoSyncSucess() {
+        val finishedCode = FinishCode.finishedSavingKontakte
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKonto, finishedCode)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKontakt, finishedCode)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        presenter.requestFromWS()
+        verify(mView, never()).onError(any())
+        verify(mView).onSucess(finishedCode)
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+    @Test
+    fun autoSyncKontakteFromFile() {
+        val finishedCode = FinishCode.finishedOnFileAutosyncKontakt
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKontakt, FinishCode.finishedOnFile)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        presenter.requestFromWS()
+        verify(mView, never()).onError(any())
+        verify(mView).onSucess(finishedCode)
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+
+    @Test
+    fun autoSyncKontakteNotLoadedFromFile() {
+        val finishedCode = FinishCode.finishedOnFileAutosyncKontakt
 
         doAnswer {
             val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
-            callback.onFailure(failureCode)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
         }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onFailure(FailureCode.NO_DATA)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        presenter.requestFromWS()
+        verify(mView).onSucess(finishedCode)
+        verify(mView, never()).onError(any())
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+    @Test
+    fun autoSyncKontakteNoConnection() {
+        val finishedCode = FinishCode.finishedOnFileAutosyncKontakt
+
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onFailure(FailureCode.NO_CONNECTION)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        presenter.requestFromWS()
+        verify(mView).onSucess(finishedCode)
+        verify(mView, never()).onError(any())
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+    @Test
+    fun autoSyncKontakteErrorSaving() {
+        val finishedCode = FinishCode.finishedOnFileAutosyncKontakt
+
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKontakt, FinishCode.finishedOnWeb)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
+        doAnswer {
+            FailureCode.ERROR_SAVING_FILE
+        }.whenever(mModelKontakt).saveKontakte(any())
+
+        presenter.requestFromWS()
+        verify(mView).onSucess(finishedCode)
+        verify(mView, never()).onError(any())
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+//================
+
+    @Test
+    fun autoSyncKontoOffline() {
+        val finishedCode = FinishCode.finishedOnFile
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKonto, FinishCode.finishedOnFile)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            false
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            FinishCode.finishedSavingKonto
+        }.whenever(mModelKonto).saveKonto(any())
+
+        presenter.requestFromWS()
+        verify(mView, never()).onError(any())
+        verify(mView).onSucess(finishedCode)
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+    @Test
+    fun autoSyncFailedSaving() {
+        val failureCode = FailureCode.ERROR_SAVING_FILE
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKonto, FinishCode.finishedOnWeb)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            FailureCode.ERROR_SAVING_FILE
+        }.whenever(mModelKonto).saveKonto(any())
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKontakt, FinishCode.finishedOnWeb)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        presenter.requestFromWS()
+        verify(mView).onError(failureCode)
+        verify(mView, never()).onSucess(any())
+        verify(mView).hideProgress()
+        verify(mView).displayKontoListInRecyclerView(listKonto)
+    }
+
+    @Test
+    fun autoSyncFailedLoading() {
+        val failureCode = FailureCode.NOT_SAVED
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onFailure(FailureCode.NOT_SAVED)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKontakt, FinishCode.finishedOnWeb)
+        }.whenever(mModelKontakt).getKontakteList(any())
+
+        presenter.requestFromWS()
+        verify(mView).onError(failureCode)
+        verify(mView, never()).onSucess(any())
+        verify(mView).hideProgress()
+        verify(mView, never()).displayKontoListInRecyclerView(any())
+    }
+
+    @Test
+    fun autoSyncKontoFailedNoConnectionNoFiles() {
+        val failureCode = FailureCode.NO_CONNECTION
+        doAnswer {
+            val callback: KontoListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onFailure(FailureCode.NO_CONNECTION)
+        }.whenever(mModelKonto).getKontoList(any())
+
+        doAnswer {
+            true
+        }.whenever(mModelKontakt).isAutoSyncActivated()
+
+        doAnswer {
+            val callback: KontakteListContract.Model.OnFinishedListener = it.getArgument(0)
+            callback.onfinished(listKontakt, FinishCode.finishedOnWeb)
+        }.whenever(mModelKontakt).getKontakteList(any())
 
         presenter.requestFromWS()
         verify(mView).onError(failureCode)
         verify(mView, never()).onSucess(any())
         verify(mView).hideProgress()
         verify(mView, never()).displayKontoListInRecyclerView(listKonto)
-    }
-
-    @Test
-    fun decoupleView() {
-        presenter.onDestroy()
-        Assert.assertNull(presenter.kontoListView)
     }
 }
 

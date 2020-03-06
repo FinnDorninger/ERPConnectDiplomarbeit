@@ -4,6 +4,11 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 
 object SharedPref {
+    fun isAutoSyncActivated(context: Context): Boolean {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        return sharedPref.getBoolean("auto_sync", true)
+    }
+
     //Liefert den Benutzernamen aus den SharedPreferences (gespeichertes!)
     fun getUserName(context: Context): String? {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)

@@ -12,6 +12,7 @@ import at.sysco.erp_connect.network.HTTPClient
 
 //Settingsfragment stellt die Einstellung dar. Setzt Listener auf die Einstellungsdaten. Prüft Benutzereingaben.
 class SettingsFragment : PreferenceFragmentCompat() {
+    var toast: Toast? = null
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         //Ladet Einstellungshierarchie
         setPreferencesFromResource(R.xml.settings_pref, rootKey)
@@ -46,7 +47,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                             shouldSafe = true
                         }
                     } else {
-                        Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG).show()
+                        toast = Toast.makeText(context, "Ungültige Eingabe", Toast.LENGTH_LONG)
+                        toast?.show()
                     }
                     return shouldSafe
                 }
@@ -67,11 +69,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
                         HTTPClient.conTimeout = checked.second
                         shouldSafe = true
                     } else {
-                        Toast.makeText(
+                        toast = Toast.makeText(
                             context,
                             "Eingabe muss zwischen 0-60 sein!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                            Toast.LENGTH_LONG
+                        )
+                        toast?.show()
                     }
                     return shouldSafe
                 }
@@ -86,11 +89,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
                         HTTPClient.readTimeout = checked.second
                         shouldSafe = true
                     } else {
-                        Toast.makeText(
+                        toast = Toast.makeText(
                             context,
                             "Eingabe muss zwischen 0-60 sein!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                            Toast.LENGTH_LONG
+                        )
+                        toast?.show()
                     }
                     return shouldSafe
                 }
@@ -108,11 +112,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
                             requireContext()
                         )
                     ) {
-                        Toast.makeText(
+                        toast = Toast.makeText(
                             context,
                             "Verschlüsselung hat nicht funktioniert!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                            Toast.LENGTH_LONG
+                        )
+                        toast?.show()
                         sucess = true
                     }
                     return sucess
@@ -130,6 +135,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
         editPwPreference?.onPreferenceChangeListener = listenerPassword
         editUserPreference?.onPreferenceChangeListener = listenerUsername
         editURLPreference?.onPreferenceChangeListener = listenerUrl
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        toast?.cancel()
     }
 
     //Methode welche die Daten löscht

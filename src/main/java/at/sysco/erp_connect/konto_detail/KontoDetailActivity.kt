@@ -23,6 +23,7 @@ import java.net.URLEncoder
 class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     lateinit var kontoDetailPresenter: KontoDetailPresenter
     lateinit var kontoNummer: String
+    var toast: Toast? = null
 
     //Methode des Lifecycles. Setzt Layout und beauftragt Presenter für Beschaffung der Daten.
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,14 +31,19 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         setContentView(R.layout.activity_konto_detail)
         val extra = intent.getStringExtra("id")
         if (extra != null) {
-            kontoNummer = extra
+            startPresenterRequest(extra)
+        } else {
+            showSnackbar("Keine Kontonummer vorhanden, bitte Seite neuladen!", false)
         }
-        kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
-        kontoDetailPresenter.requestFromWS(kontoNummer)
 
         buttonAnsprechpartner.setOnClickListener {
             startKontakte(kontoNummer)
         }
+    }
+
+    override fun startPresenterRequest(kontoNummer: String) {
+        kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
+        kontoDetailPresenter.requestFromWS(kontoNummer)
     }
 
     override fun initListener(konto: Konto) {
@@ -77,7 +83,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
                 notEnoughData()
             }
         }
-        if (!mobileNumber.isNotBlank()) {
+        if (!mobileNumber.isBlank()) {
             buttonSMS.setOnClickListener {
                 messageNumber(mobileNumber)
             }
@@ -172,7 +178,8 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
-            Toast.makeText(this, "Kein Google Maps installiert!", Toast.LENGTH_SHORT).show()
+            toast = Toast.makeText(this, "Kein Google Maps installiert!", Toast.LENGTH_SHORT)
+            toast?.show()
         }
     }
     //Startet Intent welches eine Telefonnummer anruft.
@@ -182,7 +189,9 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
-            Toast.makeText(this, "Keine Telefon-App installiert!", Toast.LENGTH_SHORT).show()
+        } else {
+            toast = Toast.makeText(this, "Keine Telefon-App installiert!", Toast.LENGTH_SHORT)
+            toast?.show()
         }
     }
 
@@ -194,7 +203,8 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
-            Toast.makeText(this, "Keine SMS-App vorhanden!", Toast.LENGTH_SHORT).show()
+            toast = Toast.makeText(this, "Keine SMS-App vorhanden!", Toast.LENGTH_SHORT)
+            toast?.show()
         }
     }
 
@@ -213,12 +223,19 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Kein Browser vorhanden!", Toast.LENGTH_SHORT).show()
+                toast = Toast.makeText(this, "Kein Browser vorhanden!", Toast.LENGTH_SHORT)
+                toast?.show()
             }
         }
     }
 
     private fun notEnoughData() {
-        Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT).show()
+        toast = Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT)
+        toast?.show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        toast?.cancel()
     }
 }

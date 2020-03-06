@@ -39,8 +39,12 @@ class KontoListActivity : AppCompatActivity(),
         setContentView(R.layout.activity_konto_list)
         initRecyclerView()
         PreferenceManager.setDefaultValues(this, R.xml.settings_pref, false)
-        kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        startPresenterRequest()
+    }
+
+    override fun startPresenterRequest() {
+        kontoListPresenter = KontoListPresenter(this, KontoListModel(this), KontakteListModel(this))
         kontoListPresenter.requestFromWS()
     }
 

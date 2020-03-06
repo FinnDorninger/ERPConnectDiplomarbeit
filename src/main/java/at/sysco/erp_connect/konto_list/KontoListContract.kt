@@ -21,6 +21,7 @@ interface KontoListContract {
         fun onSucess(finishCode: String)
         fun onError(failureCode: String)
         fun displayKontoListInRecyclerView(kontoList: List<Konto>)
+        fun startPresenterRequest()
     }
 
     //Präsentierlogik

@@ -30,7 +30,6 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
     val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    var autoSync = sharedPref.getBoolean("auto_sync", true)
 
     //Methode welche entscheidet welches Verfahren für die Beschaffung der Daten ausgeführt werden soll
     override fun getKontakteList(onFinishedListener: KontakteListContract.Model.OnFinishedListener) {
@@ -41,6 +40,10 @@ class KontakteListModel(val context: Context) : KontakteListContract.Model {
             )
             else -> onFinishedListener.onFailure(FailureCode.NO_CONNECTION)
         }
+    }
+
+    override fun isAutoSyncActivated(): Boolean {
+        return sharedPref.getBoolean("auto_sync", true)
     }
 
     //Ladet Daten aus dem Webservice

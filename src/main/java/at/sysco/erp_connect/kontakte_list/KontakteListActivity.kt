@@ -32,13 +32,14 @@ class KontakteListActivity : AppCompatActivity(),
         val intent = intent
         //Ruft Extras auf welche angehängt wurden. Extra ist die ID des zu ladenden Kontakt/Ansprechpartner
         search = intent.getStringExtra("searchdetail")
-
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        startPresenterRequest()
         initRecyclerView()
+    }
 
+    override fun startPresenterRequest() {
         kontakteListPresenter = KontakteListPresenter(this, KontakteListModel(this))
         kontakteListPresenter.requestFromWS()
-
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     //Listener auf die Auswahl in dem Bottom-Navigation-Menu

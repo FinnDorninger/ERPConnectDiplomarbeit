@@ -30,6 +30,7 @@ import kotlinx.android.synthetic.main.activity_kontakte_detail.textInputWWW
 class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View {
     lateinit var kontaktDetailPresenter: KontakteDetailPresenter
     lateinit var kontaktNummer: String
+    var toast: Toast? = null
 
     //Methode des Lifecycles. Setzt Layout und beauftragt Presenter für Beschaffung der Daten.
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +40,13 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         //Ruft Extras auf welche angehängt wurden. Extra ist die ID des zu ladenden Kontakt/Ansprechpartner
         val extra = intent.getStringExtra("id")
         if (extra != null) {
-            kontaktNummer = extra
+            startPresenterRequest(extra)
+        } else {
+            showSnackbar("Keine Konto-Nummer vorhanden!", false)
         }
+    }
+
+    override fun startPresenterRequest(kontaktNummer: String) {
         kontaktDetailPresenter = KontakteDetailPresenter(this, KontakteDetailModel(this))
         kontaktDetailPresenter.requestFromWS(kontaktNummer)
     }
@@ -117,28 +123,37 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
             }
             buttonCall.setColorFilter(color)
         } else {
-            notEnoughData()
+            buttonCall.setOnClickListener {
+                notEnoughData()
+            }
         }
 
         if (!mail.isNullOrBlank()) {
             buttonMail.setOnClickListener {
                 startMail(mail)
             }
-        } else {
             buttonMail.setColorFilter(color)
+        } else {
+            buttonMail.setOnClickListener {
+                notEnoughData()
+            }
         }
 
         if (!url.isNullOrBlank()) {
             buttonURL.setOnClickListener {
                 openURL(url)
             }
-        } else {
             buttonURL.setColorFilter(color)
+        } else {
+            buttonURL.setOnClickListener {
+                notEnoughData()
+            }
         }
     }
 
     private fun notEnoughData() {
-        Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT).show()
+        toast = Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT)
+        toast?.show()
     }
 
     //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
@@ -157,8 +172,9 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Kein passender Browser vorhanden!", Toast.LENGTH_SHORT)
-                    .show()
+                toast =
+                    Toast.makeText(this, "Kein passender Browser vorhanden!", Toast.LENGTH_SHORT)
+                toast?.show()
             }
         }
 
@@ -172,7 +188,8 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
-            Toast.makeText(this, "Keine Telefon-App vorhanden!", Toast.LENGTH_SHORT).show()
+            toast = Toast.makeText(this, "Keine Telefon-App vorhanden!", Toast.LENGTH_SHORT)
+            toast?.show()
         }
     }
 
@@ -185,10 +202,18 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Keine Mail-App vorhanden!", Toast.LENGTH_SHORT).show()
+                toast = Toast.makeText(this, "Keine Mail-App vorhanden!", Toast.LENGTH_SHORT)
+                toast?.show()
             }
         } else {
-            Toast.makeText(this, "Keine E-Mail-Adresse vorhanden!", Toast.LENGTH_SHORT).show()
+            toast =
+                Toast.makeText(this, "Keine gültige E-Mail-Adresse vorhanden!", Toast.LENGTH_SHORT)
+            toast?.show()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        toast?.cancel()
     }
 }

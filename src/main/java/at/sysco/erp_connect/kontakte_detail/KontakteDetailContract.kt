@@ -21,6 +21,7 @@ interface KontakteDetailContract {
         fun hideProgress()
         fun showProgress()
         fun initListener(kontakt: Kontakt)
+        fun startPresenterRequest(kontaktNummer: String)
     }
 
     //Presentierlogik

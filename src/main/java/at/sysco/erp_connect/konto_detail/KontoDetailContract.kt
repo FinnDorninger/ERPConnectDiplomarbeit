@@ -21,6 +21,7 @@ interface KontoDetailContract {
         fun hideProgress()
         fun showProgress()
         fun initListener(konto: Konto)
+        fun startPresenterRequest(kontoNummer: String)
     }
 
     //Presentierlogik

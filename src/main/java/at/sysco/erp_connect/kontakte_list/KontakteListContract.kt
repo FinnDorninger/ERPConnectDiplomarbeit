@@ -11,6 +11,7 @@ interface KontakteListContract {
         }
 
         fun getKontakteList(onFinishedListener: OnFinishedListener)
+        fun isAutoSyncActivated(): Boolean
     }
 
     //Darstellung
@@ -20,6 +21,7 @@ interface KontakteListContract {
         fun onSucess(finishCode: String)
         fun onError(failureCode: String)
         fun displayKontakteListInRecyclerView(kontakteList: List<Kontakt>)
+        fun startPresenterRequest()
     }
 
     //Presentierlogik
