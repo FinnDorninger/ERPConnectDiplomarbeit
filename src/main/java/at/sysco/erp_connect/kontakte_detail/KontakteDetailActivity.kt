@@ -40,9 +40,11 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         //Ruft Extras auf welche angehängt wurden. Extra ist die ID des zu ladenden Kontakt/Ansprechpartner
         val extra = intent.getStringExtra("id")
         if (extra != null) {
-            startPresenterRequest(extra)
+            kontaktNummer = extra
+            startPresenterRequest(kontaktNummer)
         } else {
-            showSnackbar("Keine Konto-Nummer vorhanden!", false)
+            showSnackbar(FailureCode.NO_DETAIL_NUMBER, true)
+            kontaktNummer = "notvalidkontaktnumber"
         }
     }
 
@@ -79,12 +81,21 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
     //Darstellung von Fehlermeldungen oder Erfolsmeldungen in Snackbar
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
-            val snackbar: Snackbar =
-                Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
-            snackbar.setAction(
-                "Retry!"
-            ) { kontaktDetailPresenter.requestFromWS(kontaktNummer) }
-            snackbar.show()
+            if (title != FailureCode.NO_DETAIL_NUMBER) {
+                val snackbar: Snackbar =
+                    Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
+                snackbar.setAction(
+                    "Retry!"
+                ) { kontaktDetailPresenter.requestFromWS(kontaktNummer) }
+                snackbar.show()
+            } else {
+                val snackbar: Snackbar =
+                    Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
+                snackbar.setAction(
+                    "Zurück!"
+                ) { finish() }
+                snackbar.show()
+            }
         } else {
             val snackbar: Snackbar =
                 Snackbar.make(findViewById(android.R.id.content), title, Snackbar.LENGTH_LONG)
@@ -159,14 +170,14 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
     //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
     private fun openURL(urlInput: String) {
         var url = urlInput
-        if (url.startsWith("http:") or url.startsWith("https:")) {
+        if (url.startsWith("http://") or url.startsWith("https://")) {
             val webpage: Uri = Uri.parse(url)
             val intent = Intent(Intent.ACTION_VIEW, webpage)
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             }
         } else {
-            url = "https:$url"
+            url = "https://$url"
             val webpage: Uri = Uri.parse(url)
             val intent = Intent(Intent.ACTION_VIEW, webpage)
             if (intent.resolveActivity(packageManager) != null) {

@@ -70,8 +70,17 @@ class KontoAdapter(kontoList: ArrayList<Konto>, val context: Context) :
             } else {
                 var filterPattern = constraint.toString().toLowerCase().trim()
                 for (konto in kontoListFull) {
-                    if (konto.kName?.toLowerCase()!!.contains(filterPattern)) {
-                        filteredList.add(konto)
+                    val kontoName = konto.kName
+                    val kontoNumber = konto.kNumber
+                    if (kontoName != null) {
+                        if (kontoName.toLowerCase().contains(filterPattern)) {
+                            filteredList.add(konto)
+                        }
+                    }
+                    if (kontoNumber != null) {
+                        if (kontoNumber.toLowerCase().contains(filterPattern)) {
+                            filteredList.add(konto)
+                        }
                     }
                 }
             }

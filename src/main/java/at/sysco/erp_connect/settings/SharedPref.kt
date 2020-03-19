@@ -21,6 +21,7 @@ object SharedPref {
         return sharedPref.getString("base_url", "")
     }
 
+    //Methode welche das Passwort aus den SharedPreferences liefert
     fun getUserPW(context: Context): String? {
         val key = Encrypt().getOrCreateSymmetricKey()
         var userPw: String? = null
@@ -44,6 +45,7 @@ object SharedPref {
         return userPw
     }
 
+    //Methode zum speichern des Passwortes in den SharedPreferences
     fun storePw(pwPlain: String, context: Context): Boolean {
         var sucess = false
         val key = Encrypt().getOrCreateSymmetricKey()

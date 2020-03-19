@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.activity_konto_list.*
 import android.content.Intent
 import android.view.*
 import androidx.preference.PreferenceManager
-import androidx.security.crypto.MasterKeys
 import at.sysco.erp_connect.settings.SettingsActivity
 import at.sysco.erp_connect.constants.FinishCode
 import at.sysco.erp_connect.kontakte_list.KontakteListActivity
@@ -81,7 +80,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
 
     //Löscht Daten aus Recyclerview
     fun clearResults() {
-        search_konto.visibility = View.GONE
+        searchView.visibility = View.GONE
         snackbar?.dismiss()
         adapterRV?.clearAll()
     }
@@ -113,7 +112,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
 
     //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
-        search_konto.visibility = View.GONE
+        searchView.visibility = View.GONE
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
@@ -124,6 +123,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
 
     //Zeigt den Ladebalken
     override fun showProgress() {
+        rv_konto_list.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
     }
 
@@ -142,10 +142,10 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
     override fun displayKontoListInRecyclerView(kontoList: List<Konto>) {
         rv_konto_list.visibility = View.VISIBLE
         adapterRV = KontoAdapter(ArrayList(kontoList), this)
-        search_konto.visibility = View.VISIBLE
+        searchView.visibility = View.VISIBLE
         rv_konto_list.adapter = adapterRV
 
-        search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }

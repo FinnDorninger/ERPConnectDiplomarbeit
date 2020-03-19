@@ -70,7 +70,7 @@ class KontakteListActivity : AppCompatActivity(),
     }
 
     //Stellt Snackbar dar.
-    private fun showSnackbar(title: String, withAction: Boolean) {
+    fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
             snackbar =
                 Snackbar.make(
@@ -95,7 +95,7 @@ class KontakteListActivity : AppCompatActivity(),
 
     //Prüft welcher Fehler vorherrscht, und ruft dann showSnackbar auf.
     override fun onError(failureCode: String) {
-        search_konto.visibility = View.GONE
+        searchView.visibility = View.GONE
         when (failureCode) {
             FailureCode.ERROR_LOADING_FILE -> showSnackbar(failureCode, true)
             FailureCode.NO_DATA -> showSnackbar(failureCode, true)
@@ -106,6 +106,7 @@ class KontakteListActivity : AppCompatActivity(),
 
     //Zeigt den Ladebalken
     override fun showProgress() {
+        rv_kontakte_list.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
     }
 
@@ -124,10 +125,10 @@ class KontakteListActivity : AppCompatActivity(),
     override fun displayKontakteListInRecyclerView(kontakteList: List<Kontakt>) {
         rv_kontakte_list.visibility = View.VISIBLE
         adapterRV = KontakteListAdapter(ArrayList(kontakteList), this)
-        search_konto.visibility = View.VISIBLE
+        searchView.visibility = View.VISIBLE
         rv_kontakte_list.adapter = adapterRV
 
-        search_konto.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (search == query) {
                     adapterRV?.getSubFilter()?.filter(search)
@@ -141,7 +142,7 @@ class KontakteListActivity : AppCompatActivity(),
             }
         })
         if (!search.isNullOrEmpty()) {
-            search_konto.setQuery(search, true)
+            searchView.setQuery(search, true)
             search = ""
         }
     }
@@ -165,6 +166,7 @@ class KontakteListActivity : AppCompatActivity(),
         }
         //Retry: Neuer Webservice-Call
         if (id == R.id.action_retry) {
+            progressBar.visibility = View.GONE
             kontakteListPresenter.requestFromWS()
         }
         return super.onOptionsItemSelected(item)

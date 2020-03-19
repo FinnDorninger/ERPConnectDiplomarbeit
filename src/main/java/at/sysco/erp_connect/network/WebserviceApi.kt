@@ -11,7 +11,7 @@ import java.lang.Exception
 
 //Interface für die Erstellung der Retrofit-API
 interface WebserviceApi {
-    //Mit @Get Annotationen werden
+    //In der Annotation wird der relative Teil der URL angegeben.
     @GET("/ewlservice/export?Company=300M&Type=1&Vorlage=KontenWebservice&Key=FILTERWSKonten")
     fun getKontoList(@Query("Password") pw: String, @Query("User") user: String): Call<KontoList>
 
@@ -25,6 +25,7 @@ interface WebserviceApi {
     fun getKontakt(@Query("Password") pw: String, @Query("User") user: String, @Query("Key") kontoNummer: String): Call<KontakteList>
 
     object Factory {
+        //Baut WebSevervice Api, über welche die GET-Abfragen abgesendet werden können
         fun getApi(baseURL: String): WebserviceApi? {
             val api: WebserviceApi?
             api = if (baseURL.startsWith("https://")) {

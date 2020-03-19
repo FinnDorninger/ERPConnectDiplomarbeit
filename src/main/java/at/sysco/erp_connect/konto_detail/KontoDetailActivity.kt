@@ -31,13 +31,14 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         setContentView(R.layout.activity_konto_detail)
         val extra = intent.getStringExtra("id")
         if (extra != null) {
-            startPresenterRequest(extra)
+            kontoNummer = extra
+            startPresenterRequest(kontoNummer)
+            buttonAnsprechpartner.setOnClickListener {
+                startKontakte(kontoNummer)
+            }
         } else {
-            showSnackbar("Keine Kontonummer vorhanden, bitte Seite neuladen!", false)
-        }
-
-        buttonAnsprechpartner.setOnClickListener {
-            startKontakte(kontoNummer)
+            kontoNummer = "notvalidkontonumber"
+            showSnackbar(FailureCode.NO_DETAIL_NUMBER, true)
         }
     }
 
@@ -50,7 +51,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         val mobileNumber = KontoUtility.createMobilNumber(konto)
         val phoneNumber = KontoUtility.createFullNumber(konto)
         val url = konto.kUrl
-        val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet)
+        val adressList = listOf(konto.kPlz, konto.kCity, konto.kStreet, konto.kCountry)
         val color = Color.rgb(216, 27, 96)
 
         if (!phoneNumber.isBlank()) {
@@ -73,16 +74,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
                 notEnoughData()
             }
         }
-        if (adressList.isNotEmpty()) {
-            buttonMap.setOnClickListener {
-                openAddress(adressList)
-            }
-            buttonMap.setColorFilter(color)
-        } else {
-            buttonMap.setOnClickListener {
-                notEnoughData()
-            }
-        }
+
         if (!mobileNumber.isBlank()) {
             buttonSMS.setOnClickListener {
                 messageNumber(mobileNumber)
@@ -91,6 +83,24 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         } else {
             buttonSMS.setOnClickListener {
                 notEnoughData()
+            }
+        }
+
+        initAdressListButton(adressList, color)
+    }
+
+    fun initAdressListButton(adressList: List<String?>, color: Int) {
+        adressList.forEach {
+            if (!it.isNullOrBlank()) {
+                buttonMap.setOnClickListener {
+                    openAddress(adressList)
+                }
+                buttonMap.setColorFilter(color)
+                return
+            } else {
+                buttonMap.setOnClickListener {
+                    notEnoughData()
+                }
             }
         }
     }
@@ -123,12 +133,21 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
     //Darstellung von Fehlermeldungen oder Erfolsmeldungen in Snackbar
     private fun showSnackbar(title: String, withAction: Boolean) {
         if (withAction) {
-            val snackbar: Snackbar =
-                Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
-            snackbar.setAction(
-                "Retry!"
-            ) { kontoDetailPresenter.requestFromWS(kontoNummer) }
-            snackbar.show()
+            if (title != FailureCode.NO_DETAIL_NUMBER) {
+                val snackbar: Snackbar =
+                    Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
+                snackbar.setAction(
+                    "Retry!"
+                ) { kontoDetailPresenter.requestFromWS(kontoNummer) }
+                snackbar.show()
+            } else {
+                val snackbar: Snackbar =
+                    Snackbar.make(this.layout_kontoDetail, title, Snackbar.LENGTH_INDEFINITE)
+                snackbar.setAction(
+                    "Retry!"
+                ) { finish() }
+                snackbar.show()
+            }
         } else {
             val snackbar: Snackbar =
                 Snackbar.make(findViewById(android.R.id.content), title, Snackbar.LENGTH_LONG)
@@ -167,8 +186,10 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         var url = "https://www.google.com/maps/search/?api=1&query="
         var adress = ""
 
-        while (adressIterator.hasNext()) {
-            adress += adressIterator.next() + ", "
+        adressList.forEach {
+            if (!it.isNullOrBlank()) {
+                adress += "$it, "
+            }
         }
         url += URLEncoder.encode(adress.removeSuffix(", "), "utf-8")
 
@@ -197,9 +218,8 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
 
     //Intent welcher eine hinterlegte Nummer in einem Telefonfenster öffnet
     private fun messageNumber(mobilNumber: String) {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("smsto:$mobilNumber")
-        }
+        val data = Uri.parse("smsto:$mobilNumber")
+        val intent = Intent(Intent.ACTION_SENDTO, data)
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
@@ -210,14 +230,14 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
 
     //Funktion für den URL-Button. Startet Intent für das öffnen einer Webseite
     private fun openURL(url: String) {
-        if (url.startsWith("http:") or url.startsWith("https:")) {
+        if (url.startsWith("http://") or url.startsWith("https://")) {
             val webpage: Uri = Uri.parse(url)
             val intent = Intent(Intent.ACTION_VIEW, webpage)
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             }
         } else {
-            val newUrl = "https:$url"
+            val newUrl = "https://$url"
             val webpage: Uri = Uri.parse(newUrl)
             val intent = Intent(Intent.ACTION_VIEW, webpage)
             if (intent.resolveActivity(packageManager) != null) {
@@ -229,7 +249,7 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
-    private fun notEnoughData() {
+    fun notEnoughData() {
         toast = Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT)
         toast?.show()
     }

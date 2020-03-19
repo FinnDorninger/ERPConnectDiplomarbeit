@@ -14,14 +14,14 @@ import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import at.sysco.erp_connect.R
-import at.sysco.erp_connect.konto_list.KontoListActivity
 import at.sysco.erp_connect.R.*
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
 import at.sysco.erp_connect.constants.FailureCode
 import at.sysco.erp_connect.constants.FinishCode
-import at.sysco.erp_connect.konto_detail.KontoDetailActivity
-import at.sysco.erp_connect.pojo.Konto
+import at.sysco.erp_connect.kontakte_detail.KontakteDetailActivity
+import at.sysco.erp_connect.kontakte_list.KontakteListActivity
+import at.sysco.erp_connect.pojo.Kontakt
 import at.sysco.erp_connect.settings.SettingsActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.junit.Assert.*
@@ -36,17 +36,18 @@ import org.junit.runner.RunWith
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 
-//Klasse welche die KontoListActivity testet
+//Klasse welche die KontakteListActivity testet
 //Dafür wurde die Library Espresso verwendet
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class TestKontoListActivity {
+class TestKontakteListActivity {
     //Für normale Activity-Tests.
-    var rule: ActivityTestRule<KontoListActivity> = ActivityTestRule(KontoListActivity::class.java)
+    var rule: ActivityTestRule<KontakteListActivity> =
+        ActivityTestRule(KontakteListActivity::class.java)
     //Benötigt wenn bei einer Activity auch Intents geprüft werden sollen.
-    var testRuleWithIntents: IntentsTestRule<KontoListActivity> =
-        IntentsTestRule<KontoListActivity>(KontoListActivity::class.java)
-    lateinit var activity: KontoListActivity
+    var testRuleWithIntents: IntentsTestRule<KontakteListActivity> =
+        IntentsTestRule<KontakteListActivity>(KontakteListActivity::class.java)
+    lateinit var activity: KontakteListActivity
 
     //Prüft ob Funktion welche das Ladessymbol anzeigt richtig funktioniert!
     @Test
@@ -57,7 +58,7 @@ class TestKontoListActivity {
                 scenario.showProgress()
             }
         })
-        onView(withId(id.rv_konto_list)).check(
+        onView(withId(id.rv_kontakte_list)).check(
             matches(
                 withEffectiveVisibility(
                     Visibility.GONE
@@ -83,8 +84,8 @@ class TestKontoListActivity {
     @Test
     fun navigationCorrect() {
         val scenario = rule.launchActivity(null)
-        val view = scenario.findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        assertTrue(view.menu.findItem(id.action_Konten).isChecked)
+        val view = scenario.findViewById<BottomNavigationView>(id.bottomNavigation)
+        assertTrue(view.menu.findItem(id.action_Kontakte).isChecked)
     }
 
     //Prüft ob die Darstellung in dem Recyclerview funktioniert!
@@ -92,22 +93,22 @@ class TestKontoListActivity {
     @Test
     fun testDisplayRecyclerview() {
         val scenario = testRuleWithIntents.launchActivity(null)
-        val konto = Konto("100", "Test")
-        val kontolist = listOf<Konto>(konto)
+        val kontakt = Kontakt("100", "Test")
+        val kontolist = listOf(kontakt)
         scenario.runOnUiThread(object : Runnable {
             override fun run() {
-                scenario.displayKontoListInRecyclerView(kontolist)
+                scenario.displayKontakteListInRecyclerView(kontolist)
             }
         })
 
-        onView(withId(id.rv_konto_list)).check(matches(isDisplayed()))
+        onView(withId(id.rv_kontakte_list)).check(matches(isDisplayed()))
         onView(withId(id.searchView)).check(matches(isDisplayed()))
 
-        onView(withId(R.id.rv_konto_list)).perform(
+        onView(withId(R.id.rv_kontakte_list)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
         )
 
-        intended(hasComponent(KontoDetailActivity::class.java.name))
+        intended(hasComponent(KontakteDetailActivity::class.java.name))
         Intents.release()
     }
 
@@ -192,12 +193,12 @@ class TestKontoListActivity {
     @Test
     fun testSearch() {
         val scenario = rule.launchActivity(null)
-        val kontakt = Konto("1", "Test", "Vorname")
-        val kontakt2 = Konto("2", "Nachname2")
-        val kontolist = listOf(kontakt, kontakt2)
+        val kontakt = Kontakt("1", "Test", "Vorname")
+        val kontakt2 = Kontakt("2", "Nachname2")
+        val kontaktlist = listOf(kontakt, kontakt2)
         scenario.runOnUiThread(object : Runnable {
             override fun run() {
-                scenario.displayKontoListInRecyclerView(kontolist)
+                scenario.displayKontakteListInRecyclerView(kontaktlist)
                 scenario.adapterRV?.filter?.filter("Test")
             }
         })
@@ -220,18 +221,20 @@ class TestKontoListActivity {
     fun searchWithKontoNumber() {
         val scenario = rule.launchActivity(null)
 
-        val konto = Konto("1", "Test")
-        val konto2 = Konto("2", "Nachname2")
-        val kontoList = listOf(konto, konto2)
+        val kontakt = Kontakt("1", "Test")
+        kontakt.kNumber = "TestA1"
+        val kontakt2 = Kontakt("2", "Nachname2")
+        kontakt2.kNumber = "B123123"
+        val kontaktlist = listOf(kontakt, kontakt2)
 
         scenario.runOnUiThread(object : Runnable {
             override fun run() {
-                scenario.displayKontoListInRecyclerView(kontoList)
-                scenario.adapterRV?.filter?.filter("1")
+                scenario.displayKontakteListInRecyclerView(kontaktlist)
+                scenario.adapterRV?.filter?.filter("B123123")
             }
         })
 
-        onView(withText("1"))
+        onView(withText("Nachname2"))
             .check(
                 matches(
                     withEffectiveVisibility(
@@ -239,7 +242,7 @@ class TestKontoListActivity {
                     )
                 )
             )
-        onView(withText("2"))
+        onView(withText("Test"))
             .check(
                 doesNotExist()
             )

@@ -1,7 +1,5 @@
 package at.sysco.erp_connect
 
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import at.sysco.erp_connect.network.WebserviceApi
 
@@ -9,10 +7,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import org.junit.Assert.*
-import java.security.SecureRandom
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-
 /**
  * Instrumented test, which will execute on an Android device.
  *

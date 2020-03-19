@@ -14,6 +14,7 @@ class Encrypt {
     private val cipherAlgorithm = "AES/CBC/PKCS7Padding"
     private val keyAlias = "aes_encryption"
 
+    //Schlüssel Einstellungen
     private fun getKeyGenParameter(): KeyGenParameterSpec {
         val keyGenParameterSpec =
             KeyGenParameterSpec.Builder(

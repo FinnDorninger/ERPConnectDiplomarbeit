@@ -26,6 +26,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val masterKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
 
+    //Entscheidet wie ein Konto geladen werden soll
     override fun getKontoDetail(
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
@@ -43,6 +44,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         }
     }
 
+    //Versucht Konto aus dem Webservice zu laden
     private fun loadDataFromWebservice(
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
@@ -82,6 +84,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
 
     }
 
+    //Prüft ob Laden aus File möglich
     private fun tryLoadingFromFile(
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
@@ -97,6 +100,7 @@ class KontoDetailModel(val context: Context) : KontoDetailContract.Model {
         }
     }
 
+    //Lade Konto aus File
     private fun loadKontoDetailFromFile(
         onFinishedListener: KontoDetailContract.Model.OnFinishedListener,
         kontoNummer: String
