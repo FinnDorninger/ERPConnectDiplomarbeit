@@ -48,6 +48,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         }
     }
 
+    //Startet den Request an den Presenter
     override fun startPresenterRequest(kontaktNummer: String) {
         kontaktDetailPresenter = KontakteDetailPresenter(this, KontakteDetailModel(this))
         kontaktDetailPresenter.requestFromWS(kontaktNummer)
@@ -122,6 +123,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         textInputSex.text = KontaktUtility.calculateSex(kontakt.kSex)
     }
 
+    //Setzt Listener der Buttons
     override fun initListener(kontakt: Kontakt) {
         val mail = kontakt.kMail
         val number = KontaktUtility.calculateNumber(kontakt)
@@ -162,6 +164,7 @@ class KontakteDetailActivity : AppCompatActivity(), KontakteDetailContract.View 
         }
     }
 
+    //Fehler Meldung wenn nicht genug Daten für eine Button-Funktion vorhanden sind.
     private fun notEnoughData() {
         toast = Toast.makeText(this, "Nicht genug Daten vorhanden!", Toast.LENGTH_SHORT)
         toast?.show()

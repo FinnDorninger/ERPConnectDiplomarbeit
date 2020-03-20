@@ -1,5 +1,6 @@
 package at.sysco.erp_connect.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -13,15 +14,11 @@ import at.sysco.erp_connect.kontakte_detail.KontakteDetailActivity
 import at.sysco.erp_connect.pojo.Kontakt
 import kotlinx.android.synthetic.main.kontakt_list_item.view.*
 
+@SuppressLint("DefaultLocale")
 //Adapter welcher beschreibt wie Daten an Recyclerview gebunden werden sollen
-class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context) :
+class KontakteListAdapter(private var kontaktList: ArrayList<Kontakt>, val context: Context) :
     RecyclerView.Adapter<ViewHolderKontakt>(), Filterable {
-    var kontaktList: ArrayList<Kontakt> = kontaktList
-    var kontaktListFull: ArrayList<Kontakt>
-
-    init {
-        this.kontaktListFull = ArrayList(kontaktList)
-    }
+    var kontaktListFull: ArrayList<Kontakt> = ArrayList(kontaktList)
 
     //Füllt die einzelnen Einträge eines Recyclerviews mit Daten
     override fun onBindViewHolder(holder: ViewHolderKontakt, position: Int) {
@@ -79,28 +76,32 @@ class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context)
         return subFilter
     }
 
+    //Submit-Filter (Wenn Eingabe in Suchfeld losgeschickt wurde)
     private var subFilter: Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
-            var filteredList = ArrayList<Kontakt>()
-            var filterPattern = constraint.toString().toLowerCase().trim()
+            val filteredList = ArrayList<Kontakt>()
+            val filterPattern = constraint.toString().toLowerCase().trim()
             for (kontakt in kontaktListFull) {
-                if (!kontakt.kFirstName.isNullOrEmpty()) {
-                    if (kontakt.kFirstName!!.toLowerCase() == filterPattern) {
+                val kontaktFirstName = kontakt.kFirstName
+                val kontaktLastName = kontakt.kLastName
+                val kontaktNumber = kontakt.kNumber
+                if (kontaktFirstName != null) {
+                    if (kontaktFirstName.toLowerCase() == filterPattern) {
                         filteredList.add(kontakt)
                     }
                 }
-                if (!kontakt.kLastName.isNullOrEmpty()) {
-                    if (kontakt.kLastName!!.toLowerCase() == filterPattern) {
+                if (kontaktLastName != null) {
+                    if (kontaktLastName.toLowerCase() == filterPattern) {
                         filteredList.add(kontakt)
                     }
                 }
-                if (!kontakt.kNumber.isNullOrEmpty()) {
-                    if (kontakt.kNumber!!.toLowerCase() == filterPattern) {
+                if (kontaktNumber != null) {
+                    if (kontaktNumber.toLowerCase() == filterPattern) {
                         filteredList.add(kontakt)
                     }
                 }
             }
-            var results = FilterResults()
+            val results = FilterResults()
             results.values = filteredList
             return results
         }
@@ -113,15 +114,15 @@ class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context)
         }
     }
 
-    //Filter, beschreibt wie gefiltert werden soll
+    //Filter, beschreibt wie gefiltert werden soll.
     private var kontaktFilter: Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
-            var filteredList = ArrayList<Kontakt>()
+            val filteredList = ArrayList<Kontakt>()
 
             if (constraint == null || constraint.isEmpty()) {
                 filteredList.addAll(kontaktListFull)
             } else {
-                var filterPattern = constraint.toString().toLowerCase().trim()
+                val filterPattern = constraint.toString().toLowerCase().trim()
 
                 for (kontakt in kontaktListFull) {
                     if (!kontakt.kFirstName.isNullOrEmpty()) {
@@ -141,7 +142,7 @@ class KontakteListAdapter(kontaktList: ArrayList<Kontakt>, val context: Context)
                     }
                 }
             }
-            var results = FilterResults()
+            val results = FilterResults()
             results.values = filteredList
             return results
         }

@@ -1,6 +1,7 @@
 package at.sysco.erp_connect.pojo
 
 object KontaktUtility {
+    //Erstellt für Darstellung Geschlecht
     fun calculateSex(kSex: String?): String {
         var sex = when (kSex) {
             "1" -> "Weiblich"
@@ -13,6 +14,7 @@ object KontaktUtility {
         return sex
     }
 
+    //Erstellt vollständigen Namen
     fun calculateName(kontakt: Kontakt): String {
         val fullname: String
         if (!kontakt.kLastName.isNullOrBlank()) {
@@ -31,6 +33,7 @@ object KontaktUtility {
         return fullname
     }
 
+    //Erstellt Telefonnummer aus Konto
     fun calculateNumber(kontakt: Kontakt): String {
         val telNumber = kontakt.kTelNumber
         val telNumberCity = kontakt.kTelCity

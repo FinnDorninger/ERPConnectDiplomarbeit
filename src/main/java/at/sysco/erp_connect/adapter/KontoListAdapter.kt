@@ -1,5 +1,6 @@
 package at.sysco.erp_connect.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -13,10 +14,10 @@ import at.sysco.erp_connect.konto_detail.KontoDetailActivity
 import at.sysco.erp_connect.pojo.Konto
 import kotlinx.android.synthetic.main.konto_list_item.view.*
 
+@SuppressLint("DefaultLocale")
 //Adapter welcher beschreibt wie Daten an Recyclerview gebunden werden sollen
-class KontoAdapter(kontoList: ArrayList<Konto>, val context: Context) :
+class KontoAdapter(private var kontoList: ArrayList<Konto>, val context: Context) :
     RecyclerView.Adapter<ViewHolder>(), Filterable {
-    var kontoList: ArrayList<Konto> = kontoList
     var kontoListFull: ArrayList<Konto>
 
     init {
@@ -60,15 +61,51 @@ class KontoAdapter(kontoList: ArrayList<Konto>, val context: Context) :
         notifyItemRangeRemoved(0, sizeListFull)
     }
 
+    fun getSubFilter(): Filter {
+        return subFilter
+    }
+
+    //Filter welcher nach den exakten Eingaben filtert
+    private var subFilter: Filter = object : Filter() {
+        override fun performFiltering(constraint: CharSequence?): FilterResults {
+            val filteredList = ArrayList<Konto>()
+            val filterPattern = constraint.toString().toLowerCase().trim()
+            for (konto in kontoListFull) {
+                val kontoFirstName = konto.kName
+                val kontoNumber = konto.kNumber
+                if (kontoFirstName != null) {
+                    if (kontoFirstName.toLowerCase() == filterPattern) {
+                        filteredList.add(konto)
+                    }
+                }
+                if (kontoNumber != null) {
+                    if (kontoNumber.toLowerCase() == filterPattern) {
+                        filteredList.add(konto)
+                    }
+                }
+            }
+            val results = FilterResults()
+            results.values = filteredList
+            return results
+        }
+
+        //Methode welche die gefilterte Liste veröffentlicht und die alte Liste cleared.
+        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+            kontoList.clear()
+            kontoList.addAll(results?.values as ArrayList<Konto>)
+            notifyDataSetChanged()
+        }
+    }
+
     //Filter, beschreibt wie gefiltert werden soll
     private var rvFilter: Filter = object : Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
-            var filteredList = ArrayList<Konto>()
+            val filteredList = ArrayList<Konto>()
 
             if (constraint == null || constraint.isEmpty()) {
                 filteredList.addAll(kontoListFull)
             } else {
-                var filterPattern = constraint.toString().toLowerCase().trim()
+                val filterPattern = constraint.toString().toLowerCase().trim()
                 for (konto in kontoListFull) {
                     val kontoName = konto.kName
                     val kontoNumber = konto.kNumber
@@ -85,7 +122,7 @@ class KontoAdapter(kontoList: ArrayList<Konto>, val context: Context) :
                 }
             }
 
-            var results = FilterResults()
+            val results = FilterResults()
             results.values = filteredList
             return results
         }

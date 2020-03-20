@@ -42,11 +42,13 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
         }
     }
 
+    //Startet Request an Presenter
     override fun startPresenterRequest(kontoNummer: String) {
         kontoDetailPresenter = KontoDetailPresenter(this, KontoDetailModel(this))
         kontoDetailPresenter.requestFromWS(kontoNummer)
     }
 
+    //Initialisierung der Buttons des Layouts
     override fun initListener(konto: Konto) {
         val mobileNumber = KontoUtility.createMobilNumber(konto)
         val phoneNumber = KontoUtility.createFullNumber(konto)
@@ -182,7 +184,6 @@ class KontoDetailActivity : AppCompatActivity(), KontoDetailContract.View {
 
     //Startet Intent welche hinterlegte Adresse mit Google Maps öffnet
     private fun openAddress(adressList: List<String?>) {
-        val adressIterator = adressList.iterator()
         var url = "https://www.google.com/maps/search/?api=1&query="
         var adress = ""
 

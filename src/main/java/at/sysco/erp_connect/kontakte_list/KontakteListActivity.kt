@@ -37,7 +37,9 @@ class KontakteListActivity : AppCompatActivity(),
         initRecyclerView()
     }
 
+    //Startet Request an den Presenter
     override fun startPresenterRequest() {
+        searchView.visibility = View.GONE
         kontakteListPresenter = KontakteListPresenter(this, KontakteListModel(this))
         kontakteListPresenter.requestFromWS()
     }
@@ -80,7 +82,7 @@ class KontakteListActivity : AppCompatActivity(),
                 )
             snackbar?.setAction(
                 "Retry!"
-            ) { kontakteListPresenter.requestFromWS() }
+            ) { startPresenterRequest() }
         } else {
             snackbar =
                 Snackbar.make(this.layoutKontakte_List, title, Snackbar.LENGTH_LONG)
@@ -129,13 +131,13 @@ class KontakteListActivity : AppCompatActivity(),
         rv_kontakte_list.adapter = adapterRV
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            //Wenn die Eingabe vom Benutzer abgesendet wird, wird ein Listener aufgerufen, welcher nach der exakten Eingabe filtert!
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if (search == query) {
-                    adapterRV?.getSubFilter()?.filter(search)
-                }
+                adapterRV?.getSubFilter()?.filter(search)
                 return false
             }
 
+            //Abgabe wird direkt mit Eingabe gefiltert, jedoch nicht exakt.
             override fun onQueryTextChange(newText: String?): Boolean {
                 adapterRV?.filter?.filter(newText)
                 return false
@@ -167,7 +169,7 @@ class KontakteListActivity : AppCompatActivity(),
         //Retry: Neuer Webservice-Call
         if (id == R.id.action_retry) {
             progressBar.visibility = View.GONE
-            kontakteListPresenter.requestFromWS()
+            startPresenterRequest()
         }
         return super.onOptionsItemSelected(item)
     }

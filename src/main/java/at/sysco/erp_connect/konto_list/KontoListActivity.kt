@@ -41,6 +41,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
     }
 
     override fun startPresenterRequest() {
+        searchView.visibility = View.GONE
         kontoListPresenter.requestFromWS()
     }
 
@@ -66,7 +67,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
         bottomNavigation.menu.findItem(R.id.action_Konten).isChecked = true
         if (!firstCall && !this.fileList().contains("KontoFile.xml")) {
             clearResults()
-            kontoListPresenter.requestFromWS()
+            startPresenterRequest()
         } else {
             firstCall = false
         }
@@ -94,7 +95,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
                     title,
                     Snackbar.LENGTH_INDEFINITE
                 )
-            snackbar?.setAction("Retry!") { kontoListPresenter.requestFromWS() }
+            snackbar?.setAction("Retry!") { startPresenterRequest() }
         } else {
             val text = when (title) {
                 FinishCode.finishedSavingKontakte -> "Alles gespeichert!"
@@ -147,9 +148,9 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
+                adapterRV?.getSubFilter()?.filter(query)
                 return false
             }
-
             override fun onQueryTextChange(newText: String?): Boolean {
                 adapterRV?.filter?.filter(newText)
                 return false
@@ -173,7 +174,7 @@ class KontoListActivity : AppCompatActivity(), KontoListContract.View {
             return true
         }
         if (id == R.id.action_retry) {
-            kontoListPresenter.requestFromWS()
+            startPresenterRequest()
         }
         return super.onOptionsItemSelected(item)
     }
