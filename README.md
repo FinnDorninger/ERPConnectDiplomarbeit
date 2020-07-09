@@ -1,5 +1,5 @@
 # Präsentation
-https://drive.google.com/drive/folders/1Q0sv4E2T5R6z-8ZKuP7Zj0oYL7CpIKJq?usp=sharing
+https://drive.google.com/file/d/147F3KSeXchkwLzNKkGkqM9b8hs100cFx/view?usp=sharing
 
 # ERPConnectDiplomarbeit
 ERPConnect wurde 2019/20 für das Unternehmen SYSCO EDV erstellt.
