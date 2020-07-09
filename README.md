@@ -1,6 +1,6 @@
 # ERPConnectDiplomarbeit
 ERPConnect wurde 2019/20 für das Unternehmen SYSCO EDV erstellt.
-Diese Anwendung kann sich zu "WinLine-ERP"-Systemen verbinden.
+Diese Anwendung verbindet sich zu "WinLine-ERP"-Systemen.
 Kunden und zugehörige Ansprechpartnerdaten werden übersichtlich visualisiert.
 Um die Informationsmöglichkeit zu verbessern, werden die Daten zwischengespeichert (Offline-Verfügbarkeit), innovative Funktionen erleichtern
 die Kommunikation mit dem Kunden.
