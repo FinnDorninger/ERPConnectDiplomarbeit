@@ -17,15 +17,7 @@ class HTTPClient {
                 builder.hostnameVerifier(object : HostnameVerifier {
                     override fun verify(p0: String?, p1: SSLSession?): Boolean {
                         val isHostVerified: Boolean
-                        //Zertifikat von Sysco ist nicht an die IP-Adresse gebunden, deswegen normalerweise keine sichere Verbindung
-                        //Deswegen wird geprüft ob der Hostname dem Webservice entspricht und dann wird erst die Verbindung erlaubt!
-                        if (p0 == "83.164.140.68") {
-                            isHostVerified = true
-                        } else {
-                            isHostVerified = p0 == p1?.peerHost
-                        }
-                        //Falls eine andere Eingabe vorherrscht wird die Verbindung nur erlaubt, wenn der Hostname
-                        //aus dem Zertifikat der gleiche ist wie der Verbindungs-Hostname.
+						isHostVerified = p0 == p1?.peerHost
                         return isHostVerified
                     }
                 })
